@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AWS DevOps Study App</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f5f5f5; }
+        .container { max-width: 900px; margin: 0 auto; padding: 20px; }
+        .header { background: #232f3e; color: white; padding: 20px; border-radius: 10px; margin-bottom: 20px; }
+        .progress-bar { background: #ddd; height: 10px; border-radius: 5px; margin: 10px 0; }
+        .progress { background: #ff9900; height: 100%; border-radius: 5px; transition: width 0.3s; }
+        .question-card { background: white; padding: 30px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        .question-text { font-size: 18px; line-height: 1.6; margin-bottom: 20px; }
+        .question-type { background: #e3f2fd; color: #1976d2; padding: 8px 16px; border-radius: 20px; font-size: 14px; font-weight: bold; margin-bottom: 15px; display: inline-block; }
+        .options { margin: 20px 0; }
+        .option { background: #f8f9fa; border: 2px solid #e9ecef; padding: 15px; margin: 10px 0; border-radius: 8px; cursor: pointer; transition: all 0.3s; position: relative; }
+        .option:hover { border-color: #ff9900; }
+        .option.selected { border-color: #ff9900; background: #fff3cd; }
+        .option.correct { border-color: #28a745; background: #d4edda; }
+        .option.incorrect { border-color: #dc3545; background: #f8d7da; }
+        .option.partial { border-color: #ffc107; background: #fff3cd; }
+        .option-checkbox { position: absolute; right: 15px; top: 50%; transform: translateY(-50%); width: 20px; height: 20px; }
+        .controls { display: flex; gap: 15px; justify-content: center; margin-top: 20px; }
+        .btn { padding: 12px 24px; border: none; border-radius: 6px; cursor: pointer; font-size: 16px; transition: all 0.3s; }
+        .btn-primary { background: #ff9900; color: white; }
+        .btn-primary:hover { background: #e68900; }
+        .btn-secondary { background: #6c757d; color: white; }
+        .btn-secondary:hover { background: #545b62; }
+        .btn:disabled { background: #ccc; cursor: not-allowed; }
+        .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px; }
+        .stat-card { background: white; padding: 20px; border-radius: 8px; text-align: center; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .stat-number { font-size: 24px; font-weight: bold; color: #ff9900; }
+        .review-section { background: white; padding: 20px; border-radius: 10px; margin-top: 20px; }
+        .wrong-answer { background: #fff3cd; padding: 15px; margin: 10px 0; border-radius: 8px; border-left: 4px solid #ffc107; }
+        .hidden { display: none; }
+        .explanation { margin-top: 20px; padding: 15px; border-radius: 8px; }
+        .explanation.correct { background: #d4edda; border-left: 4px solid #28a745; }
+        .explanation.incorrect { background: #f8d7da; border-left: 4px solid #dc3545; }
+        .explanation.partial { background: #fff3cd; border-left: 4px solid #ffc107; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚀 AWS Solution Architect Professional Study App</h1>
+            <div class="progress-bar">
+                <div class="progress" id="progressBar"></div>
+            </div>
+            <p>Ngày <span id="currentDay">2</span> - Câu <span id="currentQuestion">1</span>/<span id="totalQuestions">0</span></p>
+        </div>
+
+        <div class="stats">
+            <div class="stat-card">
+                <div class="stat-number" id="correctCount">0</div>
+                <div>Câu đúng</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="wrongCount">0</div>
+                <div>Câu sai</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="accuracy">0%</div>
+                <div>Độ chính xác</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="timeSpent">0:00</div>
+                <div>Thời gian</div>
+            </div>
+        </div>
+
+        <div id="studyMode" class="question-card">
+            <div class="question-type" id="questionType">Single Choice</div>
+            <div class="question-text" id="questionText">
+                Đang tải câu hỏi...
+            </div>
+            <div class="options" id="optionsContainer">
+                <!-- Options will be loaded here -->
+            </div>
+            <div class="controls">
+                <button class="btn btn-secondary" onclick="previousQuestion()">⬅️ Câu trước</button>
+                <button class="btn btn-primary" onclick="submitAnswer()" id="submitBtn" disabled>Xác nhận</button>
+                <button class="btn btn-secondary" onclick="nextQuestion()" id="nextBtn" disabled>Câu tiếp ➡️</button>
+            </div>
+        </div>
+
+        <div id="reviewMode" class="review-section hidden">
+            <h2>📊 Kết quả học tập</h2>
+            <div id="reviewStats"></div>
+            <div id="wrongAnswers"></div>
+            <div class="controls">
+                <button class="btn btn-primary" onclick="restartStudy()">🔄 Học lại</button>
+                <button class="btn btn-secondary" onclick="exportResults()">💾 Xuất kết quả</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Sample questions with both single and multiple choice
+        let questions = [
+            {
+        "id": 91,
+        "text": "A company is running its solution on AWS in a manually created VPC. The company is using AWS CloudFormation to provision other parts of the infrastructure. According to a new requirement, the company must manage all infrastructure in an automatic way.What should the company do to meet this new requirement with the LEAST effort?",
+        "options": [
+            "Create a new AWS Cloud Development Kit (AWS CDK) stack that strictly provisions the existing VPC resources and configuration. Use AWS CDK to import the VPC into the stack and to manage the VPC.",
+            "Create a new CloudFormation template that strictly provisions the existing VPC resources and configuration. From the CloudFormation console, create a new stack by importing the Existing resources.",
+            "Create a CloudFormation stack set that creates the VPC. Use the stack set to import the VPC into the stack.",
+            "Create a new CloudFormation template that creates the VPC. Use the AWS Serverless Application Model (AWS SAM) CLI to import the VPC."
+        ],
+        "correct": [
+            1
+        ],
+        "type": "single",
+        "explanation": "Đáp án được chọn nhiều nhất trong cộng đồng. Xem thêm giải thích trong file gốc."
+    },
+    {
+        "id": 92,
+        "text": "A company has an on-premises data center and is using Kubernetes to develop a new solution on AWS. The company uses Amazon Elastic Kubernetes Service (Amazon EKS) clusters for its development and test environments.The EKS control plane and data plane for production workloads must reside on premises. The company needs an AWS managed solution for Kubernetes management.Which solution will meet these requirements with the LEAST operational overhead?",
+        "options": [
+            "Install an AWS Outposts server in the on-premises data center. Install Amazon EKS Anywhere on the Outposts server. Deploy the production workloads on an EKS Anywhere cluster.",
+            "Install an AWS Outposts server in the on-premises data center. Deploy Amazon EKS by using an extended cluster configuration on the Outposts server for the production workloads.",
+            "Install Amazon EKS Anywhere on the company's hardware in the on-premises data center. Deploy the production workloads on an EKS Anywhere cluster.",
+            "Install an AWS Outposts server in the on-premises data center. Deploy Amazon EKS by using a local cluster configuration on the Outposts server for the production workloads."
+        ],
+        "correct": [
+            3
+        ],
+        "type": "single",
+        "explanation": "Đáp án được chọn nhiều nhất trong cộng đồng. Xem thêm giải thích trong file gốc."
+    },
+    {
+        "id": 93,
+        "text": "A company is using AWS CloudFormation as its deployment tool for all applications. It stages all application binaries and templates within Amazon S3 buckets with versioning enabled. Developers have access to an Amazon EC2 instance that hosts the integrated development environment (IDE). The developers download the application binaries from Amazon S3 to the EC2 instance, make changes, and upload the binaries to an S3 bucket after running the unit tests locally. The developers want to improve the existing deployment mechanism and implement CI/CD using AWS CodePipeline.The developers have the following requirements:•\tUse AWS CodeCommit for source control.•\tAutomate unit testing and security scanning.•\tAlert the developers when unit tests fail.•\tTurn application features on and off, and customize deployment dynamically as part of CI/CD.•\tHave the lead developer provide approval before deploying an application.Which solution will meet these requirements?",
+        "options": [
+            "Use Jenkins to run unit tests and security scans. Use an Amazon EventBridge rule in the pipeline to send Amazon SES alerts to the developers when unit tests fail Use AWS CloudFormation nested stacks for different solution features and parameters to turn features on and off. Use AWS Lambda in the pipeline to allow the lead developer to approve applications.",
+            "Use AWS Lambda to run unit tests and security scans. Use Lambda in a subsequent stage in the pipeline to send Amazon SNS alerts to the developers when unit tests fail. Write AWS Amplify plugins for different solution features and utilize user prompts to tum features on and off. Use Amazon SES in the pipeline to allow the lead developer to approve applications.",
+            "Use AWS CodeBuild to run unit tests and security scans. Use an Amazon EventBridge rule to send Amazon SNS alerts to the developers when unit tests fail. Write AWS Cloud Development Kit (AWS CDK) constructs for different solution features, and use a manifest file to tum features on and off in the AWS CDK application. Use a manual approval stage in the pipeline to allow the lead developer to approve applications.",
+            "Use AWS CodeDeploy to run unit tests and security scans. Use an Amazon CloudWatch alarm in the pipeline to send Amazon SNS alerts to the developers when unit tests fail. Use Docker images for different solution features and the AWS CLI to turn features on and off. Use a manual approval stage in the pipeline to allow the lead developer to approve applications."
+        ],
+        "correct": [
+            2
+        ],
+        "type": "single",
+        "explanation": "Đáp án được chọn nhiều nhất trong cộng đồng. Xem thêm giải thích trong file gốc."
+    },
+    {
+        "id": 94,
+        "text": "A company needs to modernize an application and migrate the application to AWS. The application stores user profile data as text in a single table in an on-premises MySQL database.After the modernization, users will use the application to upload video files that are up to 4 GB in size. Other users must be able to download the video files from the application. The company needs a video storage solution that provides rapid scaling. The solution must not affect application performance.Which solution will meet these requirements?",
+        "options": [
+            "Migrate the database to Amazon Aurora PostgreSQL by using AWS Database Migration Service (AWS DMS). Store the videos as base64-encoded strings in a TEXT column in the database.",
+            "Migrate the database to Amazon Keyspaces (for Apache Cassandra) by using AWS Database Migration Service (AWS DMS) with the AWS Schema Conversion Tool (AWS SCT). Store the videos as objects in Amazon S3. Store the S3 object identifier in the corresponding Amazon Keyspaces entry.",
+            "Migrate the database to Amazon DynamoDB by using AWS Database Migration Service (AWS DMS) with the AWS Schema Conversion Tool (AWS SCT). Store the videos as base64-encoded strings in the corresponding DynamoDB item.",
+            "Migrate the database to Amazon DynamoDB by using AWS Database Migration Service (AWS DMS) with the AWS Schema Conversion Tool (AWS SCT). Store the videos as objects in Amazon S3. Store the S3 key in the corresponding DynamoDB item."
+        ],
+        "correct": [
+            3
+        ],
+        "type": "single",
+        "explanation": "Đáp án được chọn nhiều nhất trong cộng đồng. Xem thêm giải thích trong file gốc."
+    },
+    {
+        "id": 95,
+        "text": "A company wants to migrate its website to AWS. The website uses microservices and runs on containers that are deployed in an on-premises, self-managed Kubernetes cluster. All the manifests that define the deployments for the containers in the Kubernetes deployment are in source control.All data for the website is stored in a PostgreSQL database. An open source container image repository runs alongside the on-premises environment.A solutions architect needs to determine the architecture that the company will use for the website on AWS.Which solution will meet these requirements with the LEAST effort to migrate?",
+        "options": [
+            "Rebuild the on-premises Kubernetes cluster by hosting the cluster on Amazon EC2 instances. Migrate the open source container image repository to the EC2 instances. Deploy the manifests from on premises to the new cluster on AWS. Deploy an open source PostgreSQL database on the new cluster.",
+            "Create an Amazon Elastic Kubernetes Service (Amazon EKS) cluster that has managed node groups. Copy the application containers to a new Amazon Elastic Container Registry (Amazon ECR) repository. Deploy the manifests from on premises to the EKS cluster. Create an Amazon Aurora PostgreSQL DB cluster.",
+            "Create an Amazon Elastic Container Service (Amazon ECS) cluster that has an Amazon EC2 capacity pool. Copy the application containers to a new Amazon Elastic Container Registry (Amazon ECR) repository. Register each container image as a new task definition. Configure ECS services for each task definition to match the original Kubernetes deployments. Create an Amazon Aurora PostgreSQL DB cluster.",
+            "Create an AWS App Runner service. Connect the App Runner service to the open source container image repository. Deploy the manifests from on premises to the App Runner service. Create an Amazon RDS for PostgreSQL database."
+        ],
+        "correct": [
+            1
+        ],
+        "type": "single",
+        "explanation": "Đáp án được chọn nhiều nhất trong cộng đồng. Xem thêm giải thích trong file gốc."
+    },
+    {
+        "id": 96,
+        "text": "A company hosts a data-processing application on Amazon EC2 instances. The application polls an Amazon Elastic File System (Amazon EFS) file system for newly uploaded files. When a new file is detected, the application extracts data from the file and runs logic to select a Docker container image to process the file. The application starts the appropriate container image and passes the file location as a parameter.The data processing that the container performs can take up to 2 hours. When the processing is complete, the code that runs inside the container writes the file back to Amazon EFS and exits.The company needs to refactor the application to eliminate the EC2 instances that are running the containers.Which solution will meet these requirements?",
+        "options": [
+            "Create an Amazon Elastic Container Service (Amazon ECS) cluster. Configure the processing to run as AWS Fargate tasks. Extract the container selection logic to run as an Amazon EventBridge rule that starts the appropriate Fargate task. Configure the EventBridge rule to run when files are added to the EFS file system.",
+            "Create an Amazon Elastic Container Service (Amazon ECS) cluster. Configure the processing to run as AWS Fargate tasks. Update and containerize the container selection logic to run as a Fargate service that starts the appropriate Fargate task. Configure an EFS event notification to invoke the Fargate service when files are added to the EFS file system.",
+            "Create AWS Lambda container images for the processing. Configure Lambda functions to use the container images. Extract the container selection logic to run as a decision Lambda function that invokes the appropriate Lambda processing function. Migrate the storage of file uploads to an Amazon S3 bucket. Update the processing code to use Amazon S3. Configure an S3 event notification to invoke the decision Lambda function when objects are created.",
+            "Create an Amazon Elastic Container Service (Amazon ECS) cluster. Configure the processing to run as AWS Fargate tasks. Extract the container selection logic to run as an AWS Lambda function that starts the appropriate Fargate task. Migrate the storage of file uploads to an Amazon S3 bucket. Update the processing code to use Amazon S3. Configure an S3 event notification to invoke the Lambda function when objects are created."
+        ],
+        "correct": [
+            3
+        ],
+        "type": "single",
+        "explanation": "Đáp án được chọn nhiều nhất trong cộng đồng. Xem thêm giải thích trong file gốc."
+    },
+    {
+        "id": 97,
+        "text": "A company has an application that uses AWS Key Management Service (AWS KMS) to encrypt and decrypt data. The application stores data in an Amazon S3 bucket in an AWS Region. Company security policies require the data to be encrypted before the data is placed into the S3 bucket. The application must decrypt the data when the application reads files from the S3 bucket.The company replicates the S3 bucket to other Regions. A solutions architect must design a solution so that the application can encrypt and decrypt data across Regions. The application must use the same key to decrypt the data in each Region.Which solution will meet these requirements?",
+        "options": [
+            "Use AWS Systems Manager Parameter Store to create a parameter in each additional Region where the application is running. Export the key material from the KMS key in the primary Region. Store the key material in the parameter in each Region. Update the application code to use the key data from the parameter in each Region.",
+            "Use AWS Private Certificate Authority to create a new certificate authority (CA) in the primary Region. Issue a new private certificate from the CA for the application’s website URL. Share the CA with the additional Regions by using AWS Resource Access Manager (AWS RAM). Update the application code to use the shared CA certificates in each Region.",
+            "Create a new customer managed KMS key in each additional Region where the application is running. Update the application code to use the specific KMS key in each Region.",
+            "Create a KMS multi-Region primary key. Use the KMS multi-Region primary key to create a KMS multi-Region replica key in each additional Region where the application is running. Update the application code to use the specific replica key in each Region."
+        ],
+        "correct": [
+            3
+        ],
+        "type": "single",
+        "explanation": "Đáp án được chọn nhiều nhất trong cộng đồng. Xem thêm giải thích trong file gốc."
+    },
+    {
+        "id": 98,
+        "text": "A company is using AWS to develop and manage its production web application. The application includes an Amazon API Gateway HTTP API that invokes an AWS Lambda function. The Lambda function processes and then stores data in a database.The company wants to implement user authorization for the web application in an integrated way. The company already uses a third-party identity provider that issues OAuth tokens for the company’s other applications.Which solution will meet these requirements?",
+        "options": [
+            "Integrate the company’s third-party identity provider with API Gateway. Configure an API Gateway Lambda authorizer to validate tokens from the identity provider. Require the Lambda authorizer on all API routes. Update the web application to get tokens from the identity provider and include the tokens in the Authorization header when calling the API Gateway HTTP API.",
+            "Integrate the company’s third-party identity provider with AWS IAM Identity Center. Configure IAM users with permissions to call the API Gateway HTTP API. Update the web application to extract request parameters from the IAM users and include the parameters in the Authorization header when calling the API Gateway HTTP API.",
+            "Integrate the company's third-party identity provider with AWS Directory Service. Configure Directory Service as an API Gateway authorizer to validate tokens from the identity provider. Require the Directory Service authorizer on all API routes. Configure AWS IAM Identity Center as a SAML 2.0 identity Provider. Configure the web application as a custom SAML 2.0 application.",
+            "Integrate the company’s third-party identity provider with AWS IAM Identity Center. Configure API Gateway to use IAM Identity Center for zero-configuration authentication and authorization. Update the web application to retrieve AWS Security Token Service (AWS STS) tokens from IAM Identity Center and include the tokens in the Authorization header when calling the API Gateway HTTP API."
+        ],
+        "correct": [
+            0
+        ],
+        "type": "single",
+        "explanation": "Đáp án được chọn nhiều nhất trong cộng đồng. Xem thêm giải thích trong file gốc."
+    },
+    {
+        "id": 99,
+        "text": "An entertainment company hosts a ticketing service on a fleet of Linux Amazon EC2 instances that are in an Auto Scaling group. The ticketing service uses a pricing file. The pricing file is stored in an Amazon S3 bucket that has S3 Standard storage. A central pricing solution that is hosted by a third party updates the pricing file.The pricing file is updated every 1-15 minutes and has several thousand line items. The pricing file is downloaded to each EC2 instance when the instance launches.The EC2 instances occasionally use outdated pricing information that can result in incorrect charges for customers.Which solution will resolve this problem MOST cost-effectively?",
+        "options": [
+            "Create an AWS Lambda function to update an Amazon DynamoDB table with new prices each time the pricing file is updated. Update the ticketing service to use DynramoDB to look up pricing",
+            "Create an Amazon Elastic Block Store (Amazon EBS) volume. Use EBS Multi-Attach to attach the volume to every EC2 instance. When a new EC2 instance launches, configure the new instance to update the pricing file on the EBS volume. Update the ticketing service to point to the new local source.",
+            "Load Mountpoint for Amazon S3 onto the AMI of the EC2 instances. Configure Mountpoint for Amazon S3 to mount the S3 bucket that contains the pricing file. Update the ticketing service to point to the mount point and path to access the $3 object,",
+            "Create an AWS Lambda function to update an Amazon Elastic File System (Amazon EFS) file share with the pricing file each time the file is updated. Update the ticketing service to use Amazon EFS to access the pricing file."
+        ],
+        "correct": [
+            2
+        ],
+        "type": "single",
+        "explanation": "Đáp án được chọn nhiều nhất trong cộng đồng. Xem thêm giải thích trong file gốc."
+    },
+    {
+        "id": 100,
+        "text": "A company uses AWS Organizations to manage its development environment. Each development team at the company has its own AWS account. Each account has a single VPC and CIDR blocks that do not overlap.The company has an Amazon Aurora DB cluster in a shared services account. All the development teams need to work with live data from the DB cluster.Which solution will provide the required connectivity to the DB cluster with the LEAST operational overhead?",
+        "options": [
+            "Create an AWS Resource Access Manager (AWS RAM) resource share for the DB cluster. Share the DB cluster with all the development accounts.",
+            "Create a transit gateway in the shared services account. Create an AWS Resource Access Manager (AWS RAM) resource share for the transit gateway. Share the transit gateway with all the development accounts. Instruct the developers to accept the resource share. Configure networking.",
+            "Create an AWS Site-to-Site VPN connection in the shared services account. Configure networking. Use AWS Marketplace VPN software in each development account to connect to the Site-to-Site VPN connection.",
+            "Create an Application Load Balancer (ALB) that points to the IP address of the DB cluster. Create an AWS PrivateLink endpoint service that uses the ALB. Add permissions to allow each development account to connect to the endpoint service."
+        ],
+        "correct": [
+            1
+        ],
+        "type": "single",
+        "explanation": "Đáp án được chọn nhiều nhất trong cộng đồng. Xem thêm giải thích trong file gốc."
+    }
+        ]
+        let currentQuestionIndex = 0;
+        let userAnswers = [];
+        let startTime = Date.now();
+        let timer;
+
+        function initializeApp() {
+            document.getElementById('totalQuestions').textContent = questions.length;
+            loadQuestion();
+            startTimer();
+            updateStats();
+        }
+
+        function loadQuestion() {
+            const question = questions[currentQuestionIndex];
+            document.getElementById('questionText').innerHTML = `
+                <strong>Câu ${question.id}:</strong><br><br>
+                ${question.text}
+            `;
+            
+            // Set question type indicator
+            const typeElement = document.getElementById('questionType');
+            if (question.type === 'multiple') {
+                typeElement.textContent = `Multiple Choice (Choose ${question.correct.length})`;
+                typeElement.style.background = '#fff3cd';
+                typeElement.style.color = '#856404';
+            } else {
+                typeElement.textContent = 'Single Choice';
+                typeElement.style.background = '#e3f2fd';
+                typeElement.style.color = '#1976d2';
+            }
+            
+            const optionsContainer = document.getElementById('optionsContainer');
+            optionsContainer.innerHTML = '';
+            
+            question.options.forEach((option, index) => {
+                const optionDiv = document.createElement('div');
+                optionDiv.className = 'option';
+                optionDiv.innerHTML = `
+                    <strong>${String.fromCharCode(65 + index)}.</strong> ${option}
+                    ${question.type === 'multiple' ? '<input type="checkbox" class="option-checkbox">' : ''}
+                `;
+                
+                if (question.type === 'multiple') {
+                    optionDiv.onclick = () => toggleMultipleOption(index);
+                } else {
+                    optionDiv.onclick = () => selectSingleOption(index);
+                }
+                
+                optionDiv.dataset.index = index;
+                optionsContainer.appendChild(optionDiv);
+            });
+
+            document.getElementById('currentQuestion').textContent = currentQuestionIndex + 1;
+            document.getElementById('submitBtn').disabled = true;
+            document.getElementById('nextBtn').disabled = true;
+            updateProgressBar();
+        }
+
+        function selectSingleOption(index) {
+            document.querySelectorAll('.option').forEach(opt => opt.classList.remove('selected'));
+            document.querySelector(`[data-index="${index}"]`).classList.add('selected');
+            document.getElementById('submitBtn').disabled = false;
+        }
+
+        function toggleMultipleOption(index) {
+            const option = document.querySelector(`[data-index="${index}"]`);
+            const checkbox = option.querySelector('.option-checkbox');
+            
+            if (option.classList.contains('selected')) {
+                option.classList.remove('selected');
+                checkbox.checked = false;
+            } else {
+                option.classList.add('selected');
+                checkbox.checked = true;
+            }
+            
+            // Enable submit if at least one option is selected
+            const selectedCount = document.querySelectorAll('.option.selected').length;
+            document.getElementById('submitBtn').disabled = selectedCount === 0;
+        }
+
+        function getSelectedAnswers() {
+            const question = questions[currentQuestionIndex];
+            const selected = [];
+            
+            document.querySelectorAll('.option.selected').forEach(opt => {
+                selected.push(parseInt(opt.dataset.index));
+            });
+            
+            return selected.sort((a, b) => a - b); // Sort for comparison
+        }
+
+        function submitAnswer() {
+            const selectedAnswers = getSelectedAnswers();
+            if (selectedAnswers.length === 0) return;
+
+            const question = questions[currentQuestionIndex];
+            const correctAnswers = [...question.correct].sort((a, b) => a - b);
+            
+            // Calculate correctness
+            let isCorrect = false;
+            let isPartial = false;
+            
+            if (question.type === 'single') {
+                isCorrect = selectedAnswers.length === 1 && selectedAnswers[0] === correctAnswers[0];
+            } else {
+                // Multiple choice scoring
+                const selectedSet = new Set(selectedAnswers);
+                const correctSet = new Set(correctAnswers);
+                
+                if (selectedAnswers.length === correctAnswers.length && 
+                    selectedAnswers.every(ans => correctSet.has(ans))) {
+                    isCorrect = true;
+                } else {
+                    // Partial credit if some answers are correct
+                    const correctSelected = selectedAnswers.filter(ans => correctSet.has(ans));
+                    const incorrectSelected = selectedAnswers.filter(ans => !correctSet.has(ans));
+                    
+                    if (correctSelected.length > 0 && incorrectSelected.length === 0) {
+                        isPartial = true; // Selected some correct, no incorrect
+                    }
+                }
+            }
+
+            userAnswers[currentQuestionIndex] = {
+                questionId: question.id,
+                selected: selectedAnswers,
+                correct: correctAnswers,
+                isCorrect: isCorrect,
+                isPartial: isPartial,
+                timeSpent: Date.now() - startTime,
+                type: question.type
+            };
+
+            // Show results
+            document.querySelectorAll('.option').forEach((opt, index) => {
+                const isSelectedCorrect = correctAnswers.includes(index);
+                const isSelectedByUser = selectedAnswers.includes(index);
+                
+                if (isSelectedCorrect) {
+                    opt.classList.add('correct');
+                } else if (isSelectedByUser) {
+                    opt.classList.add('incorrect');
+                }
+                
+                opt.onclick = null; // Disable clicking
+            });
+
+            // Show explanation
+            const explanationDiv = document.createElement('div');
+            let resultClass = 'incorrect';
+            let resultText = '❌ Sai rồi!';
+            
+            if (isCorrect) {
+                resultClass = 'correct';
+                resultText = '✅ Chính xác!';
+            } else if (isPartial) {
+                resultClass = 'partial';
+                resultText = '⚠️ Đúng một phần!';
+            }
+            
+            explanationDiv.className = `explanation ${resultClass}`;
+            explanationDiv.innerHTML = `
+                <strong>${resultText}</strong><br>
+                <strong>Đáp án đúng:</strong> ${correctAnswers.map(i => String.fromCharCode(65 + i)).join(', ')}<br>
+                <strong>Bạn chọn:</strong> ${selectedAnswers.map(i => String.fromCharCode(65 + i)).join(', ')}<br>
+                <em>Giải thích:</em> ${question.explanation}
+            `;
+            document.getElementById('optionsContainer').appendChild(explanationDiv);
+
+            document.getElementById('submitBtn').style.display = 'none';
+            document.getElementById('nextBtn').disabled = false;
+            updateStats();
+        }
+
+        function nextQuestion() {
+            if (currentQuestionIndex < questions.length - 1) {
+                currentQuestionIndex++;
+                loadQuestion();
+                document.getElementById('submitBtn').style.display = 'inline-block';
+            } else {
+                showReview();
+            }
+        }
+
+        function previousQuestion() {
+            if (currentQuestionIndex > 0) {
+                currentQuestionIndex--;
+                loadQuestion();
+                document.getElementById('submitBtn').style.display = 'inline-block';
+            }
+        }
+
+        function updateStats() {
+            const answered = userAnswers.filter(a => a).length;
+            const correct = userAnswers.filter(a => a && a.isCorrect).length;
+            const partial = userAnswers.filter(a => a && a.isPartial).length;
+            const accuracy = answered > 0 ? Math.round(((correct + partial * 0.5) / answered) * 100) : 0;
+
+            document.getElementById('correctCount').textContent = correct + (partial > 0 ? ` (+${partial} partial)` : '');
+            document.getElementById('wrongCount').textContent = answered - correct - partial;
+            document.getElementById('accuracy').textContent = accuracy + '%';
+        }
+
+        function updateProgressBar() {
+            const progress = ((currentQuestionIndex + 1) / questions.length) * 100;
+            document.getElementById('progressBar').style.width = progress + '%';
+        }
+
+        function startTimer() {
+            timer = setInterval(() => {
+                const elapsed = Math.floor((Date.now() - startTime) / 1000);
+                const minutes = Math.floor(elapsed / 60);
+                const seconds = elapsed % 60;
+                document.getElementById('timeSpent').textContent = 
+                    `${minutes}:${seconds.toString().padStart(2, '0')}`;
+            }, 1000);
+        }
+
+        function showReview() {
+            clearInterval(timer);
+            document.getElementById('studyMode').classList.add('hidden');
+            document.getElementById('reviewMode').classList.remove('hidden');
+
+            const correct = userAnswers.filter(a => a.isCorrect).length;
+            const partial = userAnswers.filter(a => a.isPartial).length;
+            const total = userAnswers.length;
+            const accuracy = Math.round(((correct + partial * 0.5) / total) * 100);
+
+            document.getElementById('reviewStats').innerHTML = `
+                <div class="stats">
+                    <div class="stat-card">
+                        <div class="stat-number">${correct}/${total}</div>
+                        <div>Hoàn toàn đúng</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">${partial}</div>
+                        <div>Đúng một phần</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">${accuracy}%</div>
+                        <div>Điểm tổng</div>
+                    </div>
+                </div>
+            `;
+
+            // Show wrong answers for review
+            const wrongAnswers = userAnswers.filter(a => !a.isCorrect);
+            if (wrongAnswers.length > 0) {
+                document.getElementById('wrongAnswers').innerHTML = `
+                    <h3>🔄 Câu cần ôn lại (${wrongAnswers.length} câu):</h3>
+                    ${wrongAnswers.map(a => `
+                        <div class="wrong-answer">
+                            <strong>Câu ${a.questionId} (${a.type === 'multiple' ? 'Multiple' : 'Single'} Choice):</strong><br>
+                            Bạn chọn: ${a.selected.map(i => String.fromCharCode(65 + i)).join(', ')}<br>
+                            Đáp án đúng: ${a.correct.map(i => String.fromCharCode(65 + i)).join(', ')}
+                            ${a.isPartial ? ' <span style="color: #856404;">(Đúng một phần)</span>' : ''}
+                        </div>
+                    `).join('')}
+                `;
+            }
+        }
+
+        function restartStudy() {
+            currentQuestionIndex = 0;
+            userAnswers = [];
+            startTime = Date.now();
+            document.getElementById('studyMode').classList.remove('hidden');
+            document.getElementById('reviewMode').classList.add('hidden');
+            initializeApp();
+        }
+
+        function exportResults() {
+            const results = {
+                date: new Date().toLocaleDateString('vi-VN'),
+                day: 1,
+                questions: questions.length,
+                correct: userAnswers.filter(a => a.isCorrect).length,
+                partial: userAnswers.filter(a => a.isPartial).length,
+                accuracy: Math.round(((userAnswers.filter(a => a.isCorrect).length + userAnswers.filter(a => a.isPartial).length * 0.5) / userAnswers.length) * 100),
+                wrongQuestions: userAnswers.filter(a => !a.isCorrect).map(a => ({
+                    id: a.questionId,
+                    type: a.type,
+                    selected: a.selected,
+                    correct: a.correct,
+                    isPartial: a.isPartial
+                })),
+                timeSpent: document.getElementById('timeSpent').textContent
+            };
+
+            const blob = new Blob([JSON.stringify(results, null, 2)], {type: 'application/json'});
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `aws-devops-results-${new Date().toISOString().split('T')[0]}.json`;
+            a.click();
+        }
+
+        // Initialize app when page loads
+        window.onload = initializeApp;
+    </script>
+</body>
+</html>

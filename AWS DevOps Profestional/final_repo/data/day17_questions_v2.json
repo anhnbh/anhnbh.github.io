@@ -1,0 +1,235 @@
+[
+  {
+    "id": 285,
+    "text": "A company operates a globally deployed product out of multiple AWS Regions. The company's DevOps team needs to use Amazon API Gateway to deploy an API to support the product.The API must be deployed redundantly. The deployment must provide independent availability from each company location. The deployment also must respond to a custom domain URL and must optimize performance for the API user requests.Which solution will meet these requirements?",
+    "options": [
+      "Deploy an API Gateway edge-optimized API endpoint in the us-east-1 Region. Create an API Gateway custom domain for the API. Create an Amazon Route 53 record set with a geoproximity routing policy for the API's custom domain. Increase the geographic bias to the maximum allowed value.",
+      "Deploy an API Gateway regional API endpoint in the us-east-1 Region. Integrate the API Gateway API with a public Application Load Balancer (ALB). Create an AWS Global Accelerator standard accelerator. Associate the endpoint with the ALCreate an Amazon Route 53 alias record set that points the custom domain name to the DNS name that is assigned to the accelerator.",
+      "Deploy an API Gateway regional API endpoint in every AWS Region where the company's product is deployed. Create an API Gateway custom domain in each Region for the deployed API Gateway API. Create an Amazon Route 53 record set that has a latency routing policy for every deployed API Gateway custom domain.",
+      "Deploy an API Gateway edge-optimized API endpoint in the us-east-1 Region. Create an Amazon CloudFront distribution. Configure the CloudFront distribution with an alternate domain name. Specify the API Gateway Invoke URL as the origin domain. Create an Amazon Route 53 alias record set with a simple routing policy. Point the routing policy to the CloudFront distribution domain name."
+    ],
+    "correct": [
+      2
+    ],
+    "type": "single",
+    "explanation": "Đáp án được chọn nhiều nhất trong cộng đồng. Xem thêm giải thích trong file gốc."
+  },
+  {
+    "id": 286,
+    "text": "A DevOps engineer uses AWS CodeBuild to frequently produce software packages. The CodeBuild project builds large Docker images that the DevOps engineer can use across multiple builds.The DevOps engineer wants to improve build performance and minimize costs.Which solution will meet these requirements?",
+    "options": [
+      "Store the Docker images in an Amazon Elastic Container Registry (Amazon ECR) repository. Implement a local Docker layer cache for CodeBuild.",
+      "Cache the Docker images in an Amazon S3 bucket that is available across multiple build hosts. Expire the cache by using an S3 Lifecycle policy.",
+      "Store the Docker images in an Amazon Elastic Container Registry (Amazon ECR) repository. Modify the CodeBuild project runtime configuration to always use the most recent image version.",
+      "Create custom AMIs that contain the cached Docker images. In the CodeBuild build, launch Amazon EC2 instances from the custom AMIs."
+    ],
+    "correct": [
+      0
+    ],
+    "type": "single",
+    "explanation": "Đáp án được chọn nhiều nhất trong cộng đồng. Xem thêm giải thích trong file gốc."
+  },
+  {
+    "id": 287,
+    "text": "A large company recently acquired a small company. The large company invited the small company to join the large company's existing organization in AWS Organizations as a new OU.A DevOps engineer determines that the small company needs to launch t3.small Amazon EC2 instance types for the company's application workloads. The small company needs to deploy the instances only within US-based AWS Regions.The DevOps engineer needs to use an SCP in the small company's new OU to ensure that the small company can launch only the required instance types.Which solution will meet these requirements?",
+    "options": [
+      "Configure a statement to deny the ec2:RunInstances action for all EC2 instance resources when the ec2:InstanceType condition is not equal to t3.small.Configure another statement to deny the ec2:RunInstances action for all EC2 instance resources when the aws:RequestedRegion condition is not equal to us-*.",
+      "Configure a statement to allow the ec2:RunInstances action for all EC2 instance resources when the ec2:InstanceType condition is not equal to t3.small.Configure another statement to allow the ec2:RunInstances action for all EC2 instance resources when the aws:RequestedRegion condition is not equal to us-*.",
+      "Configure a statement to deny the ec2:RunInstances action for all EC2 instance resources when the ec2:InstanceType condition is equal to t3.small.Configure another statement to deny the ec2:RunInstances action for all EC2 instance resources when the aws:RequestedRegion condition is equal to us-*.",
+      "Configure a statement to allow the ec2:RunInstances action for all EC2 instance resources when the ec2:InstanceType condition is equal to t3.small.Configure another statement to allow the ec2:RunInstances action for all EC2 instance resources when the aws:RequestedRegion condition is equal to us-*."
+    ],
+    "correct": [
+      0
+    ],
+    "type": "single",
+    "explanation": "Đáp án được chọn nhiều nhất trong cộng đồng. Xem thêm giải thích trong file gốc."
+  },
+  {
+    "id": 288,
+    "text": "A DevOps team manages infrastructure for an application. The application uses long-running processes to process items from an Amazon Simple Queue Service (Amazon SQS) queue. The application is deployed to an Auto Scaling group.The application recently experienced an issue where items were taking significantly longer to process. The queue exceeded the expected size, which prevented various business processes from functioning properly. The application records all logs to a third-party tool.The team is currently subscribed to an Amazon Simple Notification Service (Amazon SNS) topic that the team uses for alerts. The team needs to be alerted if the queue exceeds the expected size.Which solution will meet these requirements with the MOST operational efficiency?",
+    "options": [
+      "Create an Amazon CloudWatch metric alarm with a period of 1 hour and a static threshold to alarm if the average of the ApproximateNumberOfMessagesDelayed metric is greater than the expected value. Configure the alarm to notify the SNS topic.",
+      "Create an Amazon CloudWatch metric alarm with a period of 1 hour and a static threshold to alarm if the sum of the ApproximateNumberOfMessagesVisible metric is greater than the expected value. Configure the alarm to notify the SNS topic.",
+      "Create an AWS Lambda function that retrieves the ApproximateNumberOfMessages SQS queue attribute value and publishes the value as a new CloudWatch custom metric. Create an Amazon EventBridge rule that is scheduled to run every 5 minutes and that invokes the Lambda function. Configure a CloudWatch metrics alarm with a period of 1 hour and a static threshold to alarm if the sum of the new custom metric is greater than the expected value.",
+      "Create an AWS Lambda function that checks the ApproximateNumberOfMessagesDelayed SQS queue attribute and compares the value to a defined expected size in the function. Create an Amazon EventBridge rule that is scheduled to run every 5 minutes and that invokes the Lambda function. When the ApproximateNumberOfMessagesDelayed SQS queue attribute exceeds the expected size, send a notification the SNS topic."
+    ],
+    "correct": [
+      1
+    ],
+    "type": "single",
+    "explanation": "Đáp án được chọn nhiều nhất trong cộng đồng. Xem thêm giải thích trong file gốc."
+  },
+  {
+    "id": 289,
+    "text": "A large company runs critical workloads in multiple AWS accounts. The AWS accounts are managed under AWS Organizations with all features enabled. The company stores confidential customer data in an Amazon S3 bucket. Access to the S3 bucket requires multiple levels of approval.The company wants to monitor when the S3 bucket is accessed by using the AWS CLI. The company also wants insights into the various activities performed by other users on all other S3 buckets in the AWS accounts to detect any issues.Which solution will meet these requirements?",
+    "options": [
+      "Create an AWS CloudTrail trail that is delivered to Amazon CloudWatch in each AWS account. Enable data events logs for all S3 buckets. Use Amazon GuardDuty for anomaly detection in all the AWS accounts. Use Amazon Athena to perform SQL queries on the custom metrics created from the CloudTrail logs.",
+      "Create an AWS CloudTrail organization trail that is delivered to Amazon CloudWatch in the Organizations management account. Enable data events logs for all S3 buckets. Use Amazon CloudWatch anomaly detection in all the AWS accounts. Use Amazon Athena to perform SQL queries on the custom metrics created from the CloudTrail logs.",
+      "Create an AWS CloudTrail organization trail that is delivered to Amazon CloudWatch in the Organizations management account. Enable data events logs for all S3 buckets. Use Amazon CloudWatch anomaly detection in all the AWS accounts. Use Amazon CloudWatch Metrics Insights to perform SQL queries on the custom metrics created from the CloudTrail logs.",
+      "Create an AWS CloudTrail trail that is delivered to Amazon CloudWatch in each AWS account. Enable data events logs for all S3 buckets. Use a custom solution for anomaly detection in all the AWS accounts. Use Amazon CloudWatch Metrics Insights to perform SQL queries on the custom metrics created from the CloudTrail logs."
+    ],
+    "correct": [
+      2
+    ],
+    "type": "single",
+    "explanation": "Đáp án được chọn nhiều nhất trong cộng đồng. Xem thêm giải thích trong file gốc."
+  },
+  {
+    "id": 290,
+    "text": "A DevOps team is deploying microservices for an application on an Amazon Elastic Kubernetes Service (Amazon EKS) cluster. The cluster uses managed node groups. The DevOps team wants to enable auto scaling for the microservice Pods based on a specific CPU utilization percentage. The DevOps team has already installed the Kubernetes Metrics Server on the cluster.Which solution will meet these requirements in the MOST operationally efficient way?",
+    "options": [
+      "Edit the Auto Scaling group that is associated with the worker nodes of the EKS cluster. Configure the Auto Scaling group to use a target tracking scaling policy to scale when the average CPU utilization of the Auto Scaling group reaches a specific percentage.",
+      "Deploy the Kubernetes Horizontal Pod Autoscaler (HPA) and the Kubernetes Vertical Pod Autoscaler (VPA) in the cluster. Configure the HPA to scale based on the target CPU utilization percentage. Configure the VPA to use the recommender mode setting.",
+      "Run the AWS Systems Manager AWS-UpdateEKSManagedNodeGroup Automation document. Modify the values for NodeGroupDesiredSize, NodeGroupMaxSize, and NodeGroupMinSize to be based on an estimate for the required node size.",
+      "Deploy the Kubernetes Horizontal Pod Autoscaler (HPA) and the Kubernetes Cluster Autoscaler in the cluster. Configure the HPA to scale based on the target CPU utilization percentage. Configure the Cluster Autoscaler to use the auto-discovery setting."
+    ],
+    "correct": [
+      3
+    ],
+    "type": "single",
+    "explanation": "Đáp án được chọn nhiều nhất trong cộng đồng. Xem thêm giải thích trong file gốc."
+  },
+  {
+    "id": 292,
+    "text": "A security team wants to use AWS CloudTrail to monitor all actions and API calls in multiple accounts that are in the same organization in AWS Organizations. The security team needs to ensure that account users cannot turn off CloudTrail in the accounts.Which solution will meet this requirement?",
+    "options": [
+      "Apply an SCP to all OUs to deny the cloudtrail:StopLogging action and the cloudtrail:DeleteTrail action.",
+      "Create IAM policies in each account to deny the cloudtrail:StopLogging action and the cloudtrail:DeleteTrail action.",
+      "Set up Amazon CloudWatch alarms to notify the security team when a user disables CloudTrail in an account.",
+      "Use AWS Config to automatically re-enable CloudTrail if a user disables CloudTrail in an account."
+    ],
+    "correct": [
+      0
+    ],
+    "type": "single",
+    "explanation": "Đáp án được chọn nhiều nhất trong cộng đồng. Xem thêm giải thích trong file gốc."
+  },
+  {
+    "id": 293,
+    "text": "A DevOps engineer needs to configure a blue/green deployment for an existing three-tier application. The application runs on Amazon EC2 instances and uses an Amazon RDS database. The EC2 instances run behind an Application Load Balancer (ALB) and are in an Auto Scaling group.The DevOps engineer has created launch templates, Auto Scaling groups, and ALB target groups for the blue environment and the green environment. Each target group specifies which application version, blue or green, will be loaded on the EC2 instances. An Amazon Route 53 record for www.example.com points to the ALB.The deployment must shift traffic all at once from the blue environment to the green environment.Which solution will meet these requirements?",
+    "options": [
+      "Starta rolling restart of the Auto Scaling group for the green environment to deploy the new application version to the green environment's EC2 instances. When the rolling restart is complete, use an AWS CLI command to update the ALB to send traffic to the green environment's target group.",
+      "Use an AWS CLI command to update the ALB to send traffic to the green environments target group. Start a rolling restart of the Auto Scaling group for the green environment to deploy the new application version to the green environment's EC2 instances.",
+      "Update the launch template to deploy the green environment's application version to the blue environment's EC2 instances. Do not change the target groups or the Auto Scaling groups in either environment. Perform a rolling restart of the blue environments EC2 instances.",
+      "Starta rolling restart of the Auto Scaling group for the green environment to deploy the new application version to the green environment's EC2 instances. When the rolling restart is complete, update Route 53 to point to the green environment's endpoint on the ALB."
+    ],
+    "correct": [
+      0
+    ],
+    "type": "single",
+    "explanation": "Đáp án được chọn nhiều nhất trong cộng đồng. Xem thêm giải thích trong file gốc."
+  },
+  {
+    "id": 294,
+    "text": "A company has an application that runs on Amazon EC2 instances in an Auto Scaling group. The application processes a high volume of messages from an Amazon Simple Queue Service (Amazon SQS) queue.A DevOps engineer noticed that the application took several hours to process a group of messages from the SQS queue. The average CPU utilization of the Auto Scaling group did not cross the threshold of a target tracking scaling policy when processing the messages. The application that processes the SQS queue publishes logs to ‘Amazon CloudWatch Logs.The DevOps engineer needs to ensure that the queue is processed quickly.Which solution meets these requirements with the LEAST operational overhead?",
+    "options": [
+      "Create an AWS Lambda function. Configure the Lambda function to publish a custom metric by using the ApproximateNumberOfMessagesVisible SQS queue attribute and the GroupInServiceInstances Auto Scaling group attribute to publish the queue messages for each instance. Schedule an Amazon EventBridge rule to run the Lambda function every hour. Create a target tracking scaling policy for the Auto Scaling group that uses the custom metric to scale in and out.",
+      "Create an AWS Lambda function. Configure the Lambda function to publish a custom metric by using the ApproximateNumberOfMessagesVisible SQS queue attribute and the GroupInServiceInstances Auto Scaling group attribute to publish the queue messages for each instance. Create a CloudWatch subscription filter for the application logs with the Lambda function as the target. Create a target tracking scaling policy for the Auto Scaling group that uses the custom metric to scale in and out.",
+      "Create a target tracking scaling policy for the Auto Scaling group. In the target tracking policy, use the ApproximateNumberOfMessagesVisible SQS queue attribute and the GroupInServiceInstances Auto Scaling group attribute to calculate how many messages are in the queue for each number of instances by using metric math. Use the calculated attribute to scale in and out.",
+      "Create an AWS Lambda function that logs the ApproximateNumberOfMessagesVisible attribute of the SQS queue to a CloudWatch Logs log group. Schedule an Amazon EventBridge rule to run the Lambda function every 5 minutes. Create a metric filer to count the number of log events from a CloudWatch logs group. Create a target tracking scaling policy for the Auto Scaling group that uses the custom metric to scale in and out."
+    ],
+    "correct": [
+      2
+    ],
+    "type": "single",
+    "explanation": "Đáp án được chọn nhiều nhất trong cộng đồng. Xem thêm giải thích trong file gốc."
+  },
+  {
+    "id": 295,
+    "text": "A company has a single AWS account that runs hundreds of Amazon EC2 instances in a single AWS Region. The company launches and terminates new EC2 instances every hour. The account includes existing EC2 instances that have been running for longer than a week.The company's security policy requires all running EC2 instances to have an EC2 instance profile attached. The company has created a default EC2 instance profile. The default EC2 instance profile must be attached to any EC2 instances that do not have a profile attached.Which solution will meet these requirements?",
+    "options": [
+      "Configure an Amazon EventBridge rule that matches the Amazon EC2 RunInstances API calls. Configure the rule to invoke an AWS Lambda function to attach the default instance profile to the EC2 instances.",
+      "Configure AWS Config. Deploy an AWS Config ec2-instance-profile-attached managed rule. Configure an automatic remediation action that invokes an AWS Systems Manager Automation runbook to attach the default instance profile to the EC2 instances.",
+      "Configure an Amazon EventBridge rule that matches the Amazon EC2 StartInstances API calls. Configure the rule to invoke an AWS Systems Manager Automation runbook to attach the default instance profile to the EC2 instances.",
+      "Configure AWS Config. Deploy an AWS Config iam-role-managed-policy-check managed rule. Configure an automatic remediation action that invokes an AWS Lambda function to attach the default instance profile to the EC2 instances."
+    ],
+    "correct": [
+      1
+    ],
+    "type": "single",
+    "explanation": "Đáp án được chọn nhiều nhất trong cộng đồng. Xem thêm giải thích trong file gốc."
+  },
+  {
+    "id": 296,
+    "text": "A company uses AWS Organizations to manage hundreds of AWS accounts. The company has a team that is responsible for AWS Identity and Access Management (IAM).The IAM team wants to implement AWS IAM Identity Center. The IAM team must have only the minimum required permissions to manage IAM Identity Center. The IAM team must not be able to gain unnecessary access to the Organizations management account. The IAM team must be able to provision new IAM Identity Center permission sets and assignments for new and existing member accounts.Which combination of steps will meet these requirements? (Choose three.)",
+    "options": [
+      "Create a new AWS account for the IAM team. Enable IAM Identity Center in the new account. In the Organizations management account, register the new account as a delegated administrator for IAM Identity Center.",
+      "Create a new AWS account for the IAM team. Enable IAM Identity Center in the Organizations management account. In the Organizations management account, register the new account as a delegated administrator for IAM Identity Center.",
+      "Create an SCP in Organizations. Create a new OU for the Organizations management account, and link the new SCP to the OU. Configure the SCP to deny all access to IAM Identity Center.",
+      "Create IAM users and an IAM group for the IAM team in IAM Identity Center. Add the users to the group. Create a new permission set. Attach the AWSSSOMemberAccountAdministrator managed IAM policy to the group.",
+      "Assign the new permission set to the Organizations management account. Allow the IAM team's group to use the permission set.",
+      "Assign the new permission set to the new AWS account. Allow the IAM team's group to use the permission set."
+    ],
+    "correct": [
+      1,
+      3,
+      5
+    ],
+    "type": "multiple",
+    "explanation": "Đáp án được chọn nhiều nhất trong cộng đồng. Xem thêm giải thích trong file gốc."
+  },
+  {
+    "id": 297,
+    "text": "A company uses an Amazon Aurora PostgreSQL global database that has two secondary AWS Regions. A DevOps engineer has configured the database parameter group to guarantee an RPO of 60 seconds. Write operations on the primary cluster are occasionally blocked because of the RPO setting.The DevOps engineer needs to reduce the frequency of blocked write operations.Which solution will meet these requirements?",
+    "options": [
+      "Add an additional secondary cluster to the global database.",
+      "Enable write forwarding for the global database.",
+      "Remove one of the secondary clusters from the global database.",
+      "Configure synchronous replication for the global database."
+    ],
+    "correct": [
+      2
+    ],
+    "type": "single",
+    "explanation": "Đáp án được chọn nhiều nhất trong cộng đồng. Xem thêm giải thích trong file gốc."
+  },
+  {
+    "id": 298,
+    "text": "A company has a web application that is hosted on an Amazon Elastic Kubernetes Service (Amazon EKS) cluster. The EKS cluster runs on AWS Fargate that is available through an internet-facing Application Load Balancer.The application is experiencing stability issues that lead to longer response times. A DevOps engineer needs to configure observability in Amazon CloudWatch to troubleshoot the issue. The solution must provide only the minimum necessary permissions.Which combination of steps will meet these requirements? (Choose three.)",
+    "options": [
+      "Deploy the CloudWatch agent as a Kubernetes StatefulSet to the EKS cluster.",
+      "Deploy the AWS Distro for OpenTelemetry Collector as a Kubernetes DaemonSet to the EKS cluster.",
+      "Associate a Kubernetes service account with an IAM role by using IAM roles for service accounts in Amazon EKS. Use the CloudWatchAgentServerPolicy AWS managed policy.",
+      "Associate a Kubernetes service account with an IAM role by using IAM roles for service accounts in Amazon EKS. Use the CloudWatchAgentAdminPolicy AWS managed policy.",
+      "Configure an IAM OpenID Connect (OIDC) provider for the EKS cluster.",
+      "Enable EKS control plane logging for the EKS cluster."
+    ],
+    "correct": [
+      0,
+      2,
+      5
+    ],
+    "type": "multiple",
+    "explanation": "Đáp án được chọn nhiều nhất trong cộng đồng. Xem thêm giải thích trong file gốc."
+  },
+  {
+    "id": 299,
+    "text": "A company stores its Python-based application code in AWS CodeCommit. The company uses AWS CodePipeline to deploy the application. The CodeCommit repository and the CodePipeline pipeline are deployed to the same AWS account.The company's security team requires all code to be scanned for vulnerabilities before the code is deployed to production. If any vulnerabilities are found, the deployment must stop.Which solution will meet these requirements?",
+    "options": [
+      "Create a new CodeBuild project. Configure the project to run a security scan on the code by using Amazon CodeGuru Security. Configure the CodeBuild project to raise an error if CodeGuru Security finds vulnerabilities. Create a new IAM role that has sufficient permissions to run CodeGuru Security scans. Assign the role to the CodeBuild project. In the CodePipeline pipeline, add a new stage before the deployment stage. Select AWS CodeBuild as the action provider for the new stage. Use the source artifact from the CodeCommit repository. Configure the action to use the CodeBuild project.",
+      "Create a new CodeBuild project. Configure the project to run a security scan on the code by using Amazon Inspector. Configure the CodeBuild project to raise an error if Amazon Inspector finds vulnerabilities. Create a new IAM role that has sufficient permissions to run Amazon Inspector scans. Assign the role to the CodeBuild project. In the CodePipeline pipeline, add a new stage before the deployment stage. Select AWS CodeBuild as the action provider for the new stage. Use the source artifact from the CodeCommit repository. Configure the action to use the CodeBuild project.",
+      "Update the IAM role that is attached to CodePipeline to include sufficient permissions to invoke Amazon DevOps Guru. In the CodePipeline pipeline, add a new stage before the deployment stage. Select DevOps Guru as the action provider for the new stage. Use the source artifact from the CodeCommit repository.",
+      "Update the IAM role that is attached to CodePipeline to include sufficient permissions to invoke Amazon DevOps Guru. In the CodePipeline pipeline, add a new stage before the deployment stage. Select CodeGuru Security as the action provider for the new stage. Use the source artifact from the CodeCommit repository."
+    ],
+    "correct": [
+      0
+    ],
+    "type": "single",
+    "explanation": "Đáp án được chọn nhiều nhất trong cộng đồng. Xem thêm giải thích trong file gốc."
+  },
+  {
+    "id": 300,
+    "text": "A DevOps engineer deploys an application to a fleet of Amazon Linux EC2 instances. The DevOps engineer needs to monitor system metrics across the fleet. The DevOps engineer wants to monitor the relationship between network traffic and memory utilization for the application code. The DevOps engineer wants to track the data on a 60 second interval.Which solution will meet these requirements?",
+    "options": [
+      "Use Amazon CloudWatch basic monitoring to collect the NetworkIn metric and the MemoryBytesUsed metric. Graph the metrics in CloudWatch.",
+      "Use Amazon CloudWatch detailed monitoring to collect the NetworkIn metric and the MemoryBytesUsed metric. Graph the metrics in CloudWatch.",
+      "Use Amazon CloudWatch detailed monitoring to collect the NetworkIn metric. Install the CloudWatch agent on the EC2 instances to collect the mem_used metric. Graph the metrics in CloudWatch.",
+      "Use Amazon CloudWatch basic monitoring to collect the built-in NetworkIn metric. Install the CloudWatch agent on the EC2 instances to collect the mem_used metric. Graph the metrics in CloudWatch."
+    ],
+    "correct": [
+      2
+    ],
+    "type": "single",
+    "explanation": "Đáp án được chọn nhiều nhất trong cộng đồng. Xem thêm giải thích trong file gốc."
+  }
+]

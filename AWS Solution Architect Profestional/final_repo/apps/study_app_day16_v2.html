@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SAP-C02 Day 16 Study</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', sans-serif; background: linear-gradient(135deg, #6f42c1, #5a32a3); min-height: 100vh; padding: 20px; }
+        .container { max-width: 1000px; margin: 0 auto; background: white; border-radius: 15px; box-shadow: 0 20px 40px rgba(0,0,0,0.1); overflow: hidden; }
+        .header { background: linear-gradient(135deg, #6f42c1, #5a32a3); color: white; padding: 30px; text-align: center; }
+        .header h1 { font-size: 2.5em; margin-bottom: 10px; }
+        .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 15px; padding: 20px 30px; background: #f8f9fa; }
+        .stat-card { background: white; padding: 15px; border-radius: 10px; text-align: center; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .stat-number { font-size: 1.8em; font-weight: bold; color: #6f42c1; }
+        .question-container { padding: 30px; }
+        .question-header { background: #6f42c1; color: white; padding: 15px 20px; border-radius: 10px 10px 0 0; font-weight: bold; }
+        .question-content { background: #f8f9fa; padding: 25px; border: 1px solid #dee2e6; border-top: none; border-radius: 0 0 10px 10px; }
+        .question-text { font-size: 1.1em; line-height: 1.6; margin-bottom: 25px; }
+        .multi-choice-note { background: #fff3cd; padding: 10px; border-radius: 5px; margin-bottom: 15px; font-size: 0.9em; color: #856404; }
+        .choices { list-style: none; }
+        .choice { background: white; margin: 10px 0; padding: 15px; border: 2px solid #dee2e6; border-radius: 8px; cursor: pointer; transition: all 0.3s ease; }
+        .choice:hover { border-color: #6f42c1; transform: translateY(-2px); }
+        .choice.selected { border-color: #6f42c1; background: #f3e5f5; }
+        .choice.correct { border-color: #28a745; background: #d4edda; }
+        .choice.incorrect { border-color: #dc3545; background: #f8d7da; }
+        .choice-letter { display: inline-block; width: 30px; height: 30px; background: #6f42c1; color: white; border-radius: 50%; text-align: center; line-height: 30px; margin-right: 15px; font-weight: bold; }
+        .choice.correct .choice-letter { background: #28a745; }
+        .choice.incorrect .choice-letter { background: #dc3545; }
+        .explanation { background: #fff3cd; border: 1px solid #ffeaa7; border-radius: 8px; padding: 20px; margin-top: 20px; display: none; }
+        .explanation.show { display: block; }
+        .navigation { padding: 30px; background: #f8f9fa; display: flex; justify-content: space-between; align-items: center; }
+        .btn { padding: 12px 24px; border: none; border-radius: 25px; cursor: pointer; font-weight: bold; transition: all 0.3s ease; text-decoration: none; display: inline-block; }
+        .btn-primary { background: linear-gradient(135deg, #6f42c1, #5a32a3); color: white; }
+        .btn-success { background: linear-gradient(135deg, #28a745, #1e7e34); color: white; }
+        .btn:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+        .back-buttons { text-align: center; padding: 20px; background: #f8f9fa; }
+        @media (max-width: 768px) { .navigation { flex-direction: column; gap: 15px; } }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📚 SAP-C02 Day 16</h1>
+            <p>18 questions for today's study session</p>
+        </div>
+        
+        <div class="stats">
+            <div class="stat-card">
+                <div class="stat-number" id="currentQ">1</div>
+                <div>Current</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="totalQ">18</div>
+                <div>Total</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="correctCount">0</div>
+                <div>Correct</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="accuracy">0%</div>
+                <div>Accuracy</div>
+            </div>
+        </div>
+        
+        <div class="question-container" id="questionContainer"></div>
+        
+        <div class="navigation">
+            <button class="btn btn-primary" onclick="previousQuestion()" id="prevBtn">Previous</button>
+            <div>
+                <button class="btn btn-primary" onclick="showAnswer()" id="showAnswerBtn">Show Answer</button>
+                <button class="btn btn-success" onclick="nextQuestion()" id="nextBtn" style="display:none;">Next Question</button>
+            </div>
+            <button class="btn btn-primary" onclick="nextQuestion()" id="skipBtn">Skip</button>
+        </div>
+        
+        <div class="back-buttons">
+            <a href="../daily_study_launcher.html" class="btn btn-primary">📚 Back to Study Plan</a>
+            <a href="../../../master_study_launcher.html" class="btn btn-success">🏠 Master Hub</a>
+            <a href="../../../index.html" class="btn" style="background: #17a2b8; color: white;">🏡 Home Page</a>
+        </div>
+    </div>
+
+    <script>
+        const questions = [
+        {
+                "question_number": 271,
+                "question_text": "A company wants to refactor its retail ordering web application that currently has a load-balanced Amazon EC2 instance fleet for web hosting, database API services, and business logic. The company needs to create a decoupled, scalable architecture with a mechanism for retaining failed orders while also minimizing operational costs.Which solution will meet these requirements?",
+                "choices": [
+                        "Use Amazon S3 for web hosting with Amazon API Gateway for database API services. Use Amazon Simple Queue Service (Amazon SQS) for order queuing. Use Amazon Elastic Container Service (Amazon ECS) for business logic with Amazon SQS long polling for retaining failed orders.",
+                        "Use AWS Elastic Beanstalk for web hosting with Amazon API Gateway for database API services. Use Amazon MQ for order queuing. Use AWS Step Functions for business logic with Amazon S3 Glacier Deep Archive for retaining failed orders.",
+                        "Use Amazon S3 for web hosting with AWS AppSync for database API services. Use Amazon Simple Queue Service (Amazon SQS) for order queuing. Use AWS Lambda for business logic with an Amazon SQS dead-letter queue for retaining failed orders.",
+                        "Use Amazon Lightsail for web hosting with AWS AppSync for database API services. Use Amazon Simple Email Service (Amazon SES) for order queuing. Use Amazon Elastic Kubernetes Service (Amazon EKS) for business logic with Amazon OpenSearch Service for retaining failed orders."
+                ],
+                "correct_answer": "C",
+                "is_multiple_choice": false,
+                "voting_data": {
+                        "C": 22,
+                        "A": 4
+                }
+        },
+        {
+                "question_number": 272,
+                "question_text": "A company hosts a web application on AWS in the us-east-1 Region. The application servers are distributed across three Availability Zones behind an Application Load Balancer. The database is hosted in a MySQL database on an Amazon EC2 instance. A solutions architect needs to design a cross-Region data recovery solution using AWS services with an RTO of less than 5 minutes and an RPO of less than 1 minute. The solutions architect is deploying application servers in us-west-2, and has configured Amazon Route 53 health checks and DNS failover to us-west-2.Which additional step should the solutions architect take?",
+                "choices": [
+                        "Migrate the database to an Amazon RDS for MySQL instance with a cross-Region read replica in us-west-2.",
+                        "Migrate the database to an Amazon Aurora global database with the primary in us-east-1 and the secondary in us-west-2.",
+                        "Migrate the database to an Amazon RDS for MySQL instance with a Multi-AZ deployment.",
+                        "Create a MySQL standby database on an Amazon EC2 instance in us-west-2."
+                ],
+                "correct_answer": "B",
+                "is_multiple_choice": false,
+                "voting_data": {
+                        "B": 32,
+                        "A": 2
+                }
+        },
+        {
+                "question_number": 273,
+                "question_text": "A company is using AWS Organizations to manage multiple accounts. Due to regulatory requirements, the company wants to restrict specific member accounts to certain AWS Regions, where they are permitted to deploy resources. The resources in the accounts must be tagged, enforced based on a group standard, and centrally managed with minimal configuration.What should a solutions architect do to meet these requirements?",
+                "choices": [
+                        "Create an AWS Config rule in the specific member accounts to limit Regions and apply a tag policy.",
+                        "From the AWS Billing and Cost Management console, in the management account, disable Regions for the specific member accounts and apply a tag policy on the root.",
+                        "Associate the specific member accounts with the root. Apply a tag policy and an SCP using conditions to limit Regions.",
+                        "Associate the specific member accounts with a new OU. Apply a tag policy and an SCP using conditions to limit Regions."
+                ],
+                "correct_answer": "D",
+                "is_multiple_choice": false,
+                "voting_data": {
+                        "D": 10
+                }
+        },
+        {
+                "question_number": 274,
+                "question_text": "A company has an application that generates reports and stores them in an Amazon S3 bucket. When a user accesses their report, the application generates a signed URL to allow the user to download the report. The company's security team has discovered that the files are public and that anyone can download them without authentication. The company has suspended the generation of new reports until the problem is resolved.Which set of actions will immediately remediate the security issue without impacting the application's normal workflow?",
+                "choices": [
+                        "Create an AWS Lambda function that applies a deny all policy for users who are not authenticated. Create a scheduled event to invoke the Lambda function.",
+                        "Review the AWS Trusted Advisor bucket permissions check and implement the recommended actions.",
+                        "Run a script that puts a private ACL on all of the objects in the bucket.",
+                        "Use the Block Public Access feature in Amazon S3 to set the IgnorePublicAcIs option to TRUE on the bucket."
+                ],
+                "correct_answer": "D",
+                "is_multiple_choice": false,
+                "voting_data": {
+                        "D": 11,
+                        "C": 2,
+                        "A": 1
+                }
+        },
+        {
+                "question_number": 275,
+                "question_text": "A company is planning to migrate an Amazon RDS for Oracle database to an RDS for PostgreSQL DB instance in another AWS account. A solutions architect needs to design a migration strategy that will require no downtime and that will minimize the amount of time necessary to complete the migration. The migration strategy must replicate all existing data and any new data that is created during the migration. The target database must be identical to the source database at completion of the migration process.All applications currently use an Amazon Route 53 CNAME record as their endpoint for communication with the RDS for Oracle DB instance. The RDS for Oracle DB instance is in a private subnet.Which combination of steps should the solutions architect take to meet these requirements? (Choose three.)",
+                "choices": [
+                        "Create a new RDS for PostgreSQL DB instance in the target account. Use the AWS Schema Conversion Tool (AWS SCT) to migrate the database schema from the source database to the target database.",
+                        "Use the AWS Schema Conversion Tool (AWS SCT) to create a new RDS for PostgreSQL DB instance in the target account with the schema and initial data from the source database.",
+                        "Configure VPC peering between the VPCs in the two AWS accounts to provide connectivity to both DB instances from the target account. Configure the security groups that are attached to each DB instance to allow traffic on the database port from the VPC in the target account.",
+                        "Temporarily allow the source DB instance to be publicly accessible to provide connectivity from the VPC in the target account. Configure the security groups that are attached to each DB instance to allow traffic on the database port from the VPC in the target account.",
+                        "Use AWS Database Migration Service (AWS DMS) in the target account to perform a full load plus change data capture (CDC) migration from the source database to the target database. When the migration is complete, change the CNAME record to point to the target DB instance endpoint.",
+                        "Use AWS Database Migration Service (AWS DMS) in the target account to perform a change data capture (CDC) migration from the source database to the target database. When the migration is complete, change the CNAME record to point to the target DB instance endpoint."
+                ],
+                "correct_answer": "ACE",
+                "is_multiple_choice": true,
+                "voting_data": {
+                        "ACE": 29,
+                        "BEF": 1
+                }
+        },
+        {
+                "question_number": 276,
+                "question_text": "A company has implemented an ordering system using an event-driven architecture. During initial testing, the system stopped processing orders. Further log analysis revealed that one order message in an Amazon Simple Queue Service (Amazon SQS) standard queue was causing an error on the backend and blocking all subsequent order messages. The visibility timeout of the queue is set to 30 seconds, and the backend processing timeout is set to 10 seconds. A solutions architect needs to analyze faulty order messages and ensure that the system continues to process subsequent messages.Which step should the solutions architect take to meet these requirements?",
+                "choices": [
+                        "Increase the backend processing timeout to 30 seconds to match the visibility timeout.",
+                        "Reduce the visibility timeout of the queue to automatically remove the faulty message.",
+                        "Configure a new SQS FIFO queue as a dead-letter queue to isolate the faulty messages.",
+                        "Configure a new SQS standard queue as a dead-letter queue to isolate the faulty messages."
+                ],
+                "correct_answer": "D",
+                "is_multiple_choice": false,
+                "voting_data": {
+                        "D": 44,
+                        "C": 6
+                }
+        },
+        {
+                "question_number": 277,
+                "question_text": "A company has automated the nightly retraining of its machine learning models by using AWS Step Functions. The workflow consists of multiple steps that use AWS Lambda. Each step can fail for various reasons, and any failure causes a failure of the overall workflow.A review reveals that the retraining has failed multiple nights in a row without the company noticing the failure. A solutions architect needs to improve the workflow so that notifications are sent for all types of failures in the retraining process.Which combination of steps should the solutions architect take to meet these requirements? (Choose three.)",
+                "choices": [
+                        "Create an Amazon Simple Notification Service (Amazon SNS) topic with a subscription of type \"Email\" that targets the team's mailing list.",
+                        "Create a task named \"Email\" that forwards the input arguments to the SNS topic.",
+                        "Add a Catch field to all Task, Map, and Parallel states that have a statement of \"ErrorEquals\": [ \"States.ALL\" ] and \"Next”: \"Email\".",
+                        "Add a new email address to Amazon Simple Email Service (Amazon SES). Verify the email address.",
+                        "Create a task named \"Email\" that forwards the input arguments to the SES email address.",
+                        "Add a Catch field to all Task, Map, and Parallel states that have a statement of \"ErrorEquals\": [ \"States.Runtime\" ] and \"Next\": \"Email\"."
+                ],
+                "correct_answer": "ABC",
+                "is_multiple_choice": true,
+                "voting_data": {
+                        "ABC": 24,
+                        "AB": 1,
+                        "ACE": 1,
+                        "ACF": 1
+                }
+        },
+        {
+                "question_number": 278,
+                "question_text": "A company plans to deploy a new private intranet service on Amazon EC2 instances inside a VPC. An AWS Site-to-Site VPN connects the VPC to the company's on-premises network. The new service must communicate with existing on-premises services. The on-premises services are accessible through the use of hostnames that reside in the company.example DNS zone. This DNS zone is wholly hosted on premises and is available only on the company's private network.A solutions architect must ensure that the new service can resolve hostnames on the company.example domain to integrate with existing services.Which solution meets these requirements?",
+                "choices": [
+                        "Create an empty private zone in Amazon Route 53 for company.example. Add an additional NS record to the company's on-premises company.example zone that points to the authoritative name servers for the new private zone in Route 53.",
+                        "Turn on DNS hostnames for the VPC. Configure a new outbound endpoint with Amazon Route 53 Resolver. Create a Resolver rule to forward requests for company.example to the on-premises name servers.",
+                        "Turn on DNS hostnames for the VPConfigure a new inbound resolver endpoint with Amazon Route 53 Resolver. Configur&the on-premises DNS server to forward requests for company.example to the new resolver.",
+                        "Use AWS Systems Manager to configure a run document that will install a hosts file that contains any required hostnames. Use an Amazon EventBridge rule to run the document when an instance is entering the running state."
+                ],
+                "correct_answer": "B",
+                "is_multiple_choice": false,
+                "voting_data": {
+                        "B": 23
+                }
+        },
+        {
+                "question_number": 279,
+                "question_text": "A company uses AWS CloudFormation to deploy applications within multiple VPCs that are all attached to a transit gateway. Each VPC that sends traffic to the public internet must send the traffic through a shared services VPC. Each subnet within a VPC uses the default VPC route table, and the traffic is routed to the transit gateway. The transit gateway uses its default route table for any VPC attachment.A security audit reveals that an Amazon EC2 instance that is deployed within a VPC can communicate with an EC2 instance that is deployed in any of the company's other VPCs. A solutions architect needs to limit the traffic between the VPCs. Each VPC must be able to communicate only with a predefined, limited set of authorized VPCs.What should the solutions architect do to meet these requirements?",
+                "choices": [
+                        "Update the network ACL of each subnet within a VPC to allow outbound traffic only to the authorized VPCs. Remove all deny rules except the default deny rule.",
+                        "Update all the security groups that are used within a VPC to deny outbound traffic to security groups that are used within the unauthorized VPCs.",
+                        "Create a dedicated transit gateway route table for each VPC attachment. Route traffic only to the authorized VPCs.",
+                        "Update the main route table of each VPC to route traffic only to the authorized VPCs through the transit gateway."
+                ],
+                "correct_answer": "C",
+                "is_multiple_choice": false,
+                "voting_data": {
+                        "C": 24
+                }
+        },
+        {
+                "question_number": 280,
+                "question_text": "A company has a Windows-based desktop application that is packaged and deployed to the users' Windows machines. The company recently acquired another company that has employees who primarily use machines with a Linux operating system. The acquiring company has decided to migrate and rehost the Windows-based desktop application to AWS.All employees must be authenticated before they use the application. The acquiring company uses Active Directory on premises but wants a simplified way to manage access to the application on AWS for all the employees.Which solution will rehost the application on AWS with the LEAST development effort?",
+                "choices": [
+                        "Set up and provision an Amazon Workspaces virtual desktop for every employee. Implement authentication by using Amazon Cognito identity pools. Instruct employees to run the application from their provisioned Workspaces virtual desktops.",
+                        "Create an Auto Scaling group of Windows-based Amazon EC2 instances. Join each EC2 instance to the company’s Active Directory domain. Implement authentication by using the Active Directory that is running on premises. Instruct employees to run the application by using a Windows remote desktop.",
+                        "Use an Amazon AppStream 2.0 image builder to create an image that includes the application and the required configurations. Provision an AppStream 2.0 On-Demand fleet with dynamic Fleet Auto Scaling policies for running the image. Implement authentication by using AppStream 2.0 user pools. Instruct the employees to access the application by starting browser-based AppStream 2.0 streaming sessions.",
+                        "Refactor and containerize the application to run as a web-based application. Run the application in Amazon Elastic Container Service (Amazon ECS) on AWS Fargate with step scaling policies. Implement authentication by using Amazon Cognito user pools. Instruct the employees to run the application from their browsers."
+                ],
+                "correct_answer": "C",
+                "is_multiple_choice": false,
+                "voting_data": {
+                        "C": 19,
+                        "B": 1
+                }
+        },
+        {
+                "question_number": 281,
+                "question_text": "A company is collecting a large amount of data from a fleet of IoT devices. Data is stored as Optimized Row Columnar (ORC) files in the Hadoop Distributed File System (HDFS) on a persistent Amazon EMR cluster. The company's data analytics team queries the data by using SQL in Apache Presto deployed on the same EMR cluster. Queries scan large amounts of data, always run for less than 15 minutes, and run only between 5 PM and 10 PM.The company is concerned about the high cost associated with the current solution. A solutions architect must propose the most cost-effective solution that will allow SQL data queries.Which solution will meet these requirements?",
+                "choices": [
+                        "Store data in Amazon S3. Use Amazon Redshift Spectrum to query data.",
+                        "Store data in Amazon S3. Use the AWS Glue Data Catalog and Amazon Athena to query data.",
+                        "Store data in EMR File System (EMRFS). Use Presto in Amazon EMR to query data.",
+                        "Store data in Amazon Redshift. Use Amazon Redshift to query data."
+                ],
+                "correct_answer": "B",
+                "is_multiple_choice": false,
+                "voting_data": {
+                        "B": 23,
+                        "C": 1
+                }
+        },
+        {
+                "question_number": 282,
+                "question_text": "A large company recently experienced an unexpected increase in Amazon RDS and Amazon DynamoDB costs. The company needs to increase visibility into details of AWS Billing and Cost Management. There are various accounts associated with AWS Organizations, including many development and production accounts. There is no consistent tagging strategy across the organization, but there are guidelines in place that require all infrastructure to be deployed using AWS CloudFormation with consistent tagging. Management requires cost center numbers and project ID numbers for all existing and future DynamoDB tables and RDS instances.Which strategy should the solutions architect provide to meet these requirements?",
+                "choices": [
+                        "Use Tag Editor to tag existing resources. Create cost allocation tags to define the cost center and project ID and allow 24 hours for tags to propagate to existing resources.",
+                        "Use an AWS Config rule to alert the finance team of untagged resources. Create a centralized AWS Lambda based solution to tag untagged RDS databases and DynamoDB resources every hour using a cross-account role.",
+                        "Use Tag Editor to tag existing resources. Create cost allocation tags to define the cost center and project ID. Use SCPs to restrict resource creation that do not have the cost center and project ID on the resource.",
+                        "Create cost allocation tags to define the cost center and project ID and allow 24 hours for tags to propagate to existing resources. Update existing federated roles to restrict privileges to provision resources that do not include the cost center and project ID on the resource."
+                ],
+                "correct_answer": "C",
+                "is_multiple_choice": false,
+                "voting_data": {
+                        "C": 17,
+                        "A": 2
+                }
+        },
+        {
+                "question_number": 283,
+                "question_text": "A company wants to send data from its on-premises systems to Amazon S3 buckets. The company created the S3 buckets in three different accounts. The company must send the data privately without the data traveling across the internet. The company has no existing dedicated connectivity to AWS.Which combination of steps should a solutions architect take to meet these requirements? (Choose two.)",
+                "choices": [
+                        "Establish a networking account in the AWS Cloud. Create a private VPC in the networking account. Set up an AWS Direct Connect connection with a private VIF between the on-premises environment and the private VPC.",
+                        "Establish a networking account in the AWS Cloud. Create a private VPC in the networking account. Set up an AWS Direct Connect connection with a public VIF between the on-premises environment and the private VPC.",
+                        "Create an Amazon S3 interface endpoint in the networking account.",
+                        "Create an Amazon S3 gateway endpoint in the networking account.",
+                        "Establish a networking account in the AWS Cloud. Create a private VPC in the networking account. Peer VPCs from the accounts that host the S3 buckets with the VPC in the network account."
+                ],
+                "correct_answer": "AC",
+                "is_multiple_choice": true,
+                "voting_data": {
+                        "AC": 41,
+                        "CE": 3,
+                        "A": 2,
+                        "AD": 1
+                }
+        },
+        {
+                "question_number": 284,
+                "question_text": "A company operates quick-service restaurants. The restaurants follow a predictable model with high sales traffic for 4 hours daily. Sales traffic is lower outside of those peak hours.The point of sale and management platform is deployed in the AWS Cloud and has a backend that is based on Amazon DynamoDB. The database table uses provisioned throughput mode with 100,000 RCUs and 80,000 WCUs to match known peak resource consumption.The company wants to reduce its DynamoDB cost and minimize the operational overhead for the IT staff.Which solution meets these requirements MOST cost-effectively?",
+                "choices": [
+                        "Reduce the provisioned RCUs and WCUs.",
+                        "Change the DynamoDB table to use on-demand capacity.",
+                        "Enable Dynamo DB auto scaling for the table.",
+                        "Purchase 1-year reserved capacity that is sufficient to cover the peak load for 4 hours each day."
+                ],
+                "correct_answer": "C",
+                "is_multiple_choice": false,
+                "voting_data": {
+                        "C": 33,
+                        "B": 11,
+                        "D": 4
+                }
+        },
+        {
+                "question_number": 285,
+                "question_text": "A company hosts a blog post application on AWS using Amazon API Gateway, Amazon DynamoDB, and AWS Lambda. The application currently does not use API keys to authorize requests. The API model is as follows:GET /posts/{postId}: to get post detailsGET /users/{userId}: to get user detailsGET /comments/{commentId}: to get comments detailsThe company has noticed users are actively discussing topics in the comments section, and the company wants to increase user engagement by making the comments appear in real time.Which design should be used to reduce comment latency and improve user experience?",
+                "choices": [
+                        "Use edge-optimized API with Amazon CloudFront to cache API responses.",
+                        "Modify the blog application code to request GET/comments/{commentId} every 10 seconds.",
+                        "Use AWS AppSync and leverage WebSockets to deliver comments.",
+                        "Change the concurrency limit of the Lambda functions to lower the API response time."
+                ],
+                "correct_answer": "C",
+                "is_multiple_choice": false,
+                "voting_data": {
+                        "C": 24
+                }
+        },
+        {
+                "question_number": 286,
+                "question_text": "A company manages hundreds of AWS accounts centrally in an organization in AWS Organizations. The company recently started to allow product teams to create and manage their own S3 access points in their accounts. The S3 access points can be accessed only within VPCs, not on the internet.What is the MOST operationally efficient way to enforce this requirement?",
+                "choices": [
+                        "Set the S3 access point resource policy to deny the s3:CreateAccessPoint action unless the s3:AccessPointNetworkOrigin condition key evaluates to VPC.",
+                        "Create an SCP at the root level in the organization to deny the s3:CreateAccessPoint action unless the s3:AccessPointNetworkOrigin condition key evaluates to VPC.",
+                        "Use AWS CloudFormation StackSets to create a new IAM policy in each AWS account that allows the s3:CreateAccessPoint action only if the s3:AccessPointNetworkOrigin condition key evaluates to VPC.",
+                        "Set the S3 bucket policy to deny the s3:CreateAccessPoint action unless the s3:AccessPointNetworkOrigin condition key evaluates to VPC."
+                ],
+                "correct_answer": "B",
+                "is_multiple_choice": false,
+                "voting_data": {
+                        "B": 20,
+                        "A": 1
+                }
+        },
+        {
+                "question_number": 287,
+                "question_text": "A solutions architect must update an application environment within AWS Elastic Beanstalk using a blue/green deployment methodology. The solutions architect creates an environment that is identical to the existing application environment and deploys the application to the new environment.What should be done next to complete the update?",
+                "choices": [
+                        "Redirect to the new environment using Amazon Route 53.",
+                        "Select the Swap Environment URLs option.",
+                        "Replace the Auto Scaling launch configuration.",
+                        "Update the DNS records to point to the green environment."
+                ],
+                "correct_answer": "B",
+                "is_multiple_choice": false,
+                "voting_data": {
+                        "B": 25
+                }
+        },
+        {
+                "question_number": 288,
+                "question_text": "A company is building an image service on the web that will allow users to upload and search random photos. At peak usage, up to 10,000 users worldwide will upload their images. The will then overlay text on the uploaded images, which will then be published on the company website.Which design should a solutions architect implement?",
+                "choices": [
+                        "Store the uploaded images in Amazon Elastic File System (Amazon EFS). Send application log information about each image to Amazon CloudWatch Logs. Create a fleet of Amazon EC2 instances that use CloudWatch Logs to determine which images need to be processed. Place processed images in another directory in Amazon EFS. Enable Amazon CloudFront and configure the origin to be the one of the EC2 instances in the fleet.",
+                        "Store the uploaded images in an Amazon S3 bucket and configure an S3 bucket event notification to send a message to Amazon Simple Notification Service (Amazon SNS). Create a fleet of Amazon EC2 instances behind an Application Load Balancer (ALB) to pull messages from Amazon SNS to process the images and place them in Amazon Elastic File System (Amazon EFS). Use Amazon CloudWatch metrics for the SNS message volume to scale out EC2 instances. Enable Amazon CloudFront and configure the origin to be the ALB in front of the EC2 instances.",
+                        "Store the uploaded images in an Amazon S3 bucket and configure an S3 bucket event notification to send a message to the Amazon Simple Queue Service (Amazon SQS) queue. Create a fleet of Amazon EC2 instances to pull messages from the SQS queue to process the images and place them in another S3 bucket. Use Amazon CloudWatch metrics for queue depth to scale out EC2 instances. Enable Amazon CloudFront and configure the origin to be the S3 bucket that contains the processed images.",
+                        "Store the uploaded images on a shared Amazon Elastic Block Store (Amazon EBS) volume mounted to a fleet of Amazon EC2 Spot instances. Create an Amazon DynamoDB table that contains information about each uploaded image and whether it has been processed. Use an Amazon EventBridge rule to scale out EC2 instances. Enable Amazon CloudFront and configure the origin to reference an Elastic Load Balancer in front of the fleet of EC2 instances."
+                ],
+                "correct_answer": "C",
+                "is_multiple_choice": false,
+                "voting_data": {
+                        "C": 19
+                }
+        }
+];
+        
+        let currentQuestionIndex = 0;
+        let correctAnswers = 0;
+        let answeredQuestions = new Set();
+        let selectedAnswers = {};
+        
+        function loadQuestion() {
+            const question = questions[currentQuestionIndex];
+            if (!question) return;
+            
+            const container = document.getElementById('questionContainer');
+            const isMultipleChoice = question.is_multiple_choice;
+            
+            let choicesHtml = '';
+            question.choices.forEach((choice, index) => {
+                const letter = String.fromCharCode(65 + index);
+                choicesHtml += `
+                    <li class="choice" onclick="selectChoice('${letter}', this)" data-choice="${letter}">
+                        <span class="choice-letter">${letter}</span>
+                        ${choice}
+                    </li>
+                `;
+            });
+            
+            const multiChoiceNote = isMultipleChoice ? 
+                '<div class="multi-choice-note">📝 Multiple Choice: You can select multiple answers</div>' : '';
+            
+            container.innerHTML = `
+                <div class="question-header">
+                    Question ${question.question_number} (Day 16 - ${currentQuestionIndex + 1} of ${questions.length})
+                </div>
+                <div class="question-content">
+                    <div class="question-text">${question.question_text}</div>
+                    ${multiChoiceNote}
+                    <ul class="choices">${choicesHtml}</ul>
+                    <div class="explanation" id="explanation"></div>
+                </div>
+            `;
+            
+            updateStats();
+        }
+        
+        function selectChoice(letter, element) {
+            const question = questions[currentQuestionIndex];
+            const isMultipleChoice = question.is_multiple_choice;
+            
+            if (!selectedAnswers[currentQuestionIndex]) {
+                selectedAnswers[currentQuestionIndex] = [];
+            }
+            
+            if (isMultipleChoice) {
+                // Multiple choice - toggle selection
+                if (element.classList.contains('selected')) {
+                    element.classList.remove('selected');
+                    selectedAnswers[currentQuestionIndex] = selectedAnswers[currentQuestionIndex].filter(ans => ans !== letter);
+                } else {
+                    element.classList.add('selected');
+                    selectedAnswers[currentQuestionIndex].push(letter);
+                }
+            } else {
+                // Single choice - clear others first
+                document.querySelectorAll('.choice').forEach(choice => {
+                    choice.classList.remove('selected');
+                });
+                element.classList.add('selected');
+                selectedAnswers[currentQuestionIndex] = [letter];
+            }
+        }
+        
+        function showAnswer() {
+            const question = questions[currentQuestionIndex];
+            const selectedAnswer = selectedAnswers[currentQuestionIndex];
+            
+            if (!selectedAnswer || selectedAnswer.length === 0) {
+                alert('Please select an answer first!');
+                return;
+            }
+            
+            answeredQuestions.add(currentQuestionIndex);
+            
+            document.querySelectorAll('.choice').forEach(choice => {
+                const choiceLetter = choice.getAttribute('data-choice');
+                if (question.correct_answer.includes(choiceLetter)) {
+                    choice.classList.add('correct');
+                } else if (selectedAnswer.includes(choiceLetter)) {
+                    choice.classList.add('incorrect');
+                }
+            });
+            
+            let isCorrect = false;
+            if (question.is_multiple_choice) {
+                const correctAnswers = question.correct_answer.split('').sort().join('');
+                const userAnswers = selectedAnswer.sort().join('');
+                isCorrect = correctAnswers === userAnswers;
+            } else {
+                isCorrect = selectedAnswer[0] === question.correct_answer;
+            }
+            
+            if (isCorrect) {
+                correctAnswers++;
+            }
+            
+            const explanationDiv = document.getElementById('explanation');
+            const yourAnswer = selectedAnswer.join(', ');
+            explanationDiv.innerHTML = `<strong>Correct Answer:</strong> ${question.correct_answer}<br><strong>Your Answer:</strong> ${yourAnswer}<br><strong>Result:</strong> ${isCorrect ? '✅ Correct' : '❌ Incorrect'}`;
+            explanationDiv.classList.add('show');
+            
+            document.getElementById('showAnswerBtn').style.display = 'none';
+            document.getElementById('nextBtn').style.display = 'inline-block';
+            
+            updateStats();
+        }
+        
+        function nextQuestion() {
+            if (currentQuestionIndex < questions.length - 1) {
+                currentQuestionIndex++;
+                loadQuestion();
+                document.getElementById('showAnswerBtn').style.display = 'inline-block';
+                document.getElementById('nextBtn').style.display = 'none';
+            } else {
+                const accuracy = Math.round((correctAnswers / answeredQuestions.size) * 100);
+                alert(`Day 16 Complete!\n\nCorrect: ${correctAnswers}/${answeredQuestions.size}\nAccuracy: ${accuracy}%\n\nGreat job!`);
+            }
+        }
+        
+        function previousQuestion() {
+            if (currentQuestionIndex > 0) {
+                currentQuestionIndex--;
+                loadQuestion();
+                document.getElementById('showAnswerBtn').style.display = 'inline-block';
+                document.getElementById('nextBtn').style.display = 'none';
+            }
+        }
+        
+        function updateStats() {
+            document.getElementById('currentQ').textContent = currentQuestionIndex + 1;
+            document.getElementById('totalQ').textContent = questions.length;
+            document.getElementById('correctCount').textContent = correctAnswers;
+            const accuracy = answeredQuestions.size > 0 ? Math.round((correctAnswers / answeredQuestions.size) * 100) : 0;
+            document.getElementById('accuracy').textContent = accuracy + '%';
+        }
+        
+        // Initialize
+        loadQuestion();
+    </script>
+</body>
+</html>

@@ -1,0 +1,879 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AWS DevOps Study App</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f5f5f5; }
+        .container { max-width: 900px; margin: 0 auto; padding: 20px; }
+        .header { background: #232f3e; color: white; padding: 20px; border-radius: 10px; margin-bottom: 20px; }
+        .progress-bar { background: #ddd; height: 10px; border-radius: 5px; margin: 10px 0; }
+        .progress { background: #ff9900; height: 100%; border-radius: 5px; transition: width 0.3s; }
+        .question-card { background: white; padding: 30px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        .question-text { font-size: 18px; line-height: 1.6; margin-bottom: 20px; }
+        .question-type { background: #e3f2fd; color: #1976d2; padding: 8px 16px; border-radius: 20px; font-size: 14px; font-weight: bold; margin-bottom: 15px; display: inline-block; }
+        .options { margin: 20px 0; }
+        .option { background: #f8f9fa; border: 2px solid #e9ecef; padding: 15px; margin: 10px 0; border-radius: 8px; cursor: pointer; transition: all 0.3s; position: relative; }
+        .option:hover { border-color: #ff9900; }
+        .option.selected { border-color: #ff9900; background: #fff3cd; }
+        .option.correct { border-color: #28a745; background: #d4edda; }
+        .option.incorrect { border-color: #dc3545; background: #f8d7da; }
+        .option.partial { border-color: #ffc107; background: #fff3cd; }
+        .option-checkbox { position: absolute; right: 15px; top: 50%; transform: translateY(-50%); width: 20px; height: 20px; }
+        .controls { display: flex; gap: 15px; justify-content: center; margin-top: 20px; }
+        .btn { padding: 12px 24px; border: none; border-radius: 6px; cursor: pointer; font-size: 16px; transition: all 0.3s; }
+        .btn-primary { background: #ff9900; color: white; }
+        .btn-primary:hover { background: #e68900; }
+        .btn-secondary { background: #6c757d; color: white; }
+        .btn-secondary:hover { background: #545b62; }
+        .btn:disabled { background: #ccc; cursor: not-allowed; }
+        .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px; }
+        .stat-card { background: white; padding: 20px; border-radius: 8px; text-align: center; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .stat-number { font-size: 24px; font-weight: bold; color: #ff9900; }
+        .review-section { background: white; padding: 20px; border-radius: 10px; margin-top: 20px; }
+        .wrong-answer { background: #fff3cd; padding: 15px; margin: 10px 0; border-radius: 8px; border-left: 4px solid #ffc107; }
+        .hidden { display: none; }
+        .explanation { margin-top: 20px; padding: 15px; border-radius: 8px; }
+        .explanation.correct { background: #d4edda; border-left: 4px solid #28a745; }
+        .explanation.incorrect { background: #f8d7da; border-left: 4px solid #dc3545; }
+        .explanation.partial { background: #fff3cd; border-left: 4px solid #ffc107; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚀 AWS Solution Architect Professional Study App</h1>
+            <div class="progress-bar">
+                <div class="progress" id="progressBar"></div>
+            </div>
+            <p>Ngày <span id="currentDay">2</span> - Câu <span id="currentQuestion">1</span>/<span id="totalQuestions">0</span></p>
+        </div>
+
+        <div class="stats">
+            <div class="stat-card">
+                <div class="stat-number" id="correctCount">0</div>
+                <div>Câu đúng</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="wrongCount">0</div>
+                <div>Câu sai</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="accuracy">0%</div>
+                <div>Độ chính xác</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="timeSpent">0:00</div>
+                <div>Thời gian</div>
+            </div>
+        </div>
+
+        <div id="studyMode" class="question-card">
+            <div class="question-type" id="questionType">Single Choice</div>
+            <div class="question-text" id="questionText">
+                Đang tải câu hỏi...
+            </div>
+            <div class="options" id="optionsContainer">
+                <!-- Options will be loaded here -->
+            </div>
+            <div class="controls">
+                <button class="btn btn-secondary" onclick="previousQuestion()">⬅️ Câu trước</button>
+                <button class="btn btn-primary" onclick="submitAnswer()" id="submitBtn" disabled>Xác nhận</button>
+                <button class="btn btn-secondary" onclick="nextQuestion()" id="nextBtn" disabled>Câu tiếp ➡️</button>
+            </div>
+        </div>
+
+        <div id="reviewMode" class="review-section hidden">
+            <h2>📊 Kết quả học tập</h2>
+            <div id="reviewStats"></div>
+            <div id="wrongAnswers"></div>
+            <div class="controls">
+                <button class="btn btn-primary" onclick="restartStudy()">🔄 Học lại</button>
+                <button class="btn btn-secondary" onclick="exportResults()">💾 Xuất kết quả</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Sample questions with both single and multiple choice
+        let questions = [
+    {
+        "id": 1,
+        "text": "A company is migrating its development and production workloads to a new organization in AWS Organizations. The company has created a separate member account for development and a separate member account for production. Consolidated billing is linked to the management account. In the management account, a solutions architect needs to create an IAM user that can stop or terminate resources in both member accounts.Which solution will meet this requirement?",
+        "options": [
+            "Create an IAM user in the management account. In the member accounts, create cross-account roles that have least privilege access. Grant the IAM user access to the roles by using a trust policy.",
+            "Create an IAM user in the management account. In the member accounts, create an IAM group that has least privilege access. Add the IAM user from the management account to each IAM group in the member accounts.",
+            "Create an IAM user in each member account. In the management account, create a cross-account role that has least privilege access. Grant the IAM users access to the cross-account role by using a trust policy.",
+            "Create an IAM user and a cross-account role in the management account. Configure the cross-account role with least privilege access to the member accounts."
+        ],
+        "correct": [
+            0
+        ],
+        "type": "single",
+        "explanation": "Đáp án được chọn nhiều nhất trong cộng đồng. Xem thêm giải thích trong file gốc."
+    },
+    {
+        "id": 2,
+        "text": "A company uses an Amazon Aurora PostgreSQL DB cluster for applications in a single AWS Region. The company's database team must monitor all data activity on all the databases.Which solution will achieve this goal?",
+        "options": [
+            "Start a database activity stream on the Aurora DB cluster to capture the activity stream in Amazon EventBridge. Define an AWS Lambda function as a target for EventBridge. Program the Lambda function to decrypt the messages from EventBridge and to publish all database activity to Amazon S3 for further analysis.",
+            "Start a database activity stream on the Aurora DB cluster to push the activity stream to an Amazon Kinesis data stream. Configure Amazon Kinesis Data Firehose to consume the Kinesis data stream and to deliver the data to Amazon S3 for further analysis.",
+            "Set up an AWS Database Migration Service (AWS DMS) change data capture (CDC) task. Specify the Aurora DB cluster as the source. Specify Amazon Kinesis Data Firehose as the target. Use Kinesis Data Firehose to upload the data into an Amazon OpenSearch Service cluster for further analysis.",
+            "Set up an AWS Database Migration Service (AWS DMS) change data capture (CDC) task. Specify the Aurora DB cluster as the source. Specify Amazon Kinesis Data Firehose as the target. Use Kinesis Data Firehose to upload the data into an Amazon Redshift cluster. Run queries on the Amazon Redshift data to determine database activities on the Aurora database."
+        ],
+        "correct": [
+            1
+        ],
+        "type": "single",
+        "explanation": "Đáp án được chọn nhiều nhất trong cộng đồng. Xem thêm giải thích trong file gốc."
+    },
+    {
+        "id": 3,
+        "text": "A company operates an on-premises software-as-a-service (SaaS) solution that ingests several files daily. The company provides multiple public SFTP endpoints to its customers to facilitate the file transfers. The customers add the SFTP endpoint IP addresses to their firewall allow list for outbound traffic. Changes to the SFTP endpoint IP addresses are not permitted.The company wants to migrate the SaaS solution to AWS and decrease the operational overhead of the file transfer service.Which solution meets these requirements?",
+        "options": [
+            "Register the customer-owned block of IP addresses in the company’s AWS account. Create Elastic IP addresses from the address pool and assign them to an Amazon S3 VPC endpoint. Enable SFTP support on the S3 bucket.",
+            "Register the customer-owned block of IP addresses in the company's AWS account. Create Elastic IP addresses from the address pool and assign them to an AWS Transfer for SFTP endpoint. Use AWS Transfer to store the files in Amazon S3.",
+            "Add a subnet containing the customer-owned block of IP addresses to a VPC. Create Elastic IP addresses from the address pool and assign them to an Application Load Balancer (ALB). Launch EC2 instances hosting FTP services in an Auto Scaling group behind the ALStore the files in attached Amazon Elastic Block Store (Amazon EBS) volumes.",
+            "Register the customer-owned block of IP addresses with Amazon Route 53. Create alias records in Route 53 that point to a Network Load Balancer (NLB). Launch EC2 instances hosting FTP services in an Auto Scaling group behind the NLB. Store the files in Amazon S3."
+        ],
+        "correct": [
+            1
+        ],
+        "type": "single",
+        "explanation": "Đáp án được chọn nhiều nhất trong cộng đồng. Xem thêm giải thích trong file gốc."
+    },
+    {
+        "id": 4,
+        "text": "A company manufactures smart vehicles. The company uses a custom application to collect vehicle data. The vehicles use the MQTT protocol to connect to the application. The company processes the data in 5-minute intervals. The company then copies vehicle telematics data to on-premises storage. Custom applications analyze this data to detect anomalies.The number of vehicles that send data grows constantly. Newer vehicles generate high volumes of data. The on-premises storage solution is not able to scale for peak traffic, which results in data loss. The company must modernize the solution and migrate the solution to AWS to resolve the scaling challenges.Which solution will meet these requirements with the LEAST operational overhead?",
+        "options": [
+            "Use AWS IoT FleetWise to collect the vehicle data. Send the data to an Amazon Kinesis data stream. Use an Amazon Kinesis Data Firehose delivery stream to store the data in Amazon S3. Use the built-in machine learning transforms in AWS Glue to detect anomalies.",
+            "Use Amazon MQ for RabbitMQ to collect the vehicle data. Send the data to an Amazon Kinesis Data Firehose delivery stream to store the data in Amazon S3. Use Amazon Lookout for Metrics to detect anomalies.",
+            "Use AWS IoT Greengrass to send the vehicle data to Amazon Managed Streaming for Apache Kafka (Amazon MSK). Create an Apache Kafka application to store the data in Amazon S3. Use a pretrained model in Amazon SageMaker to detect anomalies.",
+            "Use AWS IoT Core to receive the vehicle data. Configure rules to route data to an Amazon Kinesis Data Firehose delivery stream that stores the data in Amazon S3. Create an Amazon Kinesis Data Analytics application that reads from the delivery stream to detect anomalies."
+        ],
+        "correct": [
+            3
+        ],
+        "type": "single",
+        "explanation": "Đáp án được chọn nhiều nhất trong cộng đồng. Xem thêm giải thích trong file gốc."
+    },
+    {
+        "id": 5,
+        "text": "An education company is running a web application used by college students around the world. The application runs in an Amazon Elastic Container Service (Amazon ECS) cluster in an Auto Scaling group behind an Application Load Balancer (ALB). A system administrator detects a weekly spike in the number of failed login attempts, which overwhelm the application's authentication service. All the failed login attempts originate from about 500 different IP addresses that change each week. A solutions architect must prevent the failed login attempts from overwhelming the authentication service.Which solution meets these requirements with the MOST operational efficiency?",
+        "options": [
+            "Use AWS Firewall Manager to create a security group and security group policy to deny access from the IP addresses.",
+            "Create an AWS WAF web ACL with an IP set match rule, and set the rule action to Block. Connect the web ACL to the ALB.",
+            "Use AWS Firewall Manager to create a security group and security group policy to allow access only to specific CIDR ranges.",
+            "Create an AWS WAF web ACL with a rate-based rule, and set the rule action to Block. Connect the web ACL to the ALB."
+        ],
+        "correct": [
+            3
+        ],
+        "type": "single",
+        "explanation": "Đáp án được chọn nhiều nhất trong cộng đồng. Xem thêm giải thích trong file gốc."
+    },
+    {
+        "id": 6,
+        "text": "A company needs to create and manage multiple AWS accounts for a number of departments from a central location. The security team requires read-only access to all accounts from its own AWS account. The company is using AWS Organizations and created an account for the security team.How should a solutions architect meet these requirements?",
+        "options": [
+            "Use the OrganizationAccountAccessRole IAM role to create a new IAM policy with read-only access in each member account. Establish a trust relationship between the IAM policy in each member account and the security account. Ask the security team to use the IAM policy to gain access.",
+            "Ask the security team to use AWS Security Token Service (AWS STS) to call the AssumeRole API for the OrganizationAccountAccessRole IAM role in the member account from the security account. Use the generated temporary credentials to gain access.",
+            "Use the OrganizationAccountAccessRole IAM role to create a new IAM role with read-only access in each member account. Establish a trust relationship between the IAM role in each member account and the security account. Ask the security team to use the IAM role to gain access.",
+            "Ask the security team to use AWS Security Token Service (AWS STS) to call the AssumeRole API for the OrganizationAccountAccessRole IAM role in the management account from the security account. Use the generated temporary credentials to gain access."
+        ],
+        "correct": [
+            2
+        ],
+        "type": "single",
+        "explanation": "Đáp án được chọn nhiều nhất trong cộng đồng. Xem thêm giải thích trong file gốc."
+    },
+    {
+        "id": 7,
+        "text": "A company has more than 10,000 sensors that send data to an on-premises Apache Kafka server by using the Message Queuing Telemetry Transport (MQTT) protocol. The on-premises Kafka server transforms the data and then stores the results as objects in an Amazon S3 bucket.Recently, the Kafka server crashed. The company lost sensor data while the server was being restored. A solutions architect must create a new design on AWS that is highly available and scalable to prevent a similar occurrence.Which solution will meet these requirements?",
+        "options": [
+            "Deploy AWS IoT Core, and connect it to an Amazon Kinesis Data Firehose delivery stream. Use an AWS Lambda function to handle data transformation. Route the sensors to send the data to AWS IoT Core.",
+            "Migrate the on-premises Kafka server to Amazon Managed Streaming for Apache Kafka (Amazon MSK). Create a Network Load Balancer (NLB) that points to the Amazon MSK broker. Enable NLB health checks. Route the sensors to send the data to the NLB.",
+            "Launch two Amazon EC2 instances to host the Kafka server in an active/standby configuration across two Availability Zones. Create a domain name in Amazon Route 53. Create a Route 53 failover policy. Route the sensors to send the data to the domain name.",
+            "Deploy AWS IoT Core, and launch an Amazon EC2 instance to host the Kafka server. Configure AWS IoT Core to send the data to the EC2 instance. Route the sensors to send the data to AWS IoT Core."
+        ],
+        "correct": [
+            0
+        ],
+        "type": "single",
+        "explanation": "Đáp án được chọn nhiều nhất trong cộng đồng. Xem thêm giải thích trong file gốc."
+    },
+    {
+        "id": 8,
+        "text": "A company is creating a REST API to share information with six of its partners based in the United States. The company has created an Amazon API Gateway Regional endpoint. Each of the six partners will access the API once per day to post daily sales figures.After initial deployment, the company observes 1,000 requests per second originating from 500 different IP addresses around the world. The company believes this traffic is originating from a botnet and wants to secure its API while minimizing cost.Which approach should the company take to secure its API?",
+        "options": [
+            "Create an Amazon CloudFront distribution with the API as the origin. Create an AWS WAF web ACL with a rule to block clients that submit more than five requests per day. Associate the web ACL with the CloudFront distribution. Configure CloudFront with an origin access identity (OAI) and associate it with the distribution. Configure API Gateway to ensure only the OAI can run the POST method.",
+            "Create an Amazon CloudFront distribution with the API as the origin. Create an AWS WAF web ACL with a rule to block clients that submit more than five requests per day. Associate the web ACL with the CloudFront distribution. Add a custom header to the CloudFront distribution populated with an API key. Configure the API to require an API key on the POST method.",
+            "Create an AWS WAF web ACL with a rule to allow access to the IP addresses used by the six partners. Associate the web ACL with the API. Create a usage plan with a request limit and associate it with the API. Create an API key and add it to the usage plan.",
+            "Create an AWS WAF web ACL with a rule to allow access to the IP addresses used by the six partners. Associate the web ACL with the API. Create a resource policy with a request limit and associate it with the API. Configure the API to require an API key on the POST method."
+        ],
+        "correct": [
+            2
+        ],
+        "type": "single",
+        "explanation": "Đáp án được chọn nhiều nhất trong cộng đồng. Xem thêm giải thích trong file gốc."
+    },
+    {
+        "id": 9,
+        "text": "A company has five development teams that have each created five AWS accounts to develop and host applications. To track spending, the development teams log in to each account every month, record the current cost from the AWS Billing and Cost Management console, and provide the information to the company's finance team.The company has strict compliance requirements and needs to ensure that resources are created only in AWS Regions in the United States. However, some resources have been created in other Regions.A solutions architect needs to implement a solution that gives the finance team the ability to track and consolidate expenditures for all the accounts. The solution also must ensure that the company can create resources only in Regions in the United States.Which combination of steps will meet these requirements in the MOST operationally efficient way? (Choose three.)",
+        "options": [
+            "Create a new account to serve as a management account. Deploy an organization in AWS Organizations with all features enabled. Invite all the existing accounts to the organization. Ensure that each account accepts the invitation.",
+            "Create a new account to serve as a management account. Create an Amazon S3 bucket for the finance team. Use AWS Cost and Usage Reports to create monthly reports and to store the data in the finance team's S3 bucket.",
+            "Create an OU that includes all the development teams. Create an SCP that denies the creation of resources in Regions that are outside the United States. Apply the SCP to the OU.",
+            "Create an OU that includes all the development teams. Create an SCP that allows the creation of resources only in Regions that are in the United States. Apply the SCP to the OU.",
+            "Create an IAM role in the management account. Attach a policy that includes permissions to view the Billing and Cost Management console. Allow the finance team users to assume the role. Use AWS Cost Explorer and the Billing and Cost Management console to analyze cost.",
+            "Create an IAM role in each AWS account. Attach a policy that includes permissions to view the Billing and Cost Management console. Allow the finance team users to assume the role."
+        ],
+        "correct": [
+            0,
+            2,
+            4
+        ],
+        "type": "multiple",
+        "explanation": "Đáp án được chọn nhiều nhất trong cộng đồng. Xem thêm giải thích trong file gốc."
+    },
+    {
+        "id": 10,
+        "text": "A company is developing a gene reporting device that will collect genomic information to assist researchers with collecting large samples of data from a diverse population. The device will push 8 KB of genomic data every second to a data platform that will need to process and analyze the data and provide information back to researchers. The data platform must meet the following requirements:•\tProvide near-real-time analytics of the inbound genomic data•\tEnsure the data is flexible, parallel, and durable•\tDeliver results of processing to a data warehouseWhich strategy should a solutions architect use to meet these requirements?",
+        "options": [
+            "Use Amazon S3 to collect the inbound device data, analyze the data from Amazon SQS with Kinesis, and save the results to an Amazon Redshift cluster.",
+            "Use an Amazon API Gateway to put requests into an Amazon SQS queue, analyze the data with an AWS Lambda function, and save the results to an Amazon Redshift cluster using Amazon EMR.",
+            "Use Amazon Kinesis Data Streams to collect the inbound sensor data, analyze the data with Kinesis clients, and save the results to an Amazon Redshift cluster using Amazon EMR.",
+            "Use Amazon Kinesis Data Firehose to collect the inbound sensor data, analyze the data with Kinesis clients, and save the results to an Amazon RDS instance."
+        ],
+        "correct": [
+            2
+        ],
+        "type": "single",
+        "explanation": "Đáp án được chọn nhiều nhất trong cộng đồng. Xem thêm giải thích trong file gốc."
+    },
+    {
+        "id": 11,
+        "text": "A company has a new application that needs to run on five Amazon EC2 instances in a single AWS Region. The application requires high-throughput, low-latency network connections between all of the EC2 instances where the application will run. There is no requirement for the application to be fault tolerant.Which solution will meet these requirements?",
+        "options": [
+            "Launch five new EC2 instances into a cluster placement group. Ensure that the EC2 instance type supports enhanced networking.",
+            "Launch five new EC2 instances into a spread placement group. Attach an extra elastic network interface to each EC2 instance.",
+            "Launch five new EC2 instances into a partition placement group. Ensure that the EC2 instance type supports enhanced networking.",
+            "Launch five new EC2 instances into an Auto Scaling group in the same Availability Zone. Attach an extra elastic network interface to each EC2 instance."
+        ],
+        "correct": [
+            0
+        ],
+        "type": "single",
+        "explanation": "Đáp án được chọn nhiều nhất trong cộng đồng. Xem thêm giải thích trong file gốc."
+    },
+    {
+        "id": 12,
+        "text": "A company has built a high performance computing (HPC) cluster in AWS for a tightly coupled workload that generates a large number of shared files stored in Amazon EFS. The cluster was performing well when the number of Amazon EC2 instances in the cluster was 100. However, when the company increased the cluster size to 1.000 EC2 instances, overall performance was well below expectations.Which collection of design choices should a solutions architect make to achieve the maximum performance from the HPC cluster? (Choose three.)",
+        "options": [
+            "Replace Amazon EFS with multiple Amazon EBS volumes in a RAID array.",
+            "Select EC2 instance types with an Elastic Fabric Adapter (EFA) enabled.",
+            "Ensure the HPC cluster is launched within a single Availability Zone.",
+            "Launch the EC2 instances and attach elastic network interfaces in multiples of four.",
+            "Replace Amazon EFS with Amazon FSx for Lustre.",
+            "Ensure the cluster is launched across multiple Availability Zones."
+        ],
+        "correct": [
+            1,
+            2,
+            4
+        ],
+        "type": "multiple",
+        "explanation": "Đáp án được chọn nhiều nhất trong cộng đồng. Xem thêm giải thích trong file gốc."
+    },
+    {
+        "id": 13,
+        "text": "A solutions architect needs to define a reference architecture for a solution for three-tier applications with web. application, and NoSQL data layers. The reference architecture must meet the following requirements:•\tHigh availability within an AWS Region•\tAble to fail over in 1 minute to another AWS Region for disaster recovery•\tProvide the most efficient solution while minimizing the impact on the user experienceWhich combination of steps will meet these requirements? (Choose three.)",
+        "options": [
+            "Implement a hot standby model using Auto Scaling groups for the web and application layers across multiple Availability Zones in the Regions. Use zonal Reserved Instances for the minimum number of servers and On-Demand Instances for any additional resources.",
+            "Back up data from an Amazon DynamoDB table in the primary Region every 60 minutes and then write the data to Amazon S3. Use S3 cross-Region replication to copy the data from the primary Region to the disaster recovery Region. Have a script import the data into DynamoDB in a disaster recovery scenario.",
+            "Use Auto Scaling groups for the web and application layers across multiple Availability Zones in the Regions. Use Spot Instances for the required resources.",
+            "Use an Amazon Route 53 failover routing policy for failover from the primary Region to the disaster recovery Region. Set Time to Live (TTL) to 30 seconds.",
+            "Use an Amazon Route 53 weighted routing policy set to 100/0 across the two selected Regions. Set Time to Live (TTL) to 1 hour.",
+            "Use a global table within Amazon DynamoDB so data can be accessed in the two selected Regions."
+        ],
+        "correct": [
+            0,
+            3,
+            5
+        ],
+        "type": "multiple",
+        "explanation": "Đáp án được chọn nhiều nhất trong cộng đồng. Xem thêm giải thích trong file gốc."
+    },
+    {
+        "id": 14,
+        "text": "During an audit, a security team discovered that a development team was putting IAM user secret access keys in their code and then committing it to an AWS CodeCommit repository. The security team wants to automatically find and remediate instances of this security vulnerability.Which solution will ensure that the credentials are appropriately secured automatically?",
+        "options": [
+            "Configure a CodeCommit trigger to invoke an AWS Lambda function to scan new code submissions for credentials. If credentials are found, disable them in AWS IAM and notify the user.",
+            "Use a scheduled AWS Lambda function to download and scan the application code from CodeCommit. If credentials are found, generate new credentials and store them in AWS KMS.",
+            "Configure Amazon Macie to scan for credentials in CodeCommit repositories. If credentials are found, trigger an AWS Lambda function to disable the credentials and notify the user.",
+            "Run a script nightly using AWS Systems Manager Run Command to search for credentials on the development instances. If found, use AWS Secrets Manager to rotate the credentials"
+        ],
+        "correct": [
+            0
+        ],
+        "type": "single",
+        "explanation": "Đáp án được chọn nhiều nhất trong cộng đồng. Xem thêm giải thích trong file gốc."
+    },
+    {
+        "id": 15,
+        "text": "A company needs to establish a connection from its on-premises data center to AWS. The company needs to connect all of its VPCs that are located in different AWS Regions with transitive routing capabilities between VPC networks. The company also must reduce network outbound traffic costs, increase bandwidth throughput, and provide a consistent network experience for end users.Which solution will meet these requirements?",
+        "options": [
+            "Create an AWS Direct Connect connection between the on-premises data center and AWS. Establish an AWS Site-to-Site VPN connection between all VPCs in each Region. Create VPC peering connections that initiate from the central VPC to all other VPCs.",
+            "Create an AWS Direct Connect connection between the on-premises data center and AWS. Provision a transit VIF, and connect it to a Direct Connect gateway. Connect the Direct Connect gateway to all the other VPCs by using a transit gateway in each Region.",
+            "Create an AWS Site-to-Site VPN connection between the on-premises data center and a new central VPUse a transit gateway with dynamic routing. Connect the transit gateway to all other VPCs.",
+            "Create an AWS Site-to-Site VPN connection between the on-premises data center and a new central VPC. Create VPC peering connections that initiate from the central VPC to all other VPCs."
+        ],
+        "correct": [
+            1
+        ],
+        "type": "single",
+        "explanation": "Đáp án được chọn nhiều nhất trong cộng đồng. Xem thêm giải thích trong file gốc."
+    },
+    {
+        "id": 16,
+        "text": "A company has developed a hybrid solution between its data center and AWS. The company uses Amazon VPC and Amazon EC2 instances that send application logs to Amazon CloudWatch. The EC2 instances read data from multiple relational databases that are hosted on premises.The company wants to monitor which EC2 instances are connected to the databases in near-real time. The company already has a monitoring solution that uses Splunk on premises. A solutions architect needs to determine how to send networking traffic to Splunk.How should the solutions architect meet these requirements?",
+        "options": [
+            "Ask the company to log every request that is made to the databases along with the EC2 instance IP address. Export the CloudWatch logs to an Amazon S3 bucket. Use Amazon Athena to query the logs grouped by database name. Export Athena results to another S3 bucket. Invoke an AWS Lambda function to automatically send any new file that is put in the S3 bucket to Splunk.",
+            "Send the CloudWatch logs to an Amazon Kinesis data stream with Amazon Kinesis Data Analytics for SQL Applications. Configure a 1-minute sliding window to collect the events. Create a SQL query that uses the anomaly detection template to monitor any networking traffic anomalies in near-real time. Send the result to an Amazon Kinesis Data Firehose delivery stream with Splunk as the destination.",
+            "Enable VPC flows logs, and send them to CloudWatch. Create an AWS Lambda function to periodically export the CloudWatch logs to an Amazon S3 bucket by using the pre-defined export function. Generate ACCESS_KEY and SECRET_KEY AWS credentials. Configure Splunk to pull the logs from the S3 bucket by using those credentials.",
+            "Create an Amazon Kinesis Data Firehose delivery stream with Splunk as the destination. Configure a pre-processing AWS Lambda function with a Kinesis Data Firehose stream processor that extracts individual log events from records sent by CloudWatch Logs subscription filters. Enable VPC flows logs, and send them to CloudWatch. Create a CloudWatch Logs subscription that sends log events to the Kinesis Data Firehose delivery stream."
+        ],
+        "correct": [
+            3
+        ],
+        "type": "single",
+        "explanation": "Đáp án được chọn nhiều nhất trong cộng đồng. Xem thêm giải thích trong file gốc."
+    },
+    {
+        "id": 17,
+        "text": "A large company runs workloads in VPCs that are deployed across hundreds of AWS accounts. Each VPC consists of public subnets and private subnets that span across multiple Availability Zones. NAT gateways are deployed in the public subnets and allow outbound connectivity to the internet from the private subnets.A solutions architect is working on a hub-and-spoke design. All private subnets in the spoke VPCs must route traffic to the internet through an egress VPC. The solutions architect already has deployed a NAT gateway in an egress VPC in a central AWS account.Which set of additional steps should the solutions architect take to meet these requirements?",
+        "options": [
+            "Create a transit gateway in every account. Attach the NAT gateway to the transit gateways. Configure the required routing to allow access to the internet.",
+            "Create peering connections between the egress VPC and the spoke VPCs. Configure the required routing to allow access to the internet.",
+            "Create an AWS PrivateLink connection between the egress VPC and the spoke VPCs. Configure the required routing to allow access to the internet.",
+            "Create a transit gateway, and share it with the existing AWS accounts. Attach existing VPCs to the transit gateway. Configure the required routing to allow access to the internet."
+        ],
+        "correct": [
+            3
+        ],
+        "type": "single",
+        "explanation": "Đáp án được chọn nhiều nhất trong cộng đồng. Xem thêm giải thích trong file gốc."
+    },
+    {
+        "id": 18,
+        "text": "A company has a data lake in Amazon S3 that needs to be accessed by hundreds of applications across many AWS accounts. The company's information security policy states that the S3 bucket must not be accessed over the public internet and that each application should have the minimum permissions necessary to function.To meet these requirements, a solutions architect plans to use an S3 access point that is restricted to specific VPCs for each application.Which combination of steps should the solutions architect take to implement this solution? (Choose two.)",
+        "options": [
+            "Create a gateway endpoint for Amazon S3 in the data lake's VPC. Attach an endpoint policy to allow access to the S3 bucket. Specify the route table that is used to access the bucket.",
+            "Create an S3 access point for each application in each AWS account and attach the access points to the S3 bucket. Configure each access point to be accessible only from the application's VPC. Update the bucket policy to require access from an access point.",
+            "Create an interface endpoint for Amazon S3 in each application's VPC. Configure the endpoint policy to allow access to an S3 access point. Create a VPC gateway attachment for the S3 endpoint.",
+            "Create a gateway endpoint for Amazon S3 in each application's VPConfigure the endpoint policy to allow access to an S3 access point. Specify the route table that is used to access the access point.",
+            "Create an S3 access point for each application in the AWS account that owns the S3 bucket. Configure each access point to be accessible only from the application’s VPC. Update the bucket policy to require access from an access point."
+        ],
+        "correct": [
+            3,
+            4
+        ],
+        "type": "multiple",
+        "explanation": "Đáp án được chọn nhiều nhất trong cộng đồng. Xem thêm giải thích trong file gốc."
+    },
+    {
+        "id": 19,
+        "text": "An entertainment company recently launched a new game. To ensure a good experience for players during the launch period, the company deployed a static quantity of 12 r6g.16xlarge (memory optimized) Amazon EC2 instances behind a Network Load Balancer. The company's operations team used the Amazon CloudWatch agent and a custom metric to include memory utilization in its monitoring strategy.Analysis of the CloudWatch metrics from the launch period showed consumption at about one quarter of the CPU and memory that the company expected. Initial demand for the game has subsided and has become more variable. The company decides to use an Auto Scaling group that monitors the CPU and memory consumption to dynamically scale the instance fleet. A solutions architect needs to configure the Auto Scaling group to meet demand in the most cost-effective way.Which solution will meet these requirements?",
+        "options": [
+            "Configure the Auto Scaling group to deploy r6g.8xlarge (memory optimized) instances. Configure a minimum capacity of 2, a desired capacity of 2, and a maximum capacity of 6.",
+            "Configure the Auto Scaling group to deploy m6g.4xlarge (general purpose) instances. Configure a minimum capacity of 3, a desired capacity of 3, and a maximum capacity of 12.",
+            "Configure the Auto Scaling group to deploy r6g.4xlarge (memory optimized) instances. Configure a minimum capacity of 3, a desired capacity of 3, and a maximum capacity of 12.",
+            "Configure the Auto Scaling group to deploy c6g.4xlarge (compute optimized) instances. Configure a minimum capacity of 3, a desired capacity of 3, and a maximum capacity of 12."
+        ],
+        "correct": [
+            2
+        ],
+        "type": "single",
+        "explanation": "Đáp án được chọn nhiều nhất trong cộng đồng. Xem thêm giải thích trong file gốc."
+    },
+    {
+        "id": 20,
+        "text": "A media storage application uploads user photos to Amazon S3 for processing by AWS Lambda functions. Application state is stored in Amazon DynamoDB tables. Users are reporting that some uploaded photos are not being processed properly. The application developers trace the logs and find that Lambda is experiencing photo processing issues when thousands of users upload photos simultaneously. The issues are the result of Lambda concurrency limits and the performance of DynamoDB when data is saved.Which combination of actions should a solutions architect take to increase the performance and reliability of the application? (Choose two.)",
+        "options": [
+            "Add an Amazon Simple Queue Service (Amazon SQS) queue and reprocessing logic between Amazon S3 and the Lambda functions.",
+            "Evaluate and adjust the RCUs for the DynamoDB tables.",
+            "Evaluate and adjust the WCUs for the DynamoDB tables.",
+            "Add an Amazon ElastiCache layer to increase the performance of Lambda functions.",
+            "Use S3 Transfer Acceleration to provide lower latency to users."
+        ],
+        "correct": [
+            0,
+            2
+        ],
+        "type": "multiple",
+        "explanation": "Đáp án được chọn nhiều nhất trong cộng đồng. Xem thêm giải thích trong file gốc."
+    },
+    {
+        "id": 21,
+        "text": "A company has millions of objects in an Amazon S3 bucket. The objects are in the S3 Standard storage class. All the S3 objects are accessed frequently. The number of users and applications that access the objects is increasing rapidly. The objects are encrypted with server-side encryption with AWS KMS keys (SSE-KMS).A solutions architect reviews the company’s monthly AWS invoice and notices that AWS KMS costs are increasing because of the high number of requests from Amazon S3. The solutions architect needs to optimize costs with minimal changes to the application.Which solution will meet these requirements with the LEAST operational overhead?",
+        "options": [
+            "Use the S3 Intelligent-Tiering storage class for the S3 bucket. Create an S3 Intelligent-Tiering archive configuration to transition objects that are not accessed for 90 days to S3 Glacier Deep Archive.",
+            "Create a new S3 bucket that has server-side encryption with customer-provided keys (SSE-C) as the encryption type. Copy the existing objects to the new S3 bucket. Specify SSE-C.",
+            "Create a new S3 bucket that has server-side encryption with Amazon S3 managed keys (SSE-S3) as the encryption type. Use S3 Batch Operations to copy the existing objects to the new S3 bucket. Specify SSE-S3.",
+            "Use AWS CloudHSM to store the encryption keys. Create a new S3 bucket. Use S3 Batch Operations to copy the existing objects to the new S3 bucket. Encrypt the objects by using the keys from CloudHSM."
+        ],
+        "correct": [
+            2
+        ],
+        "type": "single",
+        "explanation": "Đáp án được chọn nhiều nhất trong cộng đồng. Xem thêm giải thích trong file gốc."
+    },
+    {
+        "id": 22,
+        "text": "A company's solutions architect is analyzing costs of a multi-application environment. The environment is deployed across multiple Availability Zones in a single AWS Region. After a recent acquisition, the company manages two organizations in AWS Organizations. The company has created multiple service provider applications as AWS PrivateLink-powered VPC endpoint services in one organization. The company has created multiple service consumer applications in the other organization.Data transfer charges are much higher than the company expected, and the solutions architect needs to reduce the costs. The solutions architect must recommend guidelines for developers to follow when they deploy services. These guidelines must minimize data transfer charges for the whole environment.Which guidelines meet these requirements? (Choose two.)",
+        "options": [
+            "Create a Savings Plan that provides adequate coverage for the organization's planned inter-Availability Zone data transfer usage.",
+            "Place the service provider applications and the service consumer applications in AWS accounts in the same organization.",
+            "Ensure that service consumer compute resources use the Availability Zone-specific endpoint service by using the endpoint's local DNS name.",
+            "Turn off cross-zone load balancing for the Network Load Balancer in all service provider application deployments.",
+            "Use AWS Resource Access Manager to share the subnets that host the service provider applications with other accounts in the organization."
+        ],
+        "correct": [
+            2,
+            3
+        ],
+        "type": "multiple",
+        "explanation": "Đáp án được chọn nhiều nhất trong cộng đồng. Xem thêm giải thích trong file gốc."
+    },
+    {
+        "id": 23,
+        "text": "A company is designing an AWS Organizations structure. The company wants to standardize a process to apply tags across the entire organization. The company will require tags with specific values when a user creates a new resource. Each of the company's OUs will have unique tag values.Which solution will meet these requirements?",
+        "options": [
+            "Use an SCP to allow the creation of resources only when the resources have the required tags. Create a tag policy that includes the tag values that the company has assigned to each OU. Attach the tag policies to the OUs.",
+            "Use an SCP to deny the creation of resources that do not have the required tags. Create a tag policy that includes the tag values that the company has assigned to each OU. Attach the tag policies to the organization's management account.",
+            "Use an SCP to deny the creation of resources that do not have the required tags. Define the list of tags. Attach the SCP to the OUs.",
+            "Use an SCP to deny the creation of resources that do not have the required tags. Create a tag policy that includes the tag values that the company has assigned to each OU. Attach the tag policies to the OUs."
+        ],
+        "correct": [
+            3
+        ],
+        "type": "single",
+        "explanation": "Đáp án được chọn nhiều nhất trong cộng đồng. Xem thêm giải thích trong file gốc."
+    },
+    {
+        "id": 24,
+        "text": "A company has an application that is deployed on Amazon EC2 instances behind an Application Load Balancer (ALB). The instances are part of an Auto Scaling group. The application has unpredictable workloads and frequently scales out and in. The company’s development team wants to analyze application logs to find ways to improve the application's performance. However, the logs are no longer available after instances scale in.Which solution will give the development team the ability to view the application logs after a scale-in event?",
+        "options": [
+            "Enable access logs for the ALB. Store the logs in an Amazon S3 bucket.",
+            "Modify the Auto Scaling group to use a step scaling policy.",
+            "Configure the EC2 instances to publish logs to Amazon CloudWatch Logs by using the unified CloudWatch agent.",
+            "Instrument the application with AWS X-Ray tracing."
+        ],
+        "correct": [
+            2
+        ],
+        "type": "single",
+        "explanation": "Đáp án được chọn nhiều nhất trong cộng đồng. Xem thêm giải thích trong file gốc."
+    },
+    {
+        "id": 25,
+        "text": "A company runs an application in an on-premises data center. The application gives users the ability to upload media files. The files persist in a file server. The web application has many users. The application server is overutilized, which causes data uploads to fail occasionally. The company frequently adds new storage to the file server. The company wants to resolve these challenges by migrating the application to AWS.Users from across the United States and Canada access the application. Only authenticated users should have the ability to access the application to upload files. The company will consider a solution that refactors the application, and the company needs to accelerate application development.Which solution will meet these requirements with the LEAST operational overhead?",
+        "options": [
+            "Use AWS Amplify to create a static website for uploads of media files. Use Amplify Hosting to serve the website through Amazon CloudFront. Use Amazon S3 to store the uploaded media files. Use Amazon Cognito to authenticate users.",
+            "Use AWS Application Migration Service to migrate the application server to Amazon EC2 instances. Create an Auto Scaling group for the EC2 instances. Use an Application Load Balancer to distribute the requests. Modify the application to use Amazon S3 to persist the files. Use Amazon Cognito to authenticate users.",
+            "Create a static website for uploads of media files. Store the static assets in Amazon S3. Use AWS AppSync to create an API. Use AWS Lambda resolvers to upload the media files to Amazon S3. Use Amazon Cognito to authenticate users.",
+            "Use AWS Application Migration Service to migrate the application server to Amazon EC2 instances. Create an Auto Scaling group for the EC2 instances. Use an Application Load Balancer to distribute the requests. Set up AWS IAM Identity Center (AWS Single Sign-On) to give users the ability to sign in to the application. Modify the application to use Amazon S3 to persist the files."
+        ],
+        "correct": [
+            0
+        ],
+        "type": "single",
+        "explanation": "Đáp án được chọn nhiều nhất trong cộng đồng. Xem thêm giải thích trong file gốc."
+    },
+    {
+        "id": 26,
+        "text": "A company is creating a centralized logging service running on Amazon EC2 that will receive and analyze logs from hundreds of AWS accounts. AWS PrivateLink is being used to provide connectivity between the client services and the logging service.In each AWS account with a client, an interface endpoint has been created for the logging service and is available. The logging service running on EC2 instances with a Network Load Balancer (NLB) are deployed in different subnets. The clients are unable to submit logs using the VPC endpoint.Which combination of steps should a solutions architect take to resolve this issue? (Choose two.)",
+        "options": [
+            "Check that the NACL is attached to the logging service subnet to allow communications to and from the NLB subnets. Check that the NACL is attached to the NLB subnet to allow communications to and from the logging service subnets running on EC2 instances.",
+            "Check that the NACL is attached to the logging service subnets to allow communications to and from the interface endpoint subnets. Check that the NACL is attached to the interface endpoint subnet to allow communications to and from the logging service subnets running on EC2 instances.",
+            "Check the security group for the NLB to ensure it allows ingress from the interface endpoint subnets.",
+            "Check the security group for the logging service running on the EC2 instances to ensure it allows ingress from the NLB subnets.",
+            "Check the security group for the logging service running on EC2 instances to ensure it allows ingress from the clients."
+        ],
+        "correct": [
+            0,
+            3
+        ],
+        "type": "multiple",
+        "explanation": "Đáp án được chọn nhiều nhất trong cộng đồng. Xem thêm giải thích trong file gốc."
+    },
+    {
+        "id": 27,
+        "text": "A financial services company loaded millions of historical stock trades into an Amazon DynamoDB table. The table uses on-demand capacity mode. Once each day at midnight, a few million new records are loaded into the table. Application read activity against the table happens in bursts throughout the day. and a limited set of keys are repeatedly looked up. The company needs to reduce costs associated with DynamoDB.Which strategy should a solutions architect recommend to meet this requirement?",
+        "options": [
+            "Deploy DynamoDB Accelerator (DAX). Configure DynamoDB auto scaling. Purchase Savings Plans in Cost Explorer.",
+            "Deploy DynamoDB Accelerator (DAX). Use provisioned capacity mode. Configure DynamoDB auto scaling.",
+            "Use provisioned capacity mode. Purchase Savings Plans in Cost Explorer.",
+            "Deploy an Amazon ElastiCache cluster in front of the DynamoDB table"
+        ],
+        "correct": [
+            1
+        ],
+        "type": "single",
+        "explanation": "Đáp án được chọn nhiều nhất trong cộng đồng. Xem thêm giải thích trong file gốc."
+    },
+    {
+        "id": 28,
+        "text": "A company recently started hosting new application workloads in the AWS Cloud. The company is using Amazon EC2 instances. Amazon Elastic File System (Amazon EFS) file systems, and Amazon RDS DB instances.To meet regulatory and business requirements, the company must make the following changes for data backups:•\tBackups must be retained based on custom daily, weekly, and monthly requirements.•\tBackups must be replicated to at least one other AWS Region immediately after capture.•\tThe backup solution must provide a single source of backup status across the AWS environment.•\tThe backup solution must send immediate notifications upon failure of any resource backup.Which combination of steps will meet these requirements with the LEAST amount of operational overhead? (Choose three.)",
+        "options": [
+            "Create an AWS Backup plan with a backup rule for each of the retention requirements.",
+            "Configure an AWS Backup plan to copy backups to another Region.",
+            "Set up RDS snapshots on each database.",
+            "Create an AWS Lambda function to replicate backups to another Region and send notification if a failure occurs.",
+            "Create an Amazon Data Lifecycle Manager (Amazon DLM) snapshot lifecycle policy for each of the retention requirements.",
+            "Add an Amazon Simple Notification Service (Amazon SNS) topic to the backup plan to send a notification for finished jobs that have any status except BACKUP_JOB_COMPLETED."
+        ],
+        "correct": [
+            0,
+            1,
+            5
+        ],
+        "type": "multiple",
+        "explanation": "Đáp án được chọn nhiều nhất trong cộng đồng. Xem thêm giải thích trong file gốc."
+    },
+    {
+        "id": 29,
+        "text": "A company wants to use AWS for disaster recovery for an on-premises application. The company has hundreds of Windows-based servers that run the application. All the servers mount a common share.The company has an RTO of 15 minutes and an RPO of 5 minutes. The solution must support native failover and fallback capabilities.Which solution will meet these requirements MOST cost-effectively?",
+        "options": [
+            "Use AWS Elastic Disaster Recovery to replicate the on-premises servers. Replicate data to an Amazon FSx for Windows File Server file system by using AWS DataSync. Mount the file system to AWS servers. During a disaster, fail over the on-premises servers to AWS. Fail back to new or existing servers by using Elastic Disaster Recovery.",
+            "Create an AWS Storage Gateway File Gateway. Schedule daily Windows server backups. Save the data to Amazon S3. During a disaster, recover the on-premises servers from the backup. During tailback, run the on-premises servers on Amazon EC2 instances.",
+            "Create an AWS Cloud Development Kit (AWS CDK) pipeline to stand up a multi-site active-active environment on AWS. Replicate data into Amazon S3 by using the s3 sync command. During a disaster, swap DNS endpoints to point to AWS. Fail back the data by using the s3 sync command.",
+            "Create a set of AWS CloudFormation templates to create infrastructure. Replicate all data to Amazon Elastic File System (Amazon EFS) by using AWS DataSync. During a disaster, use AWS CodePipeline to deploy the templates to restore the on-premises servers. Fail back the data by using DataSync."
+        ],
+        "correct": [
+            0
+        ],
+        "type": "single",
+        "explanation": "Đáp án được chọn nhiều nhất trong cộng đồng. Xem thêm giải thích trong file gốc."
+    },
+    {
+        "id": 30,
+        "text": "A company has an on-premises Microsoft SQL Server database that writes a nightly 200 GB export to a local drive. The company wants to move the backups to more robust cloud storage on Amazon S3. The company has set up a 10 Gbps AWS Direct Connect connection between the on-premises data center and AWS.Which solution meets these requirements MOST cost-effectively?",
+        "options": [
+            "Create a new S3 bucket. Deploy an AWS Storage Gateway volume gateway within the VPC that is connected to the Direct Connect connection. Create a new SMB file share. Write nightly database exports to the new SMB file share on the volume gateway, and automate copies of this data to an S3 bucket.",
+            "Create an Amazon FSx for Windows File Server Single-AZ file system within the VPC that is connected to the Direct Connect connection. Create a new SMB file share. Write nightly database exports to an SMB file share on the Amazon FSx file system. Enable nightly backups.",
+            "Create a new S3 bucket. Deploy an AWS Storage Gateway file gateway within the VPC that is connected to the Direct Connect connection. Create a new SMB file share. Write nightly database exports to the new SMB file share.",
+            "Create an Amazon FSx for Windows File Server Multi-AZ file system within the VPC that is connected to the Direct Connect connection. Create a new SMB file share. Write nightly database exports to an SMB file share on the Amazon FSx file system. Enable nightly backups."
+        ],
+        "correct": [
+            2
+        ],
+        "type": "single",
+        "explanation": "Đáp án được chọn nhiều nhất trong cộng đồng. Xem thêm giải thích trong file gốc."
+    }
+]
+        let currentQuestionIndex = 0;
+        let userAnswers = [];
+        let startTime = Date.now();
+        let timer;
+
+        function initializeApp() {
+            document.getElementById('totalQuestions').textContent = questions.length;
+            loadQuestion();
+            startTimer();
+            updateStats();
+        }
+
+        function loadQuestion() {
+            const question = questions[currentQuestionIndex];
+            document.getElementById('questionText').innerHTML = `
+                <strong>Câu ${question.id}:</strong><br><br>
+                ${question.text}
+            `;
+            
+            // Set question type indicator
+            const typeElement = document.getElementById('questionType');
+            if (question.type === 'multiple') {
+                typeElement.textContent = `Multiple Choice (Choose ${question.correct.length})`;
+                typeElement.style.background = '#fff3cd';
+                typeElement.style.color = '#856404';
+            } else {
+                typeElement.textContent = 'Single Choice';
+                typeElement.style.background = '#e3f2fd';
+                typeElement.style.color = '#1976d2';
+            }
+            
+            const optionsContainer = document.getElementById('optionsContainer');
+            optionsContainer.innerHTML = '';
+            
+            question.options.forEach((option, index) => {
+                const optionDiv = document.createElement('div');
+                optionDiv.className = 'option';
+                optionDiv.innerHTML = `
+                    <strong>${String.fromCharCode(65 + index)}.</strong> ${option}
+                    ${question.type === 'multiple' ? '<input type="checkbox" class="option-checkbox">' : ''}
+                `;
+                
+                if (question.type === 'multiple') {
+                    optionDiv.onclick = () => toggleMultipleOption(index);
+                } else {
+                    optionDiv.onclick = () => selectSingleOption(index);
+                }
+                
+                optionDiv.dataset.index = index;
+                optionsContainer.appendChild(optionDiv);
+            });
+
+            document.getElementById('currentQuestion').textContent = currentQuestionIndex + 1;
+            document.getElementById('submitBtn').disabled = true;
+            document.getElementById('nextBtn').disabled = true;
+            updateProgressBar();
+        }
+
+        function selectSingleOption(index) {
+            document.querySelectorAll('.option').forEach(opt => opt.classList.remove('selected'));
+            document.querySelector(`[data-index="${index}"]`).classList.add('selected');
+            document.getElementById('submitBtn').disabled = false;
+        }
+
+        function toggleMultipleOption(index) {
+            const option = document.querySelector(`[data-index="${index}"]`);
+            const checkbox = option.querySelector('.option-checkbox');
+            
+            if (option.classList.contains('selected')) {
+                option.classList.remove('selected');
+                checkbox.checked = false;
+            } else {
+                option.classList.add('selected');
+                checkbox.checked = true;
+            }
+            
+            // Enable submit if at least one option is selected
+            const selectedCount = document.querySelectorAll('.option.selected').length;
+            document.getElementById('submitBtn').disabled = selectedCount === 0;
+        }
+
+        function getSelectedAnswers() {
+            const question = questions[currentQuestionIndex];
+            const selected = [];
+            
+            document.querySelectorAll('.option.selected').forEach(opt => {
+                selected.push(parseInt(opt.dataset.index));
+            });
+            
+            return selected.sort((a, b) => a - b); // Sort for comparison
+        }
+
+        function submitAnswer() {
+            const selectedAnswers = getSelectedAnswers();
+            if (selectedAnswers.length === 0) return;
+
+            const question = questions[currentQuestionIndex];
+            const correctAnswers = [...question.correct].sort((a, b) => a - b);
+            
+            // Calculate correctness
+            let isCorrect = false;
+            let isPartial = false;
+            
+            if (question.type === 'single') {
+                isCorrect = selectedAnswers.length === 1 && selectedAnswers[0] === correctAnswers[0];
+            } else {
+                // Multiple choice scoring
+                const selectedSet = new Set(selectedAnswers);
+                const correctSet = new Set(correctAnswers);
+                
+                if (selectedAnswers.length === correctAnswers.length && 
+                    selectedAnswers.every(ans => correctSet.has(ans))) {
+                    isCorrect = true;
+                } else {
+                    // Partial credit if some answers are correct
+                    const correctSelected = selectedAnswers.filter(ans => correctSet.has(ans));
+                    const incorrectSelected = selectedAnswers.filter(ans => !correctSet.has(ans));
+                    
+                    if (correctSelected.length > 0 && incorrectSelected.length === 0) {
+                        isPartial = true; // Selected some correct, no incorrect
+                    }
+                }
+            }
+
+            userAnswers[currentQuestionIndex] = {
+                questionId: question.id,
+                selected: selectedAnswers,
+                correct: correctAnswers,
+                isCorrect: isCorrect,
+                isPartial: isPartial,
+                timeSpent: Date.now() - startTime,
+                type: question.type
+            };
+
+            // Show results
+            document.querySelectorAll('.option').forEach((opt, index) => {
+                const isSelectedCorrect = correctAnswers.includes(index);
+                const isSelectedByUser = selectedAnswers.includes(index);
+                
+                if (isSelectedCorrect) {
+                    opt.classList.add('correct');
+                } else if (isSelectedByUser) {
+                    opt.classList.add('incorrect');
+                }
+                
+                opt.onclick = null; // Disable clicking
+            });
+
+            // Show explanation
+            const explanationDiv = document.createElement('div');
+            let resultClass = 'incorrect';
+            let resultText = '❌ Sai rồi!';
+            
+            if (isCorrect) {
+                resultClass = 'correct';
+                resultText = '✅ Chính xác!';
+            } else if (isPartial) {
+                resultClass = 'partial';
+                resultText = '⚠️ Đúng một phần!';
+            }
+            
+            explanationDiv.className = `explanation ${resultClass}`;
+            explanationDiv.innerHTML = `
+                <strong>${resultText}</strong><br>
+                <strong>Đáp án đúng:</strong> ${correctAnswers.map(i => String.fromCharCode(65 + i)).join(', ')}<br>
+                <strong>Bạn chọn:</strong> ${selectedAnswers.map(i => String.fromCharCode(65 + i)).join(', ')}<br>
+                <em>Giải thích:</em> ${question.explanation}
+            `;
+            document.getElementById('optionsContainer').appendChild(explanationDiv);
+
+            document.getElementById('submitBtn').style.display = 'none';
+            document.getElementById('nextBtn').disabled = false;
+            updateStats();
+        }
+
+        function nextQuestion() {
+            if (currentQuestionIndex < questions.length - 1) {
+                currentQuestionIndex++;
+                loadQuestion();
+                document.getElementById('submitBtn').style.display = 'inline-block';
+            } else {
+                showReview();
+            }
+        }
+
+        function previousQuestion() {
+            if (currentQuestionIndex > 0) {
+                currentQuestionIndex--;
+                loadQuestion();
+                document.getElementById('submitBtn').style.display = 'inline-block';
+            }
+        }
+
+        function updateStats() {
+            const answered = userAnswers.filter(a => a).length;
+            const correct = userAnswers.filter(a => a && a.isCorrect).length;
+            const partial = userAnswers.filter(a => a && a.isPartial).length;
+            const accuracy = answered > 0 ? Math.round(((correct + partial * 0.5) / answered) * 100) : 0;
+
+            document.getElementById('correctCount').textContent = correct + (partial > 0 ? ` (+${partial} partial)` : '');
+            document.getElementById('wrongCount').textContent = answered - correct - partial;
+            document.getElementById('accuracy').textContent = accuracy + '%';
+        }
+
+        function updateProgressBar() {
+            const progress = ((currentQuestionIndex + 1) / questions.length) * 100;
+            document.getElementById('progressBar').style.width = progress + '%';
+        }
+
+        function startTimer() {
+            timer = setInterval(() => {
+                const elapsed = Math.floor((Date.now() - startTime) / 1000);
+                const minutes = Math.floor(elapsed / 60);
+                const seconds = elapsed % 60;
+                document.getElementById('timeSpent').textContent = 
+                    `${minutes}:${seconds.toString().padStart(2, '0')}`;
+            }, 1000);
+        }
+
+        function showReview() {
+            clearInterval(timer);
+            document.getElementById('studyMode').classList.add('hidden');
+            document.getElementById('reviewMode').classList.remove('hidden');
+
+            const correct = userAnswers.filter(a => a.isCorrect).length;
+            const partial = userAnswers.filter(a => a.isPartial).length;
+            const total = userAnswers.length;
+            const accuracy = Math.round(((correct + partial * 0.5) / total) * 100);
+
+            document.getElementById('reviewStats').innerHTML = `
+                <div class="stats">
+                    <div class="stat-card">
+                        <div class="stat-number">${correct}/${total}</div>
+                        <div>Hoàn toàn đúng</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">${partial}</div>
+                        <div>Đúng một phần</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">${accuracy}%</div>
+                        <div>Điểm tổng</div>
+                    </div>
+                </div>
+            `;
+
+            // Show wrong answers for review
+            const wrongAnswers = userAnswers.filter(a => !a.isCorrect);
+            if (wrongAnswers.length > 0) {
+                document.getElementById('wrongAnswers').innerHTML = `
+                    <h3>🔄 Câu cần ôn lại (${wrongAnswers.length} câu):</h3>
+                    ${wrongAnswers.map(a => `
+                        <div class="wrong-answer">
+                            <strong>Câu ${a.questionId} (${a.type === 'multiple' ? 'Multiple' : 'Single'} Choice):</strong><br>
+                            Bạn chọn: ${a.selected.map(i => String.fromCharCode(65 + i)).join(', ')}<br>
+                            Đáp án đúng: ${a.correct.map(i => String.fromCharCode(65 + i)).join(', ')}
+                            ${a.isPartial ? ' <span style="color: #856404;">(Đúng một phần)</span>' : ''}
+                        </div>
+                    `).join('')}
+                `;
+            }
+        }
+
+        function restartStudy() {
+            currentQuestionIndex = 0;
+            userAnswers = [];
+            startTime = Date.now();
+            document.getElementById('studyMode').classList.remove('hidden');
+            document.getElementById('reviewMode').classList.add('hidden');
+            initializeApp();
+        }
+
+        function exportResults() {
+            const results = {
+                date: new Date().toLocaleDateString('vi-VN'),
+                day: 1,
+                questions: questions.length,
+                correct: userAnswers.filter(a => a.isCorrect).length,
+                partial: userAnswers.filter(a => a.isPartial).length,
+                accuracy: Math.round(((userAnswers.filter(a => a.isCorrect).length + userAnswers.filter(a => a.isPartial).length * 0.5) / userAnswers.length) * 100),
+                wrongQuestions: userAnswers.filter(a => !a.isCorrect).map(a => ({
+                    id: a.questionId,
+                    type: a.type,
+                    selected: a.selected,
+                    correct: a.correct,
+                    isPartial: a.isPartial
+                })),
+                timeSpent: document.getElementById('timeSpent').textContent
+            };
+
+            const blob = new Blob([JSON.stringify(results, null, 2)], {type: 'application/json'});
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `aws-devops-results-${new Date().toISOString().split('T')[0]}.json`;
+            a.click();
+        }
+
+        // Initialize app when page loads
+        window.onload = initializeApp;
+    </script>
+</body>
+</html>

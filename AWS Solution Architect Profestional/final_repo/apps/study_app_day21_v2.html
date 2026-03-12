@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SAP-C02 Day 21 Study</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', sans-serif; background: linear-gradient(135deg, #6f42c1, #5a32a3); min-height: 100vh; padding: 20px; }
+        .container { max-width: 1000px; margin: 0 auto; background: white; border-radius: 15px; box-shadow: 0 20px 40px rgba(0,0,0,0.1); overflow: hidden; }
+        .header { background: linear-gradient(135deg, #6f42c1, #5a32a3); color: white; padding: 30px; text-align: center; }
+        .header h1 { font-size: 2.5em; margin-bottom: 10px; }
+        .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 15px; padding: 20px 30px; background: #f8f9fa; }
+        .stat-card { background: white; padding: 15px; border-radius: 10px; text-align: center; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .stat-number { font-size: 1.8em; font-weight: bold; color: #6f42c1; }
+        .question-container { padding: 30px; }
+        .question-header { background: #6f42c1; color: white; padding: 15px 20px; border-radius: 10px 10px 0 0; font-weight: bold; }
+        .question-content { background: #f8f9fa; padding: 25px; border: 1px solid #dee2e6; border-top: none; border-radius: 0 0 10px 10px; }
+        .question-text { font-size: 1.1em; line-height: 1.6; margin-bottom: 25px; }
+        .multi-choice-note { background: #fff3cd; padding: 10px; border-radius: 5px; margin-bottom: 15px; font-size: 0.9em; color: #856404; }
+        .choices { list-style: none; }
+        .choice { background: white; margin: 10px 0; padding: 15px; border: 2px solid #dee2e6; border-radius: 8px; cursor: pointer; transition: all 0.3s ease; }
+        .choice:hover { border-color: #6f42c1; transform: translateY(-2px); }
+        .choice.selected { border-color: #6f42c1; background: #f3e5f5; }
+        .choice.correct { border-color: #28a745; background: #d4edda; }
+        .choice.incorrect { border-color: #dc3545; background: #f8d7da; }
+        .choice-letter { display: inline-block; width: 30px; height: 30px; background: #6f42c1; color: white; border-radius: 50%; text-align: center; line-height: 30px; margin-right: 15px; font-weight: bold; }
+        .choice.correct .choice-letter { background: #28a745; }
+        .choice.incorrect .choice-letter { background: #dc3545; }
+        .explanation { background: #fff3cd; border: 1px solid #ffeaa7; border-radius: 8px; padding: 20px; margin-top: 20px; display: none; }
+        .explanation.show { display: block; }
+        .navigation { padding: 30px; background: #f8f9fa; display: flex; justify-content: space-between; align-items: center; }
+        .btn { padding: 12px 24px; border: none; border-radius: 25px; cursor: pointer; font-weight: bold; transition: all 0.3s ease; text-decoration: none; display: inline-block; }
+        .btn-primary { background: linear-gradient(135deg, #6f42c1, #5a32a3); color: white; }
+        .btn-success { background: linear-gradient(135deg, #28a745, #1e7e34); color: white; }
+        .btn:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+        .back-buttons { text-align: center; padding: 20px; background: #f8f9fa; }
+        @media (max-width: 768px) { .navigation { flex-direction: column; gap: 15px; } }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📚 SAP-C02 Day 21</h1>
+            <p>18 questions for today's study session</p>
+        </div>
+        
+        <div class="stats">
+            <div class="stat-card">
+                <div class="stat-number" id="currentQ">1</div>
+                <div>Current</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="totalQ">18</div>
+                <div>Total</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="correctCount">0</div>
+                <div>Correct</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="accuracy">0%</div>
+                <div>Accuracy</div>
+            </div>
+        </div>
+        
+        <div class="question-container" id="questionContainer"></div>
+        
+        <div class="navigation">
+            <button class="btn btn-primary" onclick="previousQuestion()" id="prevBtn">Previous</button>
+            <div>
+                <button class="btn btn-primary" onclick="showAnswer()" id="showAnswerBtn">Show Answer</button>
+                <button class="btn btn-success" onclick="nextQuestion()" id="nextBtn" style="display:none;">Next Question</button>
+            </div>
+            <button class="btn btn-primary" onclick="nextQuestion()" id="skipBtn">Skip</button>
+        </div>
+        
+        <div class="back-buttons">
+            <a href="../daily_study_launcher.html" class="btn btn-primary">📚 Back to Study Plan</a>
+            <a href="../../../master_study_launcher.html" class="btn btn-success">🏠 Master Hub</a>
+            <a href="../../../index.html" class="btn" style="background: #17a2b8; color: white;">🏡 Home Page</a>
+        </div>
+    </div>
+
+    <script>
+        const questions = [
+        {
+                "question_number": 361,
+                "question_text": "A software as a service (SaaS) company uses AWS to host a service that is powered by AWS PrivateLink. The service consists of proprietary software that runs on three Amazon EC2 instances behind a Network Load Balancer (NLB). The instances are in private subnets in multiple Availability Zones in the eu-west-2 Region. All the company's customers are in eu-west-2.However, the company now acquires a new customer in the us-east-1 Region. The company creates a new VPC and new subnets in us-east-1. The company establishes inter-Region VPC peering between the VPCs in the two Regions.The company wants to give the new customer access to the SaaS service, but the company does not want to immediately deploy new EC2 resources in us-east-1.Which solution will meet these requirements?",
+                "choices": [
+                        "Configure a PrivateLink endpoint service in us-east-1 to use the existing NLB that is in eu-west-2. Grant specific AWS accounts access to connect to the SaaS service.",
+                        "Create an NLB in us-east-1. Create an IP target group that uses the IP addresses of the company's instances in eu-west-2 that host the SaaS service. Configure a PrivateLink endpoint service that uses the NLB that is in us-east-1. Grant specific AWS accounts access to connect to the SaaS service.",
+                        "Create an Application Load Balancer (ALB) in front of the EC2 instances in eu-west-2. Create an NLB in us-east-1. Associate the NLB that is in us-east-1 with an ALB target group that uses the ALB that is in eu-west-2. Configure a PrivateLink endpoint service that uses the NLB that is in us-east-1. Grant specific AWS accounts access to connect to the SaaS service.",
+                        "Use AWS Resource Access Manager (AWS RAM) to share the EC2 instances that are in eu-west-2. In us-east-1, create an NLB and an instance target group that includes the shared EC2 instances from eu-west-2. Configure a PrivateLink endpoint service that uses the NLB that is in us-east-1. Grant specific AWS accounts access to connect to the SaaS service."
+                ],
+                "correct_answer": "A",
+                "is_multiple_choice": false,
+                "voting_data": {
+                        "A": 49,
+                        "B": 46
+                }
+        },
+        {
+                "question_number": 362,
+                "question_text": "A company needs to monitor a growing number of Amazon S3 buckets across two AWS Regions. The company also needs to track the percentage of objects that are encrypted in Amazon S3. The company needs a dashboard to display this information for internal compliance teams.Which solution will meet these requirements with the LEAST operational overhead?",
+                "choices": [
+                        "Create a new 3 Storage Lens dashboard in each Region to track bucket and encryption metrics. Aggregate data from both Region dashboards into a single dashboard in Amazon QuickSight for the compliance teams.",
+                        "Deploy an AWS Lambda function in each Region to list the number of buckets and the encryption status of objects. Store this data in Amazon S3. Use Amazon Athena queries to display the data on a custom dashboard in Amazon QuickSight for the compliance teams.",
+                        "Use the S3 Storage Lens default dashboard to track bucket and encryption metrics. Give the compliance teams access to the dashboard directly in the S3 console.",
+                        "Create an Amazon EventBridge rule to detect AWS CloudTrail events for S3 object creation. Configure the rule to invoke an AWS Lambda function to record encryption metrics in Amazon DynamoDB. Use Amazon QuickSight to display the metrics in a dashboard for the compliance teams."
+                ],
+                "correct_answer": "C",
+                "is_multiple_choice": false,
+                "voting_data": {
+                        "C": 21,
+                        "A": 4,
+                        "B": 2
+                }
+        },
+        {
+                "question_number": 363,
+                "question_text": "A company’s CISO has asked a solutions architect to re-engineer the company's current CI/CD practices to make sure patch deployments to its application can happen as quickly as possible with minimal downtime if vulnerabilities are discovered. The company must also be able to quickly roll back a change in case of errors.The web application is deployed in a fleet of Amazon EC2 instances behind an Application Load Balancer. The company is currently using GitHub to host the application source code, and has configured an AWS CodeBuild project to build the application. The company also intends to use AWS CodePipeline to trigger builds from GitHub commits using the existing CodeBuild project.What CI/CD configuration meets all of the requirements?",
+                "choices": [
+                        "Configure CodePipeline with a deploy stage using AWS CodeDeploy configured for in-place deployment. Monitor the newly deployed code, and, if there are any issues, push another code update",
+                        "Configure CodePipeline with a deploy stage using AWS CodeDeploy configured for blue/green deployments. Monitor the newly deployed code, and, if there are any issues, trigger a manual rollback using CodeDeploy.",
+                        "Configure CodePipeline with a deploy stage using AWS CloudFormation to create a pipeline for test and production stacks. Monitor the newly deployed code, and, if there are any issues, push another code update.",
+                        "Configure the CodePipeline with a deploy stage using AWS OpsWorks and in-place deployments. Monitor the newly deployed code, and, if there are any issues, push another code update."
+                ],
+                "correct_answer": "B",
+                "is_multiple_choice": false,
+                "voting_data": {
+                        "B": 19
+                }
+        },
+        {
+                "question_number": 364,
+                "question_text": "A company is managing many AWS accounts by using an organization in AWS Organizations. Different business units in the company run applications on Amazon EC2 instances. All the EC2 instances must have a BusinessUnit tag so that the company can track the cost for each business unit.A recent audit revealed that some instances were missing this tag. The company manually added the missing tag to the instances.What should a solutions architect do to enforce the tagging requirement in the future?",
+                "choices": [
+                        "Enable tag policies in the organization. Create a tag policy for the BusinessUnit tag. Ensure that compliance with tag key capitalization is turned off. Implement the tag policy for the ec2:instance resource type. Attach the tag policy to the root of the organization.",
+                        "Enable tag policies in the organization. Create a tag policy for the BusinessUnit tag. Ensure that compliance with tag key capitalization is turned on. Implement the tag policy for the ec2:instance resource type. Attach the tag policy to the organization's management account.",
+                        "Create an SCP and attach the SCP to the root of the organization. Include the following statement in the SCP:",
+                        "Create an SCP and attach the SCP to the organization’s management account. Include the following statement in the SCP:"
+                ],
+                "correct_answer": "C",
+                "is_multiple_choice": false,
+                "voting_data": {
+                        "C": 35,
+                        "B": 9,
+                        "A": 3
+                }
+        },
+        {
+                "question_number": 365,
+                "question_text": "A company is running a workload that consists of thousands of Amazon EC2 instances. The workload is running in a VPC that contains several public subnets and private subnets. The public subnets have a route for 0.0.0.0/0 to an existing internet gateway. The private subnets have a route for 0.0.0.0/0 to an existing NAT gateway.A solutions architect needs to migrate the entire fleet of EC2 instances to use IPv6. The EC2 instances that are in private subnets must not be accessible from the public internet.What should the solutions architect do to meet these requirements?",
+                "choices": [
+                        "Update the existing VPC, and associate a custom IPv6 CIDR block with the VPC and all subnets. Update all the VPC route tables, and add a route for ::/0 to the internet gateway.",
+                        "Update the existing VPC, and associate an Amazon-provided IPv6 CIDR block with the VPC and all subnets. Update the VPC route tables for all private subnets, and add a route for ::/0 to the NAT gateway.",
+                        "Update the existing VPC, and associate an Amazon-provided IPv6 CIDR block with the VPC and all subnets. Create an egress-only internet gateway. Update the VPC route tables for all private subnets, and add a route for ::/0 to the egress-only internet gateway.",
+                        "Update the existing VPC, and associate a custom IPV6 CIDR block with the VPC and all subnets. Create a new NAT gateway, and enable IPV6 support. Update the VPC route tables for all private subnets, and add a route for ::/0 to the IPv6-enabled NAT gateway."
+                ],
+                "correct_answer": "C",
+                "is_multiple_choice": false,
+                "voting_data": {
+                        "C": 23,
+                        "B": 2
+                }
+        },
+        {
+                "question_number": 366,
+                "question_text": "A company is using Amazon API Gateway to deploy a private REST API that will provide access to sensitive data. The API must be accessible only from an application that is deployed in a VPC. The company deploys the API successfully. However, the API is not accessible from an Amazon EC2 instance that is deployed in the VPC.Which solution will provide connectivity between the EC2 instance and the API?",
+                "choices": [
+                        "Create an interface VPC endpoint for API Gateway. Attach an endpoint policy that allows apigateway:* actions. Disable private DNS naming for the VPC endpoint. Configure an API resource policy that allows access from the VPC. Use the VPC endpoint's DNS name to access the API.",
+                        "Create an interface VPC endpoint for API Gateway. Attach an endpoint policy that allows the execute-api:Invoke action. Enable private DNS naming for the VPC endpoint. Configure an API resource policy that allows access from the VPC endpoint. Use the API endpoint’s DNS names to access the API.",
+                        "Create a Network Load Balancer (NLB) and a VPC link. Configure private integration between API Gateway and the NLB. Use the API endpoint’s DNS names to access the API.",
+                        "Create an Application Load Balancer (ALB) and a VPC Link. Configure private integration between API Gateway and the ALB. Use the ALB endpoint’s DNS name to access the API."
+                ],
+                "correct_answer": "B",
+                "is_multiple_choice": false,
+                "voting_data": {
+                        "B": 15
+                }
+        },
+        {
+                "question_number": 367,
+                "question_text": "A large payroll company recently merged with a small staffing company. The unified company now has multiple business units, each with its own existing AWS account.A solutions architect must ensure that the company can centrally manage the billing and access policies for all the AWS accounts. The solutions architect configures AWS Organizations by sending an invitation to all member accounts of the company from a centralized management account.What should the solutions architect do next to meet these requirements?",
+                "choices": [
+                        "Create the OrganizationAccountAccess IAM group in each member account. Include the necessary IAM roles for each administrator.",
+                        "Create the OrganizationAccountAccessPolicy IAM policy in each member account. Connect the member accounts to the management account by using cross-account access.",
+                        "Create the OrganizationAccountAccessRole IAM role in each member account. Grant permission to the management account to assume the IAM role.",
+                        "Create the OrganizationAccountAccessRole IAM role in the management account. Attach the AdministratorAccess AWS managed policy to the IAM role. Assign the IAM role to the administrators in each member account."
+                ],
+                "correct_answer": "C",
+                "is_multiple_choice": false,
+                "voting_data": {
+                        "C": 23,
+                        "B": 2
+                }
+        },
+        {
+                "question_number": 368,
+                "question_text": "A company has application services that have been containerized and deployed on multiple Amazon EC2 instances with public IPs. An Apache Kafka cluster has been deployed to the EC2 instances. A PostgreSQL database has been migrated to Amazon RDS for PostgreSQL. The company expects a significant increase of orders on its platform when a new version of its flagship product is released.What changes to the current architecture will reduce operational overhead and support the product release?",
+                "choices": [
+                        "Create an EC2 Auto Scaling group behind an Application Load Balancer. Create additional read replicas for the DB instance. Create Amazon Kinesis data streams and configure the application services to use the data streams. Store and serve static content directly from Amazon S3.",
+                        "Create an EC2 Auto Scaling group behind an Application Load Balancer. Deploy the DB instance in Multi-AZ mode and enable storage auto scaling. Create Amazon Kinesis data streams and configure the application services to use the data streams. Store and serve static content directly from Amazon S3.",
+                        "Deploy the application on a Kubernetes cluster created on the EC2 instances behind an Application Load Balancer. Deploy the DB instance in Multi-AZ mode and enable storage auto scaling. Create an Amazon Managed Streaming for Apache Kafka cluster and configure the application services to use the cluster. Store static content in Amazon S3 behind an Amazon CloudFront distribution.",
+                        "Deploy the application on Amazon Elastic Kubernetes Service (Amazon EKS) with AWS Fargate and enable auto scaling behind an Application Load Balancer. Create additional read replicas for the DB instance. Create an Amazon Managed Streaming for Apache Kafka cluster and configure the application services to use the cluster. Store static content in Amazon S3 behind an Amazon CloudFront distribution."
+                ],
+                "correct_answer": "D",
+                "is_multiple_choice": false,
+                "voting_data": {
+                        "D": 21,
+                        "B": 2,
+                        "C": 1
+                }
+        },
+        {
+                "question_number": 369,
+                "question_text": "A company hosts a VPN in an on-premises data center. Employees currently connect to the VPN to access files in their Windows home directories. Recently, there has been a large growth in the number of employees who work remotely. As a result, bandwidth usage for connections into the data center has begun to reach 100% during business hours.The company must design a solution on AWS that will support the growth of the company's remote workforce, reduce the bandwidth usage for connections into the data center, and reduce operational overhead.Which combination of steps will meet these requirements with the LEAST operational overhead? (Choose two.)",
+                "choices": [
+                        "Create an AWS Storage Gateway Volume Gateway. Mount a volume from the Volume Gateway to the on-premises file server.",
+                        "Migrate the home directories to Amazon FSx for Windows File Server.",
+                        "Migrate the home directories to Amazon FSx for Lustre.",
+                        "Migrate remote users to AWS Client VPN.",
+                        "Create an AWS Direct Connect connection from the on-premises data center to AWS."
+                ],
+                "correct_answer": "BD",
+                "is_multiple_choice": true,
+                "voting_data": {
+                        "BD": 11
+                }
+        },
+        {
+                "question_number": 370,
+                "question_text": "A company has multiple AWS accounts. The company recently had a security audit that revealed many unencrypted Amazon Elastic Block Store (Amazon EBS) volumes attached to Amazon EC2 instances.A solutions architect must encrypt the unencrypted volumes and ensure that unencrypted volumes will be detected automatically in the future. Additionally, the company wants a solution that can centrally manage multiple AWS accounts with a focus on compliance and security.Which combination of steps should the solutions architect take to meet these requirements? (Choose two.)",
+                "choices": [
+                        "Create an organization in AWS Organizations. Set up AWS Control Tower, and turn on the strongly recommended controls (guardrails). Join all accounts to the organization. Categorize the AWS accounts into OUs.",
+                        "Use the AWS CLI to list all the unencrypted volumes in all the AWS accounts. Run a script to encrypt all the unencrypted volumes in place.",
+                        "Create a snapshot of each unencrypted volume. Create a new encrypted volume from the unencrypted snapshot. Detach the existing volume, and replace it with the encrypted volume.",
+                        "Create an organization in AWS Organizations. Set up AWS Control Tower, and turn on the mandatory controls (guardrails). Join all accounts to the organization. Categorize the AWS accounts into OUs.",
+                        "Turn on AWS CloudTrail. Configure an Amazon EventBridge rule to detect and automatically encrypt unencrypted volumes."
+                ],
+                "correct_answer": "AC",
+                "is_multiple_choice": true,
+                "voting_data": {
+                        "AC": 26,
+                        "AE": 5
+                }
+        },
+        {
+                "question_number": 371,
+                "question_text": "A company hosts an intranet web application on Amazon EC2 instances behind an Application Load Balancer (ALB). Currently, users authenticate to the application against an internal user database.The company needs to authenticate users to the application by using an existing AWS Directory Service for Microsoft Active Directory directory. All users with accounts in the directory must have access to the application.Which solution will meet these requirements?",
+                "choices": [
+                        "Create a new app client in the directory. Create a listener rule for the ALB. Specify the authenticate-oidc action for the listener rule. Configure the listener rule with the appropriate issuer, client ID and secret, and endpoint details for the Active Directory service. Configure the new app client with the callback URL that the ALB provides.",
+                        "Configure an Amazon Cognito user pool. Configure the user pool with a federated identity provider (ldP) that has metadata from the directory. Create an app client. Associate the app client with the user pool. Create a listener rule for the ALSpecify the authenticate-cognito action for the listener rule. Configure the listener rule to use the user pool and app client.",
+                        "Add the directory as a new IAM identity provider (ldP). Create a new IAM role that has an entity type of SAML 2.0 federation. Configure a role policy that allows access to the ALB. Configure the new role as the default authenticated user role for the ldP. Create a listener rule for the ALB. Specify the authenticate-oidc action for the listener rule.",
+                        "Enable AWS IAM Identity Center (AWS Single Sign-On). Configure the directory as an external identity provider (ldP) that uses SAML. Use the automatic provisioning method. Create a new IAM role that has an entity type of SAML 2.0 federation. Configure a role policy that allows access to the ALB. Attach the new role to all groups. Create a listener rule for the ALB. Specify the authenticate-cognito action for the listener rule."
+                ],
+                "correct_answer": "B",
+                "is_multiple_choice": false,
+                "voting_data": {
+                        "B": 52,
+                        "D": 22,
+                        "A": 5
+                }
+        },
+        {
+                "question_number": 372,
+                "question_text": "A company has a website that serves many visitors. The company deploys a backend service for the website in a primary AWS Region and a disaster recovery (DR) Region.A single Amazon CloudFront distribution is deployed for the website. The company creates an Amazon Route 53 record set with health checks and a failover routing policy for the primary Region’s backend service. The company configures the Route 53 record set as an origin for the CloudFront distribution. The company configures another record set that points to the backend service's endpoint in the DR Region as a secondary failover record type. The TTL for both record sets is 60 seconds.Currently, failover takes more than 1 minute. A solutions architect must design a solution that will provide the fastest failover time.Which solution will achieve this goal?",
+                "choices": [
+                        "Deploy an additional CloudFront distribution. Create a new Route 53 failover record set with health checks for both CloudFront distributions.",
+                        "Set the TTL to 4 second for the existing Route 53 record sets that are used for the backend service in each Region.",
+                        "Create new record sets for the backend services by using a latency routing policy. Use the record sets as an origin in the CloudFront distribution.",
+                        "Create a CloudFront origin group that includes two origins, one for each backend service Region. Configure origin failover as a cache behavior for the CloudFront distribution."
+                ],
+                "correct_answer": "D",
+                "is_multiple_choice": false,
+                "voting_data": {
+                        "D": 20
+                }
+        },
+        {
+                "question_number": 373,
+                "question_text": "A company is using multiple AWS accounts and has multiple DevOps teams running production and non-production workloads in these accounts. The company would like to centrally-restrict access to some of the AWS services that the DevOps teams do not use. The company decided to use AWS Organizations and successfully invited all AWS accounts into the Organization. They would like to allow access to services that are currently in-use and deny a few specific services. Also they would like to administer multiple accounts together as a single unit.What combination of steps should the solutions architect take to satisfy these requirements? (Choose three.)",
+                "choices": [
+                        "Use a Deny list strategy.",
+                        "Review the Access Advisor in AWS IAM to determine services recently used",
+                        "Review the AWS Trusted Advisor report to determine services recently used.",
+                        "Remove the default FullAWSAccess SCP.",
+                        "Define organizational units (OUs) and place the member accounts in the OUs.",
+                        "Remove the default DenyAWSAccess SCP."
+                ],
+                "correct_answer": "ABE",
+                "is_multiple_choice": true,
+                "voting_data": {
+                        "ABE": 15,
+                        "BDE": 1
+                }
+        },
+        {
+                "question_number": 374,
+                "question_text": "A live-events company is designing a scaling solution for its ticket application on AWS. The application has high peaks of utilization during sale events. Each sale event is a one-time event that is scheduled. The application runs on Amazon EC2 instances that are in an Auto Scaling group. The application uses PostgreSQL for the database layer.The company needs a scaling solution to maximize availability during the sale events.Which solution will meet these requirements?",
+                "choices": [
+                        "Use a predictive scaling policy for the EC2 instances. Host the database on an Amazon Aurora PostgreSQL Serverless v2 Multi-AZ DB instance with automatically scaling read replicas. Create an AWS Step Functions state machine to run parallel AWS Lambda functions to pre-warm the database before a sale event. Create an Amazon EventBridge rule to invoke the state machine.",
+                        "Use a scheduled scaling policy for the EC2 instances. Host the database on an Amazon RDS for PostgreSQL Mulli-AZ DB instance with automatically scaling read replicas. Create an Amazon EventBridge rule that invokes an AWS Lambda function to create a larger read replica before a sale event. Fail over to the larger read replica. Create another EventBridge rule that invokes another Lambda function to scale down the read replica after the sale event.",
+                        "Use a predictive scaling policy for the EC2 instances. Host the database on an Amazon RDS for PostgreSQL MultiAZ DB instance with automatically scaling read replicas. Create an AWS Step Functions state machine to run parallel AWS Lambda functions to pre-warm the database before a sale event. Create an Amazon EventBridge rule to invoke the state machine.",
+                        "Use a scheduled scaling policy for the EC2 instances. Host the database on an Amazon Aurora PostgreSQL Multi-AZ DB cluster. Create an Amazon EventBridge rule that invokes an AWS Lambda function to create a larger Aurora Replica before a sale event. Fail over to the larger Aurora Replica. Create another EventBridge rule that invokes another Lambda function to scale down the Aurora Replica after the sale event."
+                ],
+                "correct_answer": "D",
+                "is_multiple_choice": false,
+                "voting_data": {
+                        "D": 24
+                }
+        },
+        {
+                "question_number": 375,
+                "question_text": "A company runs an intranet application on premises. The company wants to configure a cloud backup of the application. The company has selected AWS Elastic Disaster Recovery for this solution.The company requires that replication traffic does not travel through the public internet. The application also must not be accessible from the internet. The company does not want this solution to consume all available network bandwidth because other applications require bandwidth.Which combination of steps will meet these requirements? (Choose three.)",
+                "choices": [
+                        "Create a VPC that has at least two private subnets, two NAT gateways, and a virtual private gateway.",
+                        "Create a VPC that has at least two public subnets, a virtual private gateway, and an internet gateway.",
+                        "Create an AWS Site-to-Site VPN connection between the on-premises network and the target AWS network.",
+                        "Create an AWS Direct Connect connection and a Direct Connect gateway between the on-premises network and the target AWS network.",
+                        "During configuration of the replication servers, select the option to use private IP addresses for data replication.",
+                        "During configuration of the launch settings for the target servers, select the option to ensure that the Recovery instance’s private IP address matches the source server's private IP address."
+                ],
+                "correct_answer": "ADE",
+                "is_multiple_choice": true,
+                "voting_data": {
+                        "ADE": 20,
+                        "DEF": 10,
+                        "ACE": 4,
+                        "BDE": 2,
+                        "AEF": 1
+                }
+        },
+        {
+                "question_number": 376,
+                "question_text": "A company that provides image storage services wants to deploy a customer-facing solution to AWS. Millions of individual customers will use the solution. The solution will receive batches of large image files, resize the files, and store the files in an Amazon S3 bucket for up to 6 months.The solution must handle significant variance in demand. The solution must also be reliable at enterprise scale and have the ability to rerun processing jobs in the event of failure.Which solution will meet these requirements MOST cost-effectively?",
+                "choices": [
+                        "Use AWS Step Functions to process the S3 event that occurs when a user stores an image. Run an AWS Lambda function that resizes the image in place and replaces the original file in the S3 bucket. Create an S3 Lifecycle expiration policy to expire all stored images after 6 months.",
+                        "Use Amazon EventBridge to process the S3 event that occurs when a user uploads an image. Run an AWS Lambda function that resizes the image in place and replaces the original file in the S3 bucket. Create an S3 Lifecycle expiration policy to expire all stored images after 6 months.",
+                        "Use S3 Event Notifications to invoke an AWS Lambda function when a user stores an image. Use the Lambda function to resize the image in place and to store the original file in the S3 bucket. Create an S3 Lifecycle policy to move all stored images to S3 Standard-Infrequent Access (S3 Standard-IA) after 6 months.",
+                        "Use Amazon Simple Queue Service (Amazon SQS) to process the S3 event that occurs when a user stores an image. Run an AWS Lambda function that resizes the image and stores the resized file in an S3 bucket that uses S3 Standard-Infrequent Access (S3 Standard-IA). Create an S3 Lifecycle policy to move all stored images to S3 Glacier Deep Archive after 6 months."
+                ],
+                "correct_answer": "D",
+                "is_multiple_choice": false,
+                "voting_data": {
+                        "D": 37,
+                        "B": 32,
+                        "A": 16,
+                        "C": 2
+                }
+        },
+        {
+                "question_number": 377,
+                "question_text": "A company has an organization in AWS Organizations that includes a separate AWS account for each of the company’s departments. Application teams from different departments develop and deploy solutions independently.The company wants to reduce compute costs and manage costs appropriately across departments. The company also wants to improve visibility into billing for individual departments. The company does not want to lose operational flexibility when the company selects compute resources.Which solution will meet these requirements?",
+                "choices": [
+                        "Use AWS Budgets for each department. Use Tag Editor to apply tags to appropriate resources. Purchase EC2 Instance Savings Plans.",
+                        "Configure AWS Organizations to use consolidated billing. Implement a tagging strategy that identifies departments. Use SCPs to apply tags to appropriate resources. Purchase EC2 Instance Savings Plans.",
+                        "Configure AWS Organizations to use consolidated billing. Implement a tagging strategy that identifies departments. Use Tag Editor to apply tags to appropriate resources. Purchase Compute Savings Plans.",
+                        "Use AWS Budgets for each department. Use SCPs to apply tags to appropriate resources. Purchase Compute Savings Plans."
+                ],
+                "correct_answer": "C",
+                "is_multiple_choice": false,
+                "voting_data": {
+                        "C": 17,
+                        "B": 2
+                }
+        },
+        {
+                "question_number": 378,
+                "question_text": "A company has a web application that securely uploads pictures and videos to an Amazon S3 bucket. The company requires that only authenticated users are allowed to post content. The application generates a presigned URL that is used to upload objects through a browser interface. Most users are reporting slow upload times for objects larger than 100 MB.What can a solutions architect do to improve the performance of these uploads while ensuring only authenticated users are allowed to post content?",
+                "choices": [
+                        "Set up an Amazon API Gateway with an edge-optimized API endpoint that has a resource as an S3 service proxy. Configure the PUT method for this resource to expose the S3 PutObject operation. Secure the API Gateway using a COGNITO_USER_POOLS authorizer. Have the browser interface use API Gateway instead of the presigned URL to upload objects.",
+                        "Set up an Amazon API Gateway with a regional API endpoint that has a resource as an S3 service proxy. Configure the PUT method for this resource to expose the S3 PutObject operation. Secure the API Gateway using an AWS Lambda authorizer. Have the browser interface use API Gateway instead of the presigned URL to upload objects.",
+                        "Enable an S3 Transfer Acceleration endpoint on the S3 bucket. Use the endpoint when generating the presigned URL. Have the browser interface upload the objects to this URL using the S3 multipart upload API.",
+                        "Configure an Amazon CloudFront distribution for the destination S3 bucket. Enable PUT and POST methods for the CloudFront cache behavior. Update the CloudFront origin to use an origin access identity (OAI). Give the OAI user 3: PutObject permissions in the bucket policy. Have the browser interface upload objects using the CloudFront distribution."
+                ],
+                "correct_answer": "C",
+                "is_multiple_choice": false,
+                "voting_data": {
+                        "C": 21,
+                        "A": 4,
+                        "D": 1
+                }
+        }
+];
+        
+        let currentQuestionIndex = 0;
+        let correctAnswers = 0;
+        let answeredQuestions = new Set();
+        let selectedAnswers = {};
+        
+        function loadQuestion() {
+            const question = questions[currentQuestionIndex];
+            if (!question) return;
+            
+            const container = document.getElementById('questionContainer');
+            const isMultipleChoice = question.is_multiple_choice;
+            
+            let choicesHtml = '';
+            question.choices.forEach((choice, index) => {
+                const letter = String.fromCharCode(65 + index);
+                choicesHtml += `
+                    <li class="choice" onclick="selectChoice('${letter}', this)" data-choice="${letter}">
+                        <span class="choice-letter">${letter}</span>
+                        ${choice}
+                    </li>
+                `;
+            });
+            
+            const multiChoiceNote = isMultipleChoice ? 
+                '<div class="multi-choice-note">📝 Multiple Choice: You can select multiple answers</div>' : '';
+            
+            container.innerHTML = `
+                <div class="question-header">
+                    Question ${question.question_number} (Day 21 - ${currentQuestionIndex + 1} of ${questions.length})
+                </div>
+                <div class="question-content">
+                    <div class="question-text">${question.question_text}</div>
+                    ${multiChoiceNote}
+                    <ul class="choices">${choicesHtml}</ul>
+                    <div class="explanation" id="explanation"></div>
+                </div>
+            `;
+            
+            updateStats();
+        }
+        
+        function selectChoice(letter, element) {
+            const question = questions[currentQuestionIndex];
+            const isMultipleChoice = question.is_multiple_choice;
+            
+            if (!selectedAnswers[currentQuestionIndex]) {
+                selectedAnswers[currentQuestionIndex] = [];
+            }
+            
+            if (isMultipleChoice) {
+                // Multiple choice - toggle selection
+                if (element.classList.contains('selected')) {
+                    element.classList.remove('selected');
+                    selectedAnswers[currentQuestionIndex] = selectedAnswers[currentQuestionIndex].filter(ans => ans !== letter);
+                } else {
+                    element.classList.add('selected');
+                    selectedAnswers[currentQuestionIndex].push(letter);
+                }
+            } else {
+                // Single choice - clear others first
+                document.querySelectorAll('.choice').forEach(choice => {
+                    choice.classList.remove('selected');
+                });
+                element.classList.add('selected');
+                selectedAnswers[currentQuestionIndex] = [letter];
+            }
+        }
+        
+        function showAnswer() {
+            const question = questions[currentQuestionIndex];
+            const selectedAnswer = selectedAnswers[currentQuestionIndex];
+            
+            if (!selectedAnswer || selectedAnswer.length === 0) {
+                alert('Please select an answer first!');
+                return;
+            }
+            
+            answeredQuestions.add(currentQuestionIndex);
+            
+            document.querySelectorAll('.choice').forEach(choice => {
+                const choiceLetter = choice.getAttribute('data-choice');
+                if (question.correct_answer.includes(choiceLetter)) {
+                    choice.classList.add('correct');
+                } else if (selectedAnswer.includes(choiceLetter)) {
+                    choice.classList.add('incorrect');
+                }
+            });
+            
+            let isCorrect = false;
+            if (question.is_multiple_choice) {
+                const correctAnswers = question.correct_answer.split('').sort().join('');
+                const userAnswers = selectedAnswer.sort().join('');
+                isCorrect = correctAnswers === userAnswers;
+            } else {
+                isCorrect = selectedAnswer[0] === question.correct_answer;
+            }
+            
+            if (isCorrect) {
+                correctAnswers++;
+            }
+            
+            const explanationDiv = document.getElementById('explanation');
+            const yourAnswer = selectedAnswer.join(', ');
+            explanationDiv.innerHTML = `<strong>Correct Answer:</strong> ${question.correct_answer}<br><strong>Your Answer:</strong> ${yourAnswer}<br><strong>Result:</strong> ${isCorrect ? '✅ Correct' : '❌ Incorrect'}`;
+            explanationDiv.classList.add('show');
+            
+            document.getElementById('showAnswerBtn').style.display = 'none';
+            document.getElementById('nextBtn').style.display = 'inline-block';
+            
+            updateStats();
+        }
+        
+        function nextQuestion() {
+            if (currentQuestionIndex < questions.length - 1) {
+                currentQuestionIndex++;
+                loadQuestion();
+                document.getElementById('showAnswerBtn').style.display = 'inline-block';
+                document.getElementById('nextBtn').style.display = 'none';
+            } else {
+                const accuracy = Math.round((correctAnswers / answeredQuestions.size) * 100);
+                alert(`Day 21 Complete!\n\nCorrect: ${correctAnswers}/${answeredQuestions.size}\nAccuracy: ${accuracy}%\n\nGreat job!`);
+            }
+        }
+        
+        function previousQuestion() {
+            if (currentQuestionIndex > 0) {
+                currentQuestionIndex--;
+                loadQuestion();
+                document.getElementById('showAnswerBtn').style.display = 'inline-block';
+                document.getElementById('nextBtn').style.display = 'none';
+            }
+        }
+        
+        function updateStats() {
+            document.getElementById('currentQ').textContent = currentQuestionIndex + 1;
+            document.getElementById('totalQ').textContent = questions.length;
+            document.getElementById('correctCount').textContent = correctAnswers;
+            const accuracy = answeredQuestions.size > 0 ? Math.round((correctAnswers / answeredQuestions.size) * 100) : 0;
+            document.getElementById('accuracy').textContent = accuracy + '%';
+        }
+        
+        // Initialize
+        loadQuestion();
+    </script>
+</body>
+</html>

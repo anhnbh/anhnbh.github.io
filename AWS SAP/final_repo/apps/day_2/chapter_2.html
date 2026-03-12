@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AWS DevOps Study App</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f5f5f5; }
+        .container { max-width: 900px; margin: 0 auto; padding: 20px; }
+        .header { background: #232f3e; color: white; padding: 20px; border-radius: 10px; margin-bottom: 20px; }
+        .progress-bar { background: #ddd; height: 10px; border-radius: 5px; margin: 10px 0; }
+        .progress { background: #ff9900; height: 100%; border-radius: 5px; transition: width 0.3s; }
+        .question-card { background: white; padding: 30px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        .question-text { font-size: 18px; line-height: 1.6; margin-bottom: 20px; }
+        .question-type { background: #e3f2fd; color: #1976d2; padding: 8px 16px; border-radius: 20px; font-size: 14px; font-weight: bold; margin-bottom: 15px; display: inline-block; }
+        .options { margin: 20px 0; }
+        .option { background: #f8f9fa; border: 2px solid #e9ecef; padding: 15px; margin: 10px 0; border-radius: 8px; cursor: pointer; transition: all 0.3s; position: relative; }
+        .option:hover { border-color: #ff9900; }
+        .option.selected { border-color: #ff9900; background: #fff3cd; }
+        .option.correct { border-color: #28a745; background: #d4edda; }
+        .option.incorrect { border-color: #dc3545; background: #f8d7da; }
+        .option.partial { border-color: #ffc107; background: #fff3cd; }
+        .option-checkbox { position: absolute; right: 15px; top: 50%; transform: translateY(-50%); width: 20px; height: 20px; }
+        .controls { display: flex; gap: 15px; justify-content: center; margin-top: 20px; }
+        .btn { padding: 12px 24px; border: none; border-radius: 6px; cursor: pointer; font-size: 16px; transition: all 0.3s; }
+        .btn-primary { background: #ff9900; color: white; }
+        .btn-primary:hover { background: #e68900; }
+        .btn-secondary { background: #6c757d; color: white; }
+        .btn-secondary:hover { background: #545b62; }
+        .btn:disabled { background: #ccc; cursor: not-allowed; }
+        .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px; }
+        .stat-card { background: white; padding: 20px; border-radius: 8px; text-align: center; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .stat-number { font-size: 24px; font-weight: bold; color: #ff9900; }
+        .review-section { background: white; padding: 20px; border-radius: 10px; margin-top: 20px; }
+        .wrong-answer { background: #fff3cd; padding: 15px; margin: 10px 0; border-radius: 8px; border-left: 4px solid #ffc107; }
+        .hidden { display: none; }
+        .explanation { margin-top: 20px; padding: 15px; border-radius: 8px; }
+        .explanation.correct { background: #d4edda; border-left: 4px solid #28a745; }
+        .explanation.incorrect { background: #f8d7da; border-left: 4px solid #dc3545; }
+        .explanation.partial { background: #fff3cd; border-left: 4px solid #ffc107; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚀 AWS Solution Architect Professional Study App</h1>
+            <div class="progress-bar">
+                <div class="progress" id="progressBar"></div>
+            </div>
+            <p>Ngày <span id="currentDay">2</span> - Câu <span id="currentQuestion">1</span>/<span id="totalQuestions">0</span></p>
+        </div>
+
+        <div class="stats">
+            <div class="stat-card">
+                <div class="stat-number" id="correctCount">0</div>
+                <div>Câu đúng</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="wrongCount">0</div>
+                <div>Câu sai</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="accuracy">0%</div>
+                <div>Độ chính xác</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="timeSpent">0:00</div>
+                <div>Thời gian</div>
+            </div>
+        </div>
+
+        <div id="studyMode" class="question-card">
+            <div class="question-type" id="questionType">Single Choice</div>
+            <div class="question-text" id="questionText">
+                Đang tải câu hỏi...
+            </div>
+            <div class="options" id="optionsContainer">
+                <!-- Options will be loaded here -->
+            </div>
+            <div class="controls">
+                <button class="btn btn-secondary" onclick="previousQuestion()">⬅️ Câu trước</button>
+                <button class="btn btn-primary" onclick="submitAnswer()" id="submitBtn" disabled>Xác nhận</button>
+                <button class="btn btn-secondary" onclick="nextQuestion()" id="nextBtn" disabled>Câu tiếp ➡️</button>
+            </div>
+        </div>
+
+        <div id="reviewMode" class="review-section hidden">
+            <h2>📊 Kết quả học tập</h2>
+            <div id="reviewStats"></div>
+            <div id="wrongAnswers"></div>
+            <div class="controls">
+                <button class="btn btn-primary" onclick="restartStudy()">🔄 Học lại</button>
+                <button class="btn btn-secondary" onclick="exportResults()">💾 Xuất kết quả</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Sample questions with both single and multiple choice
+        let questions = [{
+        "id": 11,
+        "text": "A company is deploying a third-party web application on AWS. The application is packaged as a Docker image. The company has deployed the Docker image as an AWS Fargate service in Amazon Elastic Container Service (Amazon ECS). An Application Load Balancer (ALB) directs traffic to the application.The company needs to give only a specific list of users the ability to access the application from the internet. The company cannot change the application and cannot integrate the application with an identity provider. All users must be authenticated through multi-factor authentication (MFA).Which solution will meet these requirements?",
+        "options": [
+            "Configure the users in AWS Identity and Access Management (IAM). Enable AWS IAM Identity Center (AWS Single Sign-On). Configure resource protection for the ALB. Create a resource protection rule to require users to use MFA.",
+            "Create a user pool in AWS Amplify. Configure the pool for the application. Populate the pool with the required users. Configure the pool to require MFA. Configure a listener rule on the ALB to require authentication through the Amplify hosted UI.",
+            "Configure the users in AWS Identity and Access Management (IAM). Attach a resource policy to the Fargate service to require users to use MFA. Configure a listener rule on the ALB to require authentication through IAM.",
+            "Create a user pool in Amazon Cognito. Configure the pool for the application. Populate the pool with the required users. Configure the pool to require MFConfigure a listener rule on the ALB to require authentication through the Amazon Cognito hosted UI."
+        ],
+        "correct": [
+            3
+        ],
+        "type": "single",
+        "explanation": "Đáp án được chọn nhiều nhất trong cộng đồng. Xem thêm giải thích trong file gốc."
+    },
+    {
+        "id": 12,
+        "text": "A company operates a fleet of servers on premises and operates a fleet of Amazon EC2 instances in its organization in AWS Organizations. The company's AWS accounts contain hundreds of VPCs. The company wants to connect its AWS accounts to its on-premises network. AWS Site-to-Site VPN connections are already established to a single AWS account. The company wants to control which VPCs can communicate with other VPCs.Which combination of steps will achieve this level of control with the LEAST operational effort? (Choose three.)",
+        "options": [
+            "Configure attachments to all VPCs and VPNs.",
+            "Configure attachments between the VPCs and VPNs.",
+            "Create a transit gateway in an AWS account. Share the transit gateway across accounts by using AWS Resource Access Manager (AWS RAM).",
+            "Setup route tables on the VPCs and VPNs.",
+            "Configure VPC peering between the VPCs.",
+            "Setup transit gateway route tables. Associate the VPCs and VPNs with the route tables."
+        ],
+        "correct": [
+            0,
+            2,
+            5
+        ],
+        "type": "multiple",
+        "explanation": "Đáp án được chọn nhiều nhất trong cộng đồng. Xem thêm giải thích trong file gốc."
+    },
+    {
+        "id": 13,
+        "text": "A company that provides image storage services wants to deploy a customer-facing solution to AWS. Millions of individual customers will use the solution. The solution will receive batches of large image files, resize the files, and store the files in an Amazon S3 bucket for up to 6 months.The solution must handle significant variance in demand. The solution must also be reliable at enterprise scale and have the ability to rerun processing jobs in the event of failure.Which solution will meet these requirements MOST cost-effectively?",
+        "options": [
+            "Use S3 Event Notifications to invoke an AWS Lambda function when a user stores an image. Use the Lambda function to resize the image in place and to store the original file in the S3 bucket. Create an S3 Lifecycle policy to move all stored images to S3 Standard-Infrequent Access (S3 Standard-IA) after 6 months.",
+            "Use Amazon Simple Queue Service (Amazon SQS) to process the S3 event that occurs when a user stores an image. Run an AWS Lambda function that resizes the image and stores the resized file in an S3 bucket that uses S3 Standard-Infrequent Access (S3 Standard-IA). Create an S3 Lifecycle policy to move all stored images to S3 Glacier Deep Archive after 6 months.",
+            "Use AWS Step Functions to process the S3 event that occurs when a user stores an image. Run an AWS Lambda function that resizes the image in place and replaces the original file in the S3 bucket. Create an S3 Lifecycle expiration policy to expire all stored images after 6 months.",
+            "Use Amazon EventBridge to process the S3 event that occurs when a user uploads an image. Run an AWS Lambda function that resizes the image in place and replaces the original file in the S3 bucket. Create an S3 Lifecycle expiration policy to expire all stored images after 6 months."
+        ],
+        "correct": [
+            1
+        ],
+        "type": "single",
+        "explanation": "Đáp án được chọn nhiều nhất trong cộng đồng. Xem thêm giải thích trong file gốc."
+    },
+    {
+        "id": 14,
+        "text": "A software as a service (SaaS) company uses AWS to host a service that is powered by AWS PrivateLink. The service consists of proprietary software that runs on three Amazon EC2 instances behind a Network Load Balancer (NLB). The instances are in private subnets in multiple Availability Zones in the eu-west-2 Region. All the company's customers are in eu-west-2.However, the company now acquires a new customer in the us-east-1 Region. The company creates a new VPC and new subnets in us-east-1. The company establishes inter-Region VPC peering between the VPCs in the two Regions.The company wants to give the new customer access to the SaaS service, but the company does not want to immediately deploy new EC2 resources in us-east-1.Which solution will meet these requirements?",
+        "options": [
+            "Create an NLB in us-east-1. Create an IP target group that uses the IP addresses of the company's instances in eu-west-2 that host the SaaS service. Configure a PrivateLink endpoint service that uses the NLB that is in us-east-1. Grant specific AWS accounts access to connect to the SaaS service.",
+            "Create an Application Load Balancer (ALB) in front of the EC2 instances in eu-west-2. Create an NLB in us-east-1. Associate the NLB that is in us-east-1 with an ALB target group that uses the ALB that is in eu-west-2. Configure a PrivateLink endpoint service that uses the NLB that is in us-east-1. Grant specific AWS accounts access to connect to the SaaS service.",
+            "Use AWS Resource Access Manager (AWS RAM) to share the EC2 instances that are in eu-west-2. In us-east-1, create an NLB and an instance target group that includes the shared EC2 instances from eu-west-2. Configure a PrivateLink endpoint service that uses the NLB that is in us-east-1. Grant specific AWS accounts access to connect to the SaaS service.",
+            "Configure a PrivateLink endpoint service in us-east-1 to use the existing NLB that is in eu-west-2. Grant specific AWS accounts access to connect to the SaaS service."
+        ],
+        "correct": [
+            3
+        ],
+        "type": "single",
+        "explanation": "Đáp án được chọn nhiều nhất trong cộng đồng. Xem thêm giải thích trong file gốc."
+    },
+    {
+        "id": 15,
+        "text": "A company hosts a software as a service (SaaS) solution on AWS. The solution has an Amazon API Gateway API that serves an HTTPS endpoint. The API uses AWS Lambda functions for compute. The Lambda functions store data in an Amazon Aurora Serverless v1 database.The company used the AWS Serverless Application Model (AWS SAM) to deploy the solution. The solution extends across multiple Availability Zones and has no disaster recovery (DR) plan.A solutions architect must design a DR strategy that can recover the solution in another AWS Region. The solution has an RTO of 5 minutes and an RPO of 1 minute.What should the solutions architect do to meet these requirements?",
+        "options": [
+            "Create an Aurora Serverless v1 DB cluster that has multiple writer instances in the target Region. Launch the solution in the target Region. Configure the two Regional solutions to work in an active-passive configuration.",
+            "Create a read replica of the Aurora Serverless v1 database in the target Region. Use AWS SAM to create a runbook to deploy the solution to the target Region. Promote the read replica to primary in case of disaster.",
+            "Change the Aurora Serverless v1 database to a standard Aurora MySQL global database that extends across the source Region and the target Region. Use AWS SAM to create a runbook to deploy the solution to the target Region.",
+            "Change the Aurora Serverless v1 database to a standard Aurora MySQL global database that extends across the source Region and the target Region. Launch the solution in the target Region. Configure the two Regional solutions to work in an active-passive configuration."
+        ],
+        "correct": [
+            3
+        ],
+        "type": "single",
+        "explanation": "Đáp án được chọn nhiều nhất trong cộng đồng. Xem thêm giải thích trong file gốc."
+    },
+    {
+        "id": 16,
+        "text": "A company has an application that has a web frontend. The application runs in the company's on-premises data center and requires access to file storage for critical data. The application runs on three Linux VMs for redundancy. The architecture includes a load balancer with HTTP request-based routing.The company needs to migrate the application to AWS as quickly as possible. The architecture on AWS must be highly available.Which solution will meet these requirements with the FEWEST changes to the architecture?",
+        "options": [
+            "Migrate the application to Amazon Elastic Kubernetes Service (Amazon EKS) containers that use the Fargate launch type in three Availability Zones. Use Amazon FSx for Lustre to provide file storage for all three containers. Use a Network Load Balancer to direct traffic to the containers.",
+            "Migrate the application to Amazon EC2 instances in three AWS Regions. Use Amazon Elastic Block Store (Amazon EBS) for file storage. Enable Cross-Region Replication (CRR) for all three EC2 instances. Use an Application Load Balancer to direct traffic to the EC2 instances.",
+            "Migrate the application to Amazon Elastic Container Service (Amazon ECS) containers that use the Fargate launch type in three Availability Zones. Use Amazon S3 to provide file storage for all three containers. Use a Network Load Balancer to direct traffic to the containers.",
+            "Migrate the application to Amazon EC2 instances in three Availability Zones. Use Amazon Elastic File System (Amazon EFS) for file storage. Mount the file storage on all three EC2 instances. Use an Application Load Balancer to direct traffic to the EC2 instances."
+        ],
+        "correct": [
+            3
+        ],
+        "type": "single",
+        "explanation": "Đáp án được chọn nhiều nhất trong cộng đồng. Xem thêm giải thích trong file gốc."
+    },
+    {
+        "id": 17,
+        "text": "A company is migrating its infrastructure to the AWS Cloud. The company must comply with a variety of regulatory standards for different projects. The company needs a multi-account environment.A solutions architect needs to prepare the baseline infrastructure. The solution must provide a consistent baseline of management and security, but it must allow flexibility for different compliance requirements within various AWS accounts. The solution also needs to integrate with the existing on-premises Active Directory Federation Services (AD FS) server.Which solution meets these requirements with the LEAST amount of operational overhead?",
+        "options": [
+            "Create an organization in AWS Organizations. Enable AWS Control Tower on the organization. Review included controls (guardrails) for SCPs. Check AWS Config for areas that require additions. Configure an IAM identity provider for federation with the on-premises AD FS server.",
+            "Create an organization in AWS Organizations. Create SCPs for least privilege access. Create an OU structure, and use it to group AWS accounts. Connect AWS IAM Identity Center (AWS Single Sign-On) to the on-premises AD FS server. Configure a central logging account with a defined process for log generating services to send log events to the central account. Enable AWS Config in the central account with aggregators and conformance packs.",
+            "Create an organization in AWS Organizations. Create a single SCP for least privilege access across all accounts. Create a single OU for all accounts. Configure an IAM identity provider for federation with the on-premises AD FS server. Configure a central logging account with a defined process for log generating services to send log events to the central account. Enable AWS Config in the central account with conformance packs for all accounts.",
+            "Create an organization in AWS Organizations. Enable AWS Control Tower on the organization. Review included controls (guardrails) for SCPs. Check AWS Config for areas that require additions. Add OUs as necessary. Connect AWS IAM Identity Center (AWS Single Sign-On) to the on-premises AD FS server."
+        ],
+        "correct": [
+            3
+        ],
+        "type": "single",
+        "explanation": "Đáp án được chọn nhiều nhất trong cộng đồng. Xem thêm giải thích trong file gốc."
+    },
+    {
+        "id": 18,
+        "text": "A company is running a workload that consists of thousands of Amazon EC2 instances. The workload is running in a VPC that contains several public subnets and private subnets. The public subnets have a route for 0.0.0.0/0 to an existing internet gateway. The private subnets have a route for 0.0.0.0/0 to an existing NAT gateway.A solutions architect needs to migrate the entire fleet of EC2 instances to use IPv6. The EC2 instances that are in private subnets must not be accessible from the public internet.What should the solutions architect do to meet these requirements?",
+        "options": [
+            "Update the existing VPC, and associate an Amazon-provided IPv6 CIDR block with the VPC and all subnets. Create an egress-only internet gateway. Update the VPC route tables for all private subnets, and add a route for ::/0 to the egress-only internet gateway.",
+            "Update the existing VPC, and associate a custom IPv6 CIDR block with the VPC and all subnets. Update all the VPC route tables, and add a route for ::/0 to the internet gateway.",
+            "Update the existing VPC, and associate an Amazon-provided IPv6 CIDR block with the VPC and all subnets. Update the VPC route tables for all private subnets, and add a route for ::/0 to the NAT gateway.",
+            "Update the existing VPC, and associate a custom IPV6 CIDR block with the VPC and all subnets. Create a new NAT gateway, and enable IPV6 support. Update the VPC route tables for all private subnets, and add a route for ::/0 to the IPv6-enabled NAT gateway."
+        ],
+        "correct": [
+            0
+        ],
+        "type": "single",
+        "explanation": "Đáp án được chọn nhiều nhất trong cộng đồng. Xem thêm giải thích trong file gốc."
+    },
+    {
+        "id": 19,
+        "text": "A company is migrating a legacy application from an on-premises data center to AWS. The application consists of a single application server and a Microsoft SQL Server database server. Each server is deployed on a VMware VM that consumes 500 TB of data across multiple attached volumes.The company has established a 10 Gbps AWS Direct Connect connection from the closest AWS Region to its on-premises data center. The Direct Connect connection is not currently in use by other services.Which combination of steps should a solutions architect take to migrate the application with the LEAST amount of downtime? (Choose two.)",
+        "options": [
+            "Use VM Import/Export to import the application server VM.",
+            "Use an AWS Server Migration Service (AWS SMS) replication job to migrate the database server VM to AWS.",
+            "Use an AWS Database Migration Service (AWS DMS) replication instance to migrate the database to an Amazon RDS DB instance.",
+            "Use an AWS Server Migration Service (AWS SMS) replication job to migrate the application server VM to AWS.",
+            "Export the VM images to an AWS Snowball Edge Storage Optimized device."
+        ],
+        "correct": [
+            2,
+            3
+        ],
+        "type": "multiple",
+        "explanation": "Đáp án được chọn nhiều nhất trong cộng đồng. Xem thêm giải thích trong file gốc."
+    },
+    {
+        "id": 20,
+        "text": "A company has an application that uses an Amazon Aurora PostgreSQL DB cluster for the application's database. The DB cluster contains one small primary instance and three larger replica instances. The application runs on an AWS Lambda function. The application makes many short-lived connections to the database's replica instances to perform read-only operations.During periods of high traffic, the application becomes unreliable and the database reports that too many connections are being established. The frequency of high-traffic periods is unpredictable.Which solution will improve the reliability of the application?",
+        "options": [
+            "Use Amazon RDS Proxy to create a proxy for the DB cluster. Configure a read-only endpoint for the Aurora Data API on the proxy. Update the Lambda function to connect to the proxy endpoint.",
+            "Use Amazon RDS Proxy to create a proxy for the DB cluster. Configure a read-only endpoint for the proxy. Update the Lambda function to connect to the proxy endpoint.",
+            "Configure instance scaling for the DB cluster to occur when the DatabaseConnections metric is close to the max connections setting. Update the Lambda function to connect to the Aurora reader endpoint.",
+            "Increase the max_connections setting on the DB cluster's parameter group. Reboot all the instances in the DB cluster. Update the Lambda function to connect to the DB cluster endpoint."
+        ],
+        "correct": [
+            1
+        ],
+        "type": "single",
+        "explanation": "Đáp án được chọn nhiều nhất trong cộng đồng. Xem thêm giải thích trong file gốc."
+    }]
+
+        let currentQuestionIndex = 0;
+        let userAnswers = [];
+        let startTime = Date.now();
+        let timer;
+
+        function initializeApp() {
+            document.getElementById('totalQuestions').textContent = questions.length;
+            loadQuestion();
+            startTimer();
+            updateStats();
+        }
+
+        function loadQuestion() {
+            const question = questions[currentQuestionIndex];
+            document.getElementById('questionText').innerHTML = `
+                <strong>Câu ${question.id}:</strong><br><br>
+                ${question.text}
+            `;
+            
+            // Set question type indicator
+            const typeElement = document.getElementById('questionType');
+            if (question.type === 'multiple') {
+                typeElement.textContent = `Multiple Choice (Choose ${question.correct.length})`;
+                typeElement.style.background = '#fff3cd';
+                typeElement.style.color = '#856404';
+            } else {
+                typeElement.textContent = 'Single Choice';
+                typeElement.style.background = '#e3f2fd';
+                typeElement.style.color = '#1976d2';
+            }
+            
+            const optionsContainer = document.getElementById('optionsContainer');
+            optionsContainer.innerHTML = '';
+            
+            question.options.forEach((option, index) => {
+                const optionDiv = document.createElement('div');
+                optionDiv.className = 'option';
+                optionDiv.innerHTML = `
+                    <strong>${String.fromCharCode(65 + index)}.</strong> ${option}
+                    ${question.type === 'multiple' ? '<input type="checkbox" class="option-checkbox">' : ''}
+                `;
+                
+                if (question.type === 'multiple') {
+                    optionDiv.onclick = () => toggleMultipleOption(index);
+                } else {
+                    optionDiv.onclick = () => selectSingleOption(index);
+                }
+                
+                optionDiv.dataset.index = index;
+                optionsContainer.appendChild(optionDiv);
+            });
+
+            document.getElementById('currentQuestion').textContent = currentQuestionIndex + 1;
+            document.getElementById('submitBtn').disabled = true;
+            document.getElementById('nextBtn').disabled = true;
+            updateProgressBar();
+        }
+
+        function selectSingleOption(index) {
+            document.querySelectorAll('.option').forEach(opt => opt.classList.remove('selected'));
+            document.querySelector(`[data-index="${index}"]`).classList.add('selected');
+            document.getElementById('submitBtn').disabled = false;
+        }
+
+        function toggleMultipleOption(index) {
+            const option = document.querySelector(`[data-index="${index}"]`);
+            const checkbox = option.querySelector('.option-checkbox');
+            
+            if (option.classList.contains('selected')) {
+                option.classList.remove('selected');
+                checkbox.checked = false;
+            } else {
+                option.classList.add('selected');
+                checkbox.checked = true;
+            }
+            
+            // Enable submit if at least one option is selected
+            const selectedCount = document.querySelectorAll('.option.selected').length;
+            document.getElementById('submitBtn').disabled = selectedCount === 0;
+        }
+
+        function getSelectedAnswers() {
+            const question = questions[currentQuestionIndex];
+            const selected = [];
+            
+            document.querySelectorAll('.option.selected').forEach(opt => {
+                selected.push(parseInt(opt.dataset.index));
+            });
+            
+            return selected.sort((a, b) => a - b); // Sort for comparison
+        }
+
+        function submitAnswer() {
+            const selectedAnswers = getSelectedAnswers();
+            if (selectedAnswers.length === 0) return;
+
+            const question = questions[currentQuestionIndex];
+            const correctAnswers = [...question.correct].sort((a, b) => a - b);
+            
+            // Calculate correctness
+            let isCorrect = false;
+            let isPartial = false;
+            
+            if (question.type === 'single') {
+                isCorrect = selectedAnswers.length === 1 && selectedAnswers[0] === correctAnswers[0];
+            } else {
+                // Multiple choice scoring
+                const selectedSet = new Set(selectedAnswers);
+                const correctSet = new Set(correctAnswers);
+                
+                if (selectedAnswers.length === correctAnswers.length && 
+                    selectedAnswers.every(ans => correctSet.has(ans))) {
+                    isCorrect = true;
+                } else {
+                    // Partial credit if some answers are correct
+                    const correctSelected = selectedAnswers.filter(ans => correctSet.has(ans));
+                    const incorrectSelected = selectedAnswers.filter(ans => !correctSet.has(ans));
+                    
+                    if (correctSelected.length > 0 && incorrectSelected.length === 0) {
+                        isPartial = true; // Selected some correct, no incorrect
+                    }
+                }
+            }
+
+            userAnswers[currentQuestionIndex] = {
+                questionId: question.id,
+                selected: selectedAnswers,
+                correct: correctAnswers,
+                isCorrect: isCorrect,
+                isPartial: isPartial,
+                timeSpent: Date.now() - startTime,
+                type: question.type
+            };
+
+            // Show results
+            document.querySelectorAll('.option').forEach((opt, index) => {
+                const isSelectedCorrect = correctAnswers.includes(index);
+                const isSelectedByUser = selectedAnswers.includes(index);
+                
+                if (isSelectedCorrect) {
+                    opt.classList.add('correct');
+                } else if (isSelectedByUser) {
+                    opt.classList.add('incorrect');
+                }
+                
+                opt.onclick = null; // Disable clicking
+            });
+
+            // Show explanation
+            const explanationDiv = document.createElement('div');
+            let resultClass = 'incorrect';
+            let resultText = '❌ Sai rồi!';
+            
+            if (isCorrect) {
+                resultClass = 'correct';
+                resultText = '✅ Chính xác!';
+            } else if (isPartial) {
+                resultClass = 'partial';
+                resultText = '⚠️ Đúng một phần!';
+            }
+            
+            explanationDiv.className = `explanation ${resultClass}`;
+            explanationDiv.innerHTML = `
+                <strong>${resultText}</strong><br>
+                <strong>Đáp án đúng:</strong> ${correctAnswers.map(i => String.fromCharCode(65 + i)).join(', ')}<br>
+                <strong>Bạn chọn:</strong> ${selectedAnswers.map(i => String.fromCharCode(65 + i)).join(', ')}<br>
+                <em>Giải thích:</em> ${question.explanation}
+            `;
+            document.getElementById('optionsContainer').appendChild(explanationDiv);
+
+            document.getElementById('submitBtn').style.display = 'none';
+            document.getElementById('nextBtn').disabled = false;
+            updateStats();
+        }
+
+        function nextQuestion() {
+            if (currentQuestionIndex < questions.length - 1) {
+                currentQuestionIndex++;
+                loadQuestion();
+                document.getElementById('submitBtn').style.display = 'inline-block';
+            } else {
+                showReview();
+            }
+        }
+
+        function previousQuestion() {
+            if (currentQuestionIndex > 0) {
+                currentQuestionIndex--;
+                loadQuestion();
+                document.getElementById('submitBtn').style.display = 'inline-block';
+            }
+        }
+
+        function updateStats() {
+            const answered = userAnswers.filter(a => a).length;
+            const correct = userAnswers.filter(a => a && a.isCorrect).length;
+            const partial = userAnswers.filter(a => a && a.isPartial).length;
+            const accuracy = answered > 0 ? Math.round(((correct + partial * 0.5) / answered) * 100) : 0;
+
+            document.getElementById('correctCount').textContent = correct + (partial > 0 ? ` (+${partial} partial)` : '');
+            document.getElementById('wrongCount').textContent = answered - correct - partial;
+            document.getElementById('accuracy').textContent = accuracy + '%';
+        }
+
+        function updateProgressBar() {
+            const progress = ((currentQuestionIndex + 1) / questions.length) * 100;
+            document.getElementById('progressBar').style.width = progress + '%';
+        }
+
+        function startTimer() {
+            timer = setInterval(() => {
+                const elapsed = Math.floor((Date.now() - startTime) / 1000);
+                const minutes = Math.floor(elapsed / 60);
+                const seconds = elapsed % 60;
+                document.getElementById('timeSpent').textContent = 
+                    `${minutes}:${seconds.toString().padStart(2, '0')}`;
+            }, 1000);
+        }
+
+        function showReview() {
+            clearInterval(timer);
+            document.getElementById('studyMode').classList.add('hidden');
+            document.getElementById('reviewMode').classList.remove('hidden');
+
+            const correct = userAnswers.filter(a => a.isCorrect).length;
+            const partial = userAnswers.filter(a => a.isPartial).length;
+            const total = userAnswers.length;
+            const accuracy = Math.round(((correct + partial * 0.5) / total) * 100);
+
+            document.getElementById('reviewStats').innerHTML = `
+                <div class="stats">
+                    <div class="stat-card">
+                        <div class="stat-number">${correct}/${total}</div>
+                        <div>Hoàn toàn đúng</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">${partial}</div>
+                        <div>Đúng một phần</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">${accuracy}%</div>
+                        <div>Điểm tổng</div>
+                    </div>
+                </div>
+            `;
+
+            // Show wrong answers for review
+            const wrongAnswers = userAnswers.filter(a => !a.isCorrect);
+            if (wrongAnswers.length > 0) {
+                document.getElementById('wrongAnswers').innerHTML = `
+                    <h3>🔄 Câu cần ôn lại (${wrongAnswers.length} câu):</h3>
+                    ${wrongAnswers.map(a => `
+                        <div class="wrong-answer">
+                            <strong>Câu ${a.questionId} (${a.type === 'multiple' ? 'Multiple' : 'Single'} Choice):</strong><br>
+                            Bạn chọn: ${a.selected.map(i => String.fromCharCode(65 + i)).join(', ')}<br>
+                            Đáp án đúng: ${a.correct.map(i => String.fromCharCode(65 + i)).join(', ')}
+                            ${a.isPartial ? ' <span style="color: #856404;">(Đúng một phần)</span>' : ''}
+                        </div>
+                    `).join('')}
+                `;
+            }
+        }
+
+        function restartStudy() {
+            currentQuestionIndex = 0;
+            userAnswers = [];
+            startTime = Date.now();
+            document.getElementById('studyMode').classList.remove('hidden');
+            document.getElementById('reviewMode').classList.add('hidden');
+            initializeApp();
+        }
+
+        function exportResults() {
+            const results = {
+                date: new Date().toLocaleDateString('vi-VN'),
+                day: 1,
+                questions: questions.length,
+                correct: userAnswers.filter(a => a.isCorrect).length,
+                partial: userAnswers.filter(a => a.isPartial).length,
+                accuracy: Math.round(((userAnswers.filter(a => a.isCorrect).length + userAnswers.filter(a => a.isPartial).length * 0.5) / userAnswers.length) * 100),
+                wrongQuestions: userAnswers.filter(a => !a.isCorrect).map(a => ({
+                    id: a.questionId,
+                    type: a.type,
+                    selected: a.selected,
+                    correct: a.correct,
+                    isPartial: a.isPartial
+                })),
+                timeSpent: document.getElementById('timeSpent').textContent
+            };
+
+            const blob = new Blob([JSON.stringify(results, null, 2)], {type: 'application/json'});
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `aws-devops-results-${new Date().toISOString().split('T')[0]}.json`;
+            a.click();
+        }
+
+        // Initialize app when page loads
+        window.onload = initializeApp;
+    </script>
+</body>
+</html>

@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AWS DevOps Study App</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f5f5f5; }
+        .container { max-width: 900px; margin: 0 auto; padding: 20px; }
+        .header { background: #232f3e; color: white; padding: 20px; border-radius: 10px; margin-bottom: 20px; }
+        .progress-bar { background: #ddd; height: 10px; border-radius: 5px; margin: 10px 0; }
+        .progress { background: #ff9900; height: 100%; border-radius: 5px; transition: width 0.3s; }
+        .question-card { background: white; padding: 30px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        .question-text { font-size: 18px; line-height: 1.6; margin-bottom: 20px; }
+        .question-type { background: #e3f2fd; color: #1976d2; padding: 8px 16px; border-radius: 20px; font-size: 14px; font-weight: bold; margin-bottom: 15px; display: inline-block; }
+        .options { margin: 20px 0; }
+        .option { background: #f8f9fa; border: 2px solid #e9ecef; padding: 15px; margin: 10px 0; border-radius: 8px; cursor: pointer; transition: all 0.3s; position: relative; }
+        .option:hover { border-color: #ff9900; }
+        .option.selected { border-color: #ff9900; background: #fff3cd; }
+        .option.correct { border-color: #28a745; background: #d4edda; }
+        .option.incorrect { border-color: #dc3545; background: #f8d7da; }
+        .option.partial { border-color: #ffc107; background: #fff3cd; }
+        .option-checkbox { position: absolute; right: 15px; top: 50%; transform: translateY(-50%); width: 20px; height: 20px; }
+        .controls { display: flex; gap: 15px; justify-content: center; margin-top: 20px; }
+        .btn { padding: 12px 24px; border: none; border-radius: 6px; cursor: pointer; font-size: 16px; transition: all 0.3s; }
+        .btn-primary { background: #ff9900; color: white; }
+        .btn-primary:hover { background: #e68900; }
+        .btn-secondary { background: #6c757d; color: white; }
+        .btn-secondary:hover { background: #545b62; }
+        .btn:disabled { background: #ccc; cursor: not-allowed; }
+        .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px; }
+        .stat-card { background: white; padding: 20px; border-radius: 8px; text-align: center; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .stat-number { font-size: 24px; font-weight: bold; color: #ff9900; }
+        .review-section { background: white; padding: 20px; border-radius: 10px; margin-top: 20px; }
+        .wrong-answer { background: #fff3cd; padding: 15px; margin: 10px 0; border-radius: 8px; border-left: 4px solid #ffc107; }
+        .hidden { display: none; }
+        .explanation { margin-top: 20px; padding: 15px; border-radius: 8px; }
+        .explanation.correct { background: #d4edda; border-left: 4px solid #28a745; }
+        .explanation.incorrect { background: #f8d7da; border-left: 4px solid #dc3545; }
+        .explanation.partial { background: #fff3cd; border-left: 4px solid #ffc107; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚀 AWS Solution Architect Professional Study App</h1>
+            <div class="progress-bar">
+                <div class="progress" id="progressBar"></div>
+            </div>
+            <p>Ngày <span id="currentDay">2</span> - Câu <span id="currentQuestion">1</span>/<span id="totalQuestions">0</span></p>
+        </div>
+
+        <div class="stats">
+            <div class="stat-card">
+                <div class="stat-number" id="correctCount">0</div>
+                <div>Câu đúng</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="wrongCount">0</div>
+                <div>Câu sai</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="accuracy">0%</div>
+                <div>Độ chính xác</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="timeSpent">0:00</div>
+                <div>Thời gian</div>
+            </div>
+        </div>
+
+        <div id="studyMode" class="question-card">
+            <div class="question-type" id="questionType">Single Choice</div>
+            <div class="question-text" id="questionText">
+                Đang tải câu hỏi...
+            </div>
+            <div class="options" id="optionsContainer">
+                <!-- Options will be loaded here -->
+            </div>
+            <div class="controls">
+                <button class="btn btn-secondary" onclick="previousQuestion()">⬅️ Câu trước</button>
+                <button class="btn btn-primary" onclick="submitAnswer()" id="submitBtn" disabled>Xác nhận</button>
+                <button class="btn btn-secondary" onclick="nextQuestion()" id="nextBtn" disabled>Câu tiếp ➡️</button>
+            </div>
+        </div>
+
+        <div id="reviewMode" class="review-section hidden">
+            <h2>📊 Kết quả học tập</h2>
+            <div id="reviewStats"></div>
+            <div id="wrongAnswers"></div>
+            <div class="controls">
+                <button class="btn btn-primary" onclick="restartStudy()">🔄 Học lại</button>
+                <button class="btn btn-secondary" onclick="exportResults()">💾 Xuất kết quả</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Sample questions with both single and multiple choice
+        let questions = [
+            {
+        "id": 51,
+        "text": "A company is developing a latency-sensitive application. Part of the application includes several AWS Lambda functions that need to initialize as quickly as possible. The Lambda functions are written in Java and contain initialization code outside the handlers to load libraries, initialize classes, and generate unique IDs.Which solution will meet the startup performance requirement MOST cost-effectively?",
+        "options": [
+            "Publish a version of each Lambda function. Create an alias for each Lambda function. Configure each alias to point to its corresponding version. Set up a provisioned concurrency configuration for each Lambda function to point to the corresponding alias.",
+            "Publish a version of each Lambda function. Set up a provisioned concurrency configuration for each Lambda function to point to the corresponding version. Activate Lambda SnapStar for the published versions of the Lambda functions.",
+            "Move all the initialization code to the handlers for each Lambda function. Activate Lambda SnapStart for each Lambda function. Configure SnapStart to reference the $LATEST version of each Lambda function.",
+            "Update the Lambda functions to add a pre-snapshot hook. Move the code that generates unique IDs into the handlers. Publish a version of each Lambda function. Activate Lambda SnapStart for the published versions of the Lambda functions."
+        ],
+        "correct": [
+            3
+        ],
+        "type": "single",
+        "explanation": "Đáp án được chọn nhiều nhất trong cộng đồng. Xem thêm giải thích trong file gốc."
+    },
+    {
+        "id": 52,
+        "text": "A company is using GitHub Actions to run a CI/CD pipeline that accesses resources on AWS. The company has an IAM user that uses a secret key in the pipeline to authenticate to AWS. An existing IAM role with an attached policy grants the required permissions to deploy resources.The company’s security team implements a new requirement that pipelines can no longer use long-lived secret keys. A solutions architect must replace the secret key with a short-lived solution.Which solution will meet these requirements with the LEAST operational overhead?",
+        "options": [
+            "Create an IAM OpenID Connect (OIDC) identity provider (IdP) in AWS Identity and Access Management (IAM). Create a new IAM role with the appropriate trust policy that allows the sts:AssumeRoleWithWebIdentity API call from the GitHub OIDC IdP. Update GitHub to assume the role for the pipeline.",
+            "Create an IAM SAML 2.0 identity provider (IdP) in AWS Identity and Access Management (IAM). Create a new IAM role with the appropriate trust policy that allows the sts:AssumeRole API call. Attach the existing IAM policy to the new IAM role. Update GitHub to use SAML authentication for the pipeline.",
+            "Create an Amazon Cognito identity pool. Configure the authentication provider to use GitHub. Create a new IAM role with the appropriate trust policy that allows the sts:AssumeRoleWithWebIdentity API call from the GitHub authentication provider. Configure the pipeline to use Cognito as its authentication provider.",
+            "Create a trust anchor to AWS Private Certificate Authority. Generate a client certificate to use with AWS IAM Roles Anywhere. Create a new IAM role with the appropriate trust policy that allows the sts:AssumeRole API call. Attach the existing IAM policy to the new IAM role. Configure the pipeline to use the credential helper tool and to reference the client certificate public key to assume the new IAM role."
+        ],
+        "correct": [
+            0
+        ],
+        "type": "single",
+        "explanation": "Đáp án được chọn nhiều nhất trong cộng đồng. Xem thêm giải thích trong file gốc."
+    },
+    {
+        "id": 53,
+        "text": "A company uses AWS Organizations to manage its AWS accounts. A solutions architect must design a solution in which only administrator roles are allowed to use IAM actions. However, the solutions architect does not have access to all the AWS accounts throughout the company.Which solution meets these requirements with the LEAST operational overhead?",
+        "options": [
+            "Set an IAM permissions boundary that allows IAM actions. Attach the permissions boundary to every administrator role across all the AWS accounts.",
+            "Configure AWS CloudTrail to invoke an AWS Lambda function for each event that is related to IAM actions. Configure the function to deny the action if the user who invoked the action is not an administrator.",
+            "Create an SCP that applies to all the AWS accounts to deny IAM actions for all users except for those with administrator roles. Apply the SCP to the root OU.",
+            "Create an SCP that applies to all the AWS accounts to allow IAM actions only for administrator roles. Apply the SCP to the root OU."
+        ],
+        "correct": [
+            2
+        ],
+        "type": "single",
+        "explanation": "Đáp án được chọn nhiều nhất trong cộng đồng. Xem thêm giải thích trong file gốc."
+    },
+    {
+        "id": 54,
+        "text": "Accompany is building an application to collect and transmit sensor data from a factory. The application will use AWS IoT Core to send data from hundreds of devices to an Amazon S3 data lake. The company must enrich the data before loading the data into Amazon S3.The application will transmit the sensor data every 5 seconds. New sensor data must be available in Amazon S3 less than 30 minutes after the application collects the data. No other applications are processing the sensor data from AWS IoT Core.Which solution will meet these requirements MOST cost-effectively?",
+        "options": [
+            "Use AWS IoT Core Basic Ingest to ingest the sensor data. Configure an AWS IoT rule action to write the data to Amazon Kinesis Data Firehose. Set the Kinesis Data Firehose buffering interval to 900 seconds. Use Kinesis Data Firehose to invoke an AWS Lambda function to enrich the data, Configure Kinesis Data Firehose to deliver the data to Amazon S3.",
+            "Create a topic in AWS IoT Core to ingest the sensor data. Create an AWS Lambda function to enrich the data and to write the data to Amazon S3. Configure an AWS IoT rule action to invoke the Lambda function.",
+            "Use AWS loT Core Basic Ingest to ingest the sensor data. Configure an AWS IoT rule action to write the data to Amazon Kinesis Data Streams. Create a consumer AWS Lambda function to process the data from Kinesis Data Streams and to enrich the data. Call the S3 PutObject API operation from the Lambda function to write the data to Amazon S3.",
+            "Create a topic in AWS IoT Core to ingest the sensor data. Configure an AWS IoT rule action to send the data to an Amazon Timestream table. Create an AWS Lambda, function to read the data from Timestream. Configure the Lambda function to enrich the data and to write the data to Amazon S3."
+        ],
+        "correct": [
+            0
+        ],
+        "type": "single",
+        "explanation": "Đáp án được chọn nhiều nhất trong cộng đồng. Xem thêm giải thích trong file gốc."
+    },
+    {
+        "id": 55,
+        "text": "A company is running a serverless ecommerce application on AWS. The application uses Amazon API Gateway to invoke AWS Lambda Java functions. The Lambda functions connect to an Amazon RDS for MySQL database to store data.During a recent sale event, a sudden increase in web traffic resulted in poor API performance and database connection failures. The company needs to implement a solution to minimize the latency for the Lambda functions and to support bursts in traffic.Which solution will meet these requirements with the LEAST amount of change to the application?",
+        "options": [
+            "Create an RDS Proxy endpoint for the database. Store database secrets in AWS Secrets Manager. Set up the required IAM permissions. Update the Lambda functions to connect to the RDS Proxy endpoint. Increase the provisioned concurrency for the Lambda functions.",
+            "Update the code of the Lambda functions so that the Lambda functions open the database connection outside of the function handler. Increase the provisioned concurrency for the Lambda functions.",
+            "Create an RDS Proxy endpoint for the database. Store database secrets in AWS Secrets Manager. Set up the required IAM permissions. Update the Lambda functions to connect to the RDS Proxy endpoint. Increase the reserved concurrency for the Lambda functions.",
+            "Create a custom parameter group. Increase the value of the max_connections parameter. Associate the custom parameter group with the RDS DB instance and schedule a reboot. Increase the reserved concurrency for the Lambda functions."
+        ],
+        "correct": [
+            0
+        ],
+        "type": "single",
+        "explanation": "Đáp án được chọn nhiều nhất trong cộng đồng. Xem thêm giải thích trong file gốc."
+    },
+    {
+        "id": 56,
+        "text": "A company in the United States (US) has acquired a company in Europe. Both companies use the AWS Cloud. The US company has built a new application with a microservices architecture. The US company is hosting the application across five VPCs in the us-east-2 Region. The application must be able to access resources in one VPC in the eu-west-1 Region.However, the application must not be able to access any other VPCs.The VPCs in both Regions have no overlapping CIDR ranges. All accounts are already consolidated in one organization in AWS Organizations.Which solution will meet these requirements MOST cost-effectively?",
+        "options": [
+            "Create one transit gateway in each Region. Attach the involved subnets to the regional transit gateway. Create the necessary route entries in the associated route tables for each subnet so that the traffic is routed through the regional transit gateway. Peer the two transit gateways.",
+            "Create one VPC peering connection for each VPC in us-east-2 to the VPC in eu-west-1. Create the necessary route entries in each VPC so that the traffic is routed through the VPC peering connection.",
+            "Create one transit gateway in eu-west-1. Attach the VPCs in us-east-2 and the VPC in eu-west-1 to the transit gateway. Create the necessary route entries in each VPC so that the traffic is routed through the transit gateway.",
+            "Create a full mesh VPC peering connection configuration between all the VPCs. Create the necessary route entries in each VPC so that the traffic is routed through the VPC peering connection."
+        ],
+        "correct": [
+            1
+        ],
+        "type": "single",
+        "explanation": "Đáp án được chọn nhiều nhất trong cộng đồng. Xem thêm giải thích trong file gốc."
+    },
+    {
+        "id": 57,
+        "text": "A company is collecting data from a large set of IoT devices. The data is stored in an Amazon S3 data lake. Data scientists perform analytics on Amazon EC2 instances that run in two public subnets in a VPC in a separate AWS account.The data scientists need access to the data lake from the EC2 instances. The EC2 instances already have an assigned role with permissions to access Amazon S3.According to company policies, only authorized networks are allowed to have access to the IoT data.Which combination of steps should a solutions architect take to meet these requirements? (Choose two.)",
+        "options": [
+            "Update the VPC route table to route S3 traffic to an S3 access point.",
+            "Add an S3 bucket policy with a condition that allows the s3:GetObject action when the value for the s3:DataAccessPointArn condition key is a valid access point ARN.",
+            "Update the EC2 instance role. Add a policy with a condition that allows the s3:GetObject action when the value for the s3:DataAccessPointArn condition key is a valid access point ARN.",
+            "Create a gateway VPC endpoint for Amazon S3 in the data scientists’ VPC.",
+            "Create an S3 access point in the data scientists' AWS account for the data lake."
+        ],
+        "correct": [
+            1,
+            4
+        ],
+        "type": "multiple",
+        "explanation": "Đáp án được chọn nhiều nhất trong cộng đồng. Xem thêm giải thích trong file gốc."
+    },
+    {
+        "id": 58,
+        "text": "A company has deployed applications to thousands of Amazon EC2 instances in an AWS account. A security audit discovers that several unencrypted Amazon Elastic Block Store (Amazon EBS) volumes are attached to the EC2 instances. The company’s security policy requires the EBS volumes to be encrypted.The company needs to implement an automated solution to encrypt the EBS volumes. The solution also must prevent development teams from creating unencrypted EBS volumes.Which solution will meet these requirements?",
+        "options": [
+            "Configure the AWS Config managed rule that identifies unencrypted EBS volumes. Configure an automatic remediation action. Associate an AWS Systems Manager Automation runbook that includes the steps to create a new encrypted EBS volume. Modify the AWS account setting for EBS encryption to always encrypt new EBS volumes.",
+            "Configure the AWS Config managed rule that identifies unencrypted EBS volumes. Configure an automatic remediation action. Associate an AWS Systems Manager Automation runbook that includes the steps to create a new encrypted EBS volume. Create an AWS Key Management Service (AWS KMS) customer managed key. In the key policy, include a statement to deny the creation of unencrypted EBS volumes.",
+            "Use AWS Systems Manager Fleet Manager to create a list of unencrypted EBS volumes, Create a Systems Manager Automation runbook that includes the steps to create a new encrypted EBS volume. Create an SCP to deny the creation of unencrypted EBS volumes.",
+            "Use AWS Systems Manager Fleet Manager to create a list of unencrypted EBS volumes. Create a Systems Manager Automation runbook that includes the steps to create a new encrypted EBS volume. Modify the AWS account setting for EBS encryption to always encrypt new EBS volumes."
+        ],
+        "correct": [
+            0
+        ],
+        "type": "single",
+        "explanation": "Đáp án được chọn nhiều nhất trong cộng đồng. Xem thêm giải thích trong file gốc."
+    },
+    {
+        "id": 59,
+        "text": "A company wants to use Amazon WorkSpaces in combination with thin client devices to replace aging desktops. Employees use the desktops to access applications that work with Clinical trial data. Corporate security policy states that access to the applications must be restricted to only company branch office locations. The company is considering adding an additional branch office in the next 6 months.Which solution meets these requirements with the MOST operational efficiency?",
+        "options": [
+            "Use AWS Certificate Manager (ACM) to issue trusted device certificates to the machines deployed in the branch office locations. Enable restricted access on the WorkSpaces directory.",
+            "Use AWS Firewall Manager to create a web ACL rule with an IPSet with the list of public addresses from the branch office locations. Associate the web ACL with the WorkSpaces directory.",
+            "Create an IP access control group rule with the list of public addresses from the branch offices. Associate the IP access control group with the WorkSpaces directory.",
+            "Create a custom WorkSpace image with Windows Firewall configured to restrict access to the public addresses of the branch offices. Use the image to deploy the WorkSpaces."
+        ],
+        "correct": [
+            2
+        ],
+        "type": "single",
+        "explanation": "Đáp án được chọn nhiều nhất trong cộng đồng. Xem thêm giải thích trong file gốc."
+    },
+    {
+        "id": 60,
+        "text": "A company is hosting an application on AWS for a project that will run for the next 3 years. The application consists of 20 Amazon EC2 On-Demand Instances that are registered in a target group for a Network Load Balancer (NLB). The instances are spread across two Availability Zones. The application is stateless and runs 24 hours a day, 7 days a week.The company receives reports from users who are experiencing slow responses from the application. Performance metrics show that the instances are at 10% CPU utilization during normal application use. However, the CPU utilization increases to 100% at busy times, which typically last for a few hours.The company needs a new architecture to resolve the problem of slow responses from the application.Which solution will meet these requirements MOST cost-effectively?",
+        "options": [
+            "Create an Auto Scaling group. Attach the Auto Scaling group to the target group of the NLB. Set the minimum capacity to 4 and the maximum capacity to 28. Purchase Reserved Instances for four instances.",
+            "Create an Auto Scaling group. Attach the Auto Scaling group to the target group of the NLB. Set the minimum capacity to 20 and the desired capacity to 28. Purchase Reserved Instances for 20 instances.",
+            "Create a Spot Fleet that has a request type of request. Set the TotalTargetCapacity parameter to 20. Set the DefaultTargetCapacityType parameter to On-Demand. Specify the NLB when creating the Spot Fleet.",
+            "Create a Spot Fleet that has a request type of maintain. Set the TotalTargetCapacity parameter to 20. Set the DefaultTargetCapacityType parameter to Spot. Replace the NLB with an Application Load Balancer."
+        ],
+        "correct": [
+            0
+        ],
+        "type": "single",
+        "explanation": "Đáp án được chọn nhiều nhất trong cộng đồng. Xem thêm giải thích trong file gốc."
+    }
+        ]
+        let currentQuestionIndex = 0;
+        let userAnswers = [];
+        let startTime = Date.now();
+        let timer;
+
+        function initializeApp() {
+            document.getElementById('totalQuestions').textContent = questions.length;
+            loadQuestion();
+            startTimer();
+            updateStats();
+        }
+
+        function loadQuestion() {
+            const question = questions[currentQuestionIndex];
+            document.getElementById('questionText').innerHTML = `
+                <strong>Câu ${question.id}:</strong><br><br>
+                ${question.text}
+            `;
+            
+            // Set question type indicator
+            const typeElement = document.getElementById('questionType');
+            if (question.type === 'multiple') {
+                typeElement.textContent = `Multiple Choice (Choose ${question.correct.length})`;
+                typeElement.style.background = '#fff3cd';
+                typeElement.style.color = '#856404';
+            } else {
+                typeElement.textContent = 'Single Choice';
+                typeElement.style.background = '#e3f2fd';
+                typeElement.style.color = '#1976d2';
+            }
+            
+            const optionsContainer = document.getElementById('optionsContainer');
+            optionsContainer.innerHTML = '';
+            
+            question.options.forEach((option, index) => {
+                const optionDiv = document.createElement('div');
+                optionDiv.className = 'option';
+                optionDiv.innerHTML = `
+                    <strong>${String.fromCharCode(65 + index)}.</strong> ${option}
+                    ${question.type === 'multiple' ? '<input type="checkbox" class="option-checkbox">' : ''}
+                `;
+                
+                if (question.type === 'multiple') {
+                    optionDiv.onclick = () => toggleMultipleOption(index);
+                } else {
+                    optionDiv.onclick = () => selectSingleOption(index);
+                }
+                
+                optionDiv.dataset.index = index;
+                optionsContainer.appendChild(optionDiv);
+            });
+
+            document.getElementById('currentQuestion').textContent = currentQuestionIndex + 1;
+            document.getElementById('submitBtn').disabled = true;
+            document.getElementById('nextBtn').disabled = true;
+            updateProgressBar();
+        }
+
+        function selectSingleOption(index) {
+            document.querySelectorAll('.option').forEach(opt => opt.classList.remove('selected'));
+            document.querySelector(`[data-index="${index}"]`).classList.add('selected');
+            document.getElementById('submitBtn').disabled = false;
+        }
+
+        function toggleMultipleOption(index) {
+            const option = document.querySelector(`[data-index="${index}"]`);
+            const checkbox = option.querySelector('.option-checkbox');
+            
+            if (option.classList.contains('selected')) {
+                option.classList.remove('selected');
+                checkbox.checked = false;
+            } else {
+                option.classList.add('selected');
+                checkbox.checked = true;
+            }
+            
+            // Enable submit if at least one option is selected
+            const selectedCount = document.querySelectorAll('.option.selected').length;
+            document.getElementById('submitBtn').disabled = selectedCount === 0;
+        }
+
+        function getSelectedAnswers() {
+            const question = questions[currentQuestionIndex];
+            const selected = [];
+            
+            document.querySelectorAll('.option.selected').forEach(opt => {
+                selected.push(parseInt(opt.dataset.index));
+            });
+            
+            return selected.sort((a, b) => a - b); // Sort for comparison
+        }
+
+        function submitAnswer() {
+            const selectedAnswers = getSelectedAnswers();
+            if (selectedAnswers.length === 0) return;
+
+            const question = questions[currentQuestionIndex];
+            const correctAnswers = [...question.correct].sort((a, b) => a - b);
+            
+            // Calculate correctness
+            let isCorrect = false;
+            let isPartial = false;
+            
+            if (question.type === 'single') {
+                isCorrect = selectedAnswers.length === 1 && selectedAnswers[0] === correctAnswers[0];
+            } else {
+                // Multiple choice scoring
+                const selectedSet = new Set(selectedAnswers);
+                const correctSet = new Set(correctAnswers);
+                
+                if (selectedAnswers.length === correctAnswers.length && 
+                    selectedAnswers.every(ans => correctSet.has(ans))) {
+                    isCorrect = true;
+                } else {
+                    // Partial credit if some answers are correct
+                    const correctSelected = selectedAnswers.filter(ans => correctSet.has(ans));
+                    const incorrectSelected = selectedAnswers.filter(ans => !correctSet.has(ans));
+                    
+                    if (correctSelected.length > 0 && incorrectSelected.length === 0) {
+                        isPartial = true; // Selected some correct, no incorrect
+                    }
+                }
+            }
+
+            userAnswers[currentQuestionIndex] = {
+                questionId: question.id,
+                selected: selectedAnswers,
+                correct: correctAnswers,
+                isCorrect: isCorrect,
+                isPartial: isPartial,
+                timeSpent: Date.now() - startTime,
+                type: question.type
+            };
+
+            // Show results
+            document.querySelectorAll('.option').forEach((opt, index) => {
+                const isSelectedCorrect = correctAnswers.includes(index);
+                const isSelectedByUser = selectedAnswers.includes(index);
+                
+                if (isSelectedCorrect) {
+                    opt.classList.add('correct');
+                } else if (isSelectedByUser) {
+                    opt.classList.add('incorrect');
+                }
+                
+                opt.onclick = null; // Disable clicking
+            });
+
+            // Show explanation
+            const explanationDiv = document.createElement('div');
+            let resultClass = 'incorrect';
+            let resultText = '❌ Sai rồi!';
+            
+            if (isCorrect) {
+                resultClass = 'correct';
+                resultText = '✅ Chính xác!';
+            } else if (isPartial) {
+                resultClass = 'partial';
+                resultText = '⚠️ Đúng một phần!';
+            }
+            
+            explanationDiv.className = `explanation ${resultClass}`;
+            explanationDiv.innerHTML = `
+                <strong>${resultText}</strong><br>
+                <strong>Đáp án đúng:</strong> ${correctAnswers.map(i => String.fromCharCode(65 + i)).join(', ')}<br>
+                <strong>Bạn chọn:</strong> ${selectedAnswers.map(i => String.fromCharCode(65 + i)).join(', ')}<br>
+                <em>Giải thích:</em> ${question.explanation}
+            `;
+            document.getElementById('optionsContainer').appendChild(explanationDiv);
+
+            document.getElementById('submitBtn').style.display = 'none';
+            document.getElementById('nextBtn').disabled = false;
+            updateStats();
+        }
+
+        function nextQuestion() {
+            if (currentQuestionIndex < questions.length - 1) {
+                currentQuestionIndex++;
+                loadQuestion();
+                document.getElementById('submitBtn').style.display = 'inline-block';
+            } else {
+                showReview();
+            }
+        }
+
+        function previousQuestion() {
+            if (currentQuestionIndex > 0) {
+                currentQuestionIndex--;
+                loadQuestion();
+                document.getElementById('submitBtn').style.display = 'inline-block';
+            }
+        }
+
+        function updateStats() {
+            const answered = userAnswers.filter(a => a).length;
+            const correct = userAnswers.filter(a => a && a.isCorrect).length;
+            const partial = userAnswers.filter(a => a && a.isPartial).length;
+            const accuracy = answered > 0 ? Math.round(((correct + partial * 0.5) / answered) * 100) : 0;
+
+            document.getElementById('correctCount').textContent = correct + (partial > 0 ? ` (+${partial} partial)` : '');
+            document.getElementById('wrongCount').textContent = answered - correct - partial;
+            document.getElementById('accuracy').textContent = accuracy + '%';
+        }
+
+        function updateProgressBar() {
+            const progress = ((currentQuestionIndex + 1) / questions.length) * 100;
+            document.getElementById('progressBar').style.width = progress + '%';
+        }
+
+        function startTimer() {
+            timer = setInterval(() => {
+                const elapsed = Math.floor((Date.now() - startTime) / 1000);
+                const minutes = Math.floor(elapsed / 60);
+                const seconds = elapsed % 60;
+                document.getElementById('timeSpent').textContent = 
+                    `${minutes}:${seconds.toString().padStart(2, '0')}`;
+            }, 1000);
+        }
+
+        function showReview() {
+            clearInterval(timer);
+            document.getElementById('studyMode').classList.add('hidden');
+            document.getElementById('reviewMode').classList.remove('hidden');
+
+            const correct = userAnswers.filter(a => a.isCorrect).length;
+            const partial = userAnswers.filter(a => a.isPartial).length;
+            const total = userAnswers.length;
+            const accuracy = Math.round(((correct + partial * 0.5) / total) * 100);
+
+            document.getElementById('reviewStats').innerHTML = `
+                <div class="stats">
+                    <div class="stat-card">
+                        <div class="stat-number">${correct}/${total}</div>
+                        <div>Hoàn toàn đúng</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">${partial}</div>
+                        <div>Đúng một phần</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">${accuracy}%</div>
+                        <div>Điểm tổng</div>
+                    </div>
+                </div>
+            `;
+
+            // Show wrong answers for review
+            const wrongAnswers = userAnswers.filter(a => !a.isCorrect);
+            if (wrongAnswers.length > 0) {
+                document.getElementById('wrongAnswers').innerHTML = `
+                    <h3>🔄 Câu cần ôn lại (${wrongAnswers.length} câu):</h3>
+                    ${wrongAnswers.map(a => `
+                        <div class="wrong-answer">
+                            <strong>Câu ${a.questionId} (${a.type === 'multiple' ? 'Multiple' : 'Single'} Choice):</strong><br>
+                            Bạn chọn: ${a.selected.map(i => String.fromCharCode(65 + i)).join(', ')}<br>
+                            Đáp án đúng: ${a.correct.map(i => String.fromCharCode(65 + i)).join(', ')}
+                            ${a.isPartial ? ' <span style="color: #856404;">(Đúng một phần)</span>' : ''}
+                        </div>
+                    `).join('')}
+                `;
+            }
+        }
+
+        function restartStudy() {
+            currentQuestionIndex = 0;
+            userAnswers = [];
+            startTime = Date.now();
+            document.getElementById('studyMode').classList.remove('hidden');
+            document.getElementById('reviewMode').classList.add('hidden');
+            initializeApp();
+        }
+
+        function exportResults() {
+            const results = {
+                date: new Date().toLocaleDateString('vi-VN'),
+                day: 1,
+                questions: questions.length,
+                correct: userAnswers.filter(a => a.isCorrect).length,
+                partial: userAnswers.filter(a => a.isPartial).length,
+                accuracy: Math.round(((userAnswers.filter(a => a.isCorrect).length + userAnswers.filter(a => a.isPartial).length * 0.5) / userAnswers.length) * 100),
+                wrongQuestions: userAnswers.filter(a => !a.isCorrect).map(a => ({
+                    id: a.questionId,
+                    type: a.type,
+                    selected: a.selected,
+                    correct: a.correct,
+                    isPartial: a.isPartial
+                })),
+                timeSpent: document.getElementById('timeSpent').textContent
+            };
+
+            const blob = new Blob([JSON.stringify(results, null, 2)], {type: 'application/json'});
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `aws-devops-results-${new Date().toISOString().split('T')[0]}.json`;
+            a.click();
+        }
+
+        // Initialize app when page loads
+        window.onload = initializeApp;
+    </script>
+</body>
+</html>

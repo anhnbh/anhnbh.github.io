@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AWS Network Specialty Study App</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; }
+        .container { max-width: 900px; margin: 0 auto; padding: 20px; }
+        .header { text-align: center; color: white; margin-bottom: 30px; }
+        .header h1 { font-size: 2.5em; margin-bottom: 10px; text-shadow: 2px 2px 4px rgba(0,0,0,0.3); }
+        .stats { background: rgba(255,255,255,0.1); padding: 20px; border-radius: 15px; margin-bottom: 30px; backdrop-filter: blur(10px); }
+        .question-card { background: white; border-radius: 15px; padding: 30px; margin-bottom: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
+        .question-text { font-size: 1.1em; line-height: 1.6; margin-bottom: 20px; color: #333; }
+        .options { margin: 20px 0; }
+        .option { margin: 10px 0; padding: 15px; background: #f8f9fa; border: 2px solid #e9ecef; border-radius: 8px; cursor: pointer; transition: all 0.3s; }
+        .option:hover { background: #e3f2fd; border-color: #2196f3; }
+        .option.selected { background: #e3f2fd; border-color: #2196f3; }
+        .option.correct { background: #e8f5e8; border-color: #4caf50; }
+        .option.incorrect { background: #ffebee; border-color: #f44336; }
+        .controls { text-align: center; margin: 20px 0; }
+        .btn { padding: 12px 24px; margin: 0 10px; border: none; border-radius: 25px; cursor: pointer; font-size: 1em; transition: all 0.3s; }
+        .btn-primary { background: #2196f3; color: white; }
+        .btn-success { background: #4caf50; color: white; }
+        .btn:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
+        .explanation { background: #f0f7ff; padding: 20px; border-radius: 10px; margin-top: 20px; border-left: 4px solid #2196f3; }
+        .progress { background: rgba(255,255,255,0.2); height: 10px; border-radius: 5px; margin: 20px 0; overflow: hidden; }
+        .progress-bar { background: #4caf50; height: 100%; transition: width 0.3s; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🌐 AWS Network Specialty</h1>
+            <p>Advanced Networking Study App</p>
+        </div>
+        
+        <div class="stats">
+            <div style="display: flex; justify-content: space-between; color: white;">
+                <span>Question: <span id="current">1</span> / <span id="total">25</span></span>
+                <span>Score: <span id="score">0</span> / <span id="attempted">0</span></span>
+                <span>Progress: <span id="progress">0%</span></span>
+            </div>
+            <div class="progress">
+                <div class="progress-bar" id="progressBar"></div>
+            </div>
+        </div>
+
+        <div class="question-card" id="questionCard">
+            <div class="question-text" id="questionText"></div>
+            <div class="options" id="options"></div>
+            <div class="controls">
+                <button class="btn btn-primary" id="submitBtn" onclick="submitAnswer()">Submit Answer</button>
+                <button class="btn btn-success" id="nextBtn" onclick="nextQuestion()" style="display:none;">Next Question</button>
+            </div>
+            <div class="explanation" id="explanation" style="display:none;"></div>
+        </div>
+    </div>
+
+    <script>
+        const questions = [
+            {
+                question: "You need to connect your on-premises data center to AWS with predictable bandwidth and low latency. Which service should you use?",
+                options: ["VPN Gateway", "Direct Connect", "Internet Gateway", "NAT Gateway"],
+                correct: 1,
+                explanation: "AWS Direct Connect provides a dedicated network connection from your premises to AWS, offering predictable bandwidth and lower latency than internet-based connections."
+            },
+            {
+                question: "Which AWS service allows you to create a logically isolated section of the AWS Cloud?",
+                options: ["Security Group", "VPC", "Subnet", "Route Table"],
+                correct: 1,
+                explanation: "Amazon VPC (Virtual Private Cloud) lets you provision a logically isolated section of the AWS Cloud where you can launch AWS resources in a virtual network."
+            },
+            {
+                question: "What is the maximum number of VPCs you can create per AWS region by default?",
+                options: ["5", "10", "20", "100"],
+                correct: 0,
+                explanation: "By default, you can create up to 5 VPCs per AWS region. This limit can be increased by contacting AWS support."
+            },
+            {
+                question: "Which component acts as a virtual firewall for your instance to control inbound and outbound traffic?",
+                options: ["NACL", "Security Group", "Route Table", "Internet Gateway"],
+                correct: 1,
+                explanation: "Security Groups act as a virtual firewall for your instance to control inbound and outbound traffic at the instance level."
+            },
+            {
+                question: "What type of routing does AWS Transit Gateway use by default?",
+                options: ["Static routing", "Dynamic routing with BGP", "OSPF", "RIP"],
+                correct: 1,
+                explanation: "AWS Transit Gateway uses dynamic routing with BGP (Border Gateway Protocol) by default for route propagation."
+            },
+            {
+                question: "Which AWS service provides DDoS protection for applications running on AWS?",
+                options: ["AWS WAF", "AWS Shield", "AWS GuardDuty", "AWS Inspector"],
+                correct: 1,
+                explanation: "AWS Shield provides DDoS protection. Shield Standard is free and automatically enabled, while Shield Advanced provides enhanced protection."
+            },
+            {
+                question: "What is the CIDR block range for a VPC?",
+                options: ["/8 to /24", "/16 to /28", "/10 to /24", "/16 to /24"],
+                correct: 1,
+                explanation: "VPC CIDR blocks can range from /16 (65,536 IP addresses) to /28 (16 IP addresses)."
+            },
+            {
+                question: "Which service allows you to connect multiple VPCs across different regions?",
+                options: ["VPC Peering", "Transit Gateway", "Direct Connect", "VPN Gateway"],
+                correct: 0,
+                explanation: "VPC Peering allows you to connect VPCs across different regions. Transit Gateway is region-specific but can be peered across regions."
+            },
+            {
+                question: "What is the purpose of a NAT Gateway?",
+                options: ["Allow inbound internet traffic", "Allow outbound internet traffic from private subnets", "Route traffic between subnets", "Provide DNS resolution"],
+                correct: 1,
+                explanation: "NAT Gateway allows instances in private subnets to connect to the internet for outbound traffic while preventing inbound connections from the internet."
+            },
+            {
+                question: "Which AWS service provides a managed DNS service?",
+                options: ["Route 53", "CloudFront", "API Gateway", "Load Balancer"],
+                correct: 0,
+                explanation: "Amazon Route 53 is a scalable and highly available Domain Name System (DNS) web service."
+            },
+            {
+                question: "What is the difference between Security Groups and NACLs?",
+                options: ["No difference", "Security Groups are stateful, NACLs are stateless", "Security Groups are stateless, NACLs are stateful", "Both are stateful"],
+                correct: 1,
+                explanation: "Security Groups are stateful (return traffic is automatically allowed), while NACLs are stateless (you must explicitly allow return traffic)."
+            },
+            {
+                question: "Which Direct Connect feature provides redundancy?",
+                options: ["Virtual Interfaces", "LAG (Link Aggregation Groups)", "Multiple connections", "BGP routing"],
+                correct: 2,
+                explanation: "Multiple Direct Connect connections provide redundancy. You should establish connections in different locations for maximum resilience."
+            },
+            {
+                question: "What is the maximum bandwidth for a single Direct Connect connection?",
+                options: ["1 Gbps", "10 Gbps", "100 Gbps", "400 Gbps"],
+                correct: 2,
+                explanation: "AWS Direct Connect supports connections up to 100 Gbps for dedicated connections."
+            },
+            {
+                question: "Which routing protocol is used between your router and AWS in Direct Connect?",
+                options: ["OSPF", "RIP", "BGP", "EIGRP"],
+                correct: 2,
+                explanation: "BGP (Border Gateway Protocol) is used for routing between your router and AWS in Direct Connect connections."
+            },
+            {
+                question: "What is a Transit Gateway route table?",
+                options: ["A table that stores VPC routes", "A table that controls traffic flow between attachments", "A DNS lookup table", "A security policy table"],
+                correct: 1,
+                explanation: "Transit Gateway route tables control how traffic is routed between the different attachments (VPCs, VPNs, Direct Connect gateways)."
+            },
+            {
+                question: "Which feature allows you to share a Transit Gateway across AWS accounts?",
+                options: ["Cross-account sharing", "Resource Access Manager (RAM)", "IAM roles", "VPC sharing"],
+                correct: 1,
+                explanation: "AWS Resource Access Manager (RAM) allows you to share Transit Gateways across AWS accounts within your organization."
+            },
+            {
+                question: "What is the purpose of an Egress-only Internet Gateway?",
+                options: ["IPv4 outbound access", "IPv6 outbound access", "IPv4 inbound access", "IPv6 inbound access"],
+                correct: 1,
+                explanation: "Egress-only Internet Gateway provides outbound internet access for IPv6 traffic while preventing inbound connections."
+            },
+            {
+                question: "Which AWS service provides network packet inspection?",
+                options: ["VPC Flow Logs", "AWS Network Firewall", "Security Groups", "NACLs"],
+                correct: 1,
+                explanation: "AWS Network Firewall provides stateful network packet inspection and filtering for VPCs."
+            },
+            {
+                question: "What is the maximum number of route tables per VPC?",
+                options: ["50", "100", "200", "400"],
+                correct: 2,
+                explanation: "You can have up to 200 route tables per VPC by default. This limit can be increased."
+            },
+            {
+                question: "Which service provides global load balancing with health checks?",
+                options: ["Application Load Balancer", "Network Load Balancer", "Route 53", "CloudFront"],
+                correct: 2,
+                explanation: "Route 53 provides global load balancing with health checks through its DNS-based routing policies."
+            },
+            {
+                question: "What is a VPC endpoint?",
+                options: ["A connection to the internet", "A private connection to AWS services", "A connection between VPCs", "A connection to on-premises"],
+                correct: 1,
+                explanation: "VPC endpoints provide private connectivity to AWS services without requiring internet access, NAT devices, or VPN connections."
+            },
+            {
+                question: "Which type of VPC endpoint is used for S3 and DynamoDB?",
+                options: ["Interface endpoint", "Gateway endpoint", "Network endpoint", "Service endpoint"],
+                correct: 1,
+                explanation: "Gateway endpoints are used for S3 and DynamoDB, providing a route in your route table to these services."
+            },
+            {
+                question: "What is AWS PrivateLink?",
+                options: ["A VPN service", "A service for private connectivity", "A DNS service", "A load balancing service"],
+                correct: 1,
+                explanation: "AWS PrivateLink provides private connectivity between VPCs and AWS services without exposing traffic to the public internet."
+            },
+            {
+                question: "Which AWS service provides centralized network monitoring?",
+                options: ["CloudWatch", "VPC Flow Logs", "AWS Network Manager", "AWS Config"],
+                correct: 2,
+                explanation: "AWS Network Manager provides centralized monitoring and management of your global network infrastructure."
+            },
+            {
+                question: "What is the purpose of AWS Global Accelerator?",
+                options: ["Content delivery", "Network performance improvement", "DNS resolution", "Load balancing"],
+                correct: 1,
+                explanation: "AWS Global Accelerator improves network performance by routing traffic through AWS's global network infrastructure using anycast IP addresses."
+            }
+        ];
+
+        let currentQuestion = 0;
+        let score = 0;
+        let attempted = 0;
+        let selectedOption = -1;
+
+        function loadQuestion() {
+            const q = questions[currentQuestion];
+            document.getElementById('questionText').textContent = q.question;
+            
+            const optionsDiv = document.getElementById('options');
+            optionsDiv.innerHTML = '';
+            
+            q.options.forEach((option, index) => {
+                const optionDiv = document.createElement('div');
+                optionDiv.className = 'option';
+                optionDiv.textContent = option;
+                optionDiv.onclick = () => selectOption(index);
+                optionsDiv.appendChild(optionDiv);
+            });
+            
+            document.getElementById('current').textContent = currentQuestion + 1;
+            document.getElementById('total').textContent = questions.length;
+            document.getElementById('submitBtn').style.display = 'inline-block';
+            document.getElementById('nextBtn').style.display = 'none';
+            document.getElementById('explanation').style.display = 'none';
+            selectedOption = -1;
+            
+            updateProgress();
+        }
+
+        function selectOption(index) {
+            document.querySelectorAll('.option').forEach(opt => opt.classList.remove('selected'));
+            document.querySelectorAll('.option')[index].classList.add('selected');
+            selectedOption = index;
+        }
+
+        function submitAnswer() {
+            if (selectedOption === -1) {
+                alert('Please select an answer');
+                return;
+            }
+            
+            attempted++;
+            const q = questions[currentQuestion];
+            const options = document.querySelectorAll('.option');
+            
+            options.forEach((opt, index) => {
+                if (index === q.correct) {
+                    opt.classList.add('correct');
+                } else if (index === selectedOption && index !== q.correct) {
+                    opt.classList.add('incorrect');
+                }
+            });
+            
+            if (selectedOption === q.correct) {
+                score++;
+            }
+            
+            document.getElementById('explanation').innerHTML = '<strong>Explanation:</strong> ' + q.explanation;
+            document.getElementById('explanation').style.display = 'block';
+            document.getElementById('submitBtn').style.display = 'none';
+            document.getElementById('nextBtn').style.display = 'inline-block';
+            
+            updateStats();
+        }
+
+        function nextQuestion() {
+            currentQuestion++;
+            if (currentQuestion < questions.length) {
+                loadQuestion();
+            } else {
+                showResults();
+            }
+        }
+
+        function updateStats() {
+            document.getElementById('score').textContent = score;
+            document.getElementById('attempted').textContent = attempted;
+        }
+
+        function updateProgress() {
+            const progress = ((currentQuestion) / questions.length) * 100;
+            document.getElementById('progress').textContent = Math.round(progress) + '%';
+            document.getElementById('progressBar').style.width = progress + '%';
+        }
+
+        function showResults() {
+            const percentage = Math.round((score / questions.length) * 100);
+            document.getElementById('questionCard').innerHTML = `
+                <div style="text-align: center;">
+                    <h2>🎉 Quiz Complete!</h2>
+                    <div style="font-size: 3em; margin: 20px 0;">${percentage}%</div>
+                    <p style="font-size: 1.2em; margin: 20px 0;">
+                        You scored ${score} out of ${questions.length} questions correctly!
+                    </p>
+                    <button class="btn btn-primary" onclick="location.reload()">Restart Quiz</button>
+                </div>
+            `;
+        }
+
+        // Initialize
+        loadQuestion();
+    </script>
+</body>
+</html>

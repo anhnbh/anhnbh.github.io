@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SAP-C02 Day 6 Study</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', sans-serif; background: linear-gradient(135deg, #6f42c1, #5a32a3); min-height: 100vh; padding: 20px; }
+        .container { max-width: 1000px; margin: 0 auto; background: white; border-radius: 15px; box-shadow: 0 20px 40px rgba(0,0,0,0.1); overflow: hidden; }
+        .header { background: linear-gradient(135deg, #6f42c1, #5a32a3); color: white; padding: 30px; text-align: center; }
+        .header h1 { font-size: 2.5em; margin-bottom: 10px; }
+        .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 15px; padding: 20px 30px; background: #f8f9fa; }
+        .stat-card { background: white; padding: 15px; border-radius: 10px; text-align: center; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .stat-number { font-size: 1.8em; font-weight: bold; color: #6f42c1; }
+        .question-container { padding: 30px; }
+        .question-header { background: #6f42c1; color: white; padding: 15px 20px; border-radius: 10px 10px 0 0; font-weight: bold; }
+        .question-content { background: #f8f9fa; padding: 25px; border: 1px solid #dee2e6; border-top: none; border-radius: 0 0 10px 10px; }
+        .question-text { font-size: 1.1em; line-height: 1.6; margin-bottom: 25px; }
+        .multi-choice-note { background: #fff3cd; padding: 10px; border-radius: 5px; margin-bottom: 15px; font-size: 0.9em; color: #856404; }
+        .choices { list-style: none; }
+        .choice { background: white; margin: 10px 0; padding: 15px; border: 2px solid #dee2e6; border-radius: 8px; cursor: pointer; transition: all 0.3s ease; }
+        .choice:hover { border-color: #6f42c1; transform: translateY(-2px); }
+        .choice.selected { border-color: #6f42c1; background: #f3e5f5; }
+        .choice.correct { border-color: #28a745; background: #d4edda; }
+        .choice.incorrect { border-color: #dc3545; background: #f8d7da; }
+        .choice-letter { display: inline-block; width: 30px; height: 30px; background: #6f42c1; color: white; border-radius: 50%; text-align: center; line-height: 30px; margin-right: 15px; font-weight: bold; }
+        .choice.correct .choice-letter { background: #28a745; }
+        .choice.incorrect .choice-letter { background: #dc3545; }
+        .explanation { background: #fff3cd; border: 1px solid #ffeaa7; border-radius: 8px; padding: 20px; margin-top: 20px; display: none; }
+        .explanation.show { display: block; }
+        .navigation { padding: 30px; background: #f8f9fa; display: flex; justify-content: space-between; align-items: center; }
+        .btn { padding: 12px 24px; border: none; border-radius: 25px; cursor: pointer; font-weight: bold; transition: all 0.3s ease; text-decoration: none; display: inline-block; }
+        .btn-primary { background: linear-gradient(135deg, #6f42c1, #5a32a3); color: white; }
+        .btn-success { background: linear-gradient(135deg, #28a745, #1e7e34); color: white; }
+        .btn:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+        .back-buttons { text-align: center; padding: 20px; background: #f8f9fa; }
+        @media (max-width: 768px) { .navigation { flex-direction: column; gap: 15px; } }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📚 SAP-C02 Day 6</h1>
+            <p>18 questions for today's study session</p>
+        </div>
+        
+        <div class="stats">
+            <div class="stat-card">
+                <div class="stat-number" id="currentQ">1</div>
+                <div>Current</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="totalQ">18</div>
+                <div>Total</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="correctCount">0</div>
+                <div>Correct</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="accuracy">0%</div>
+                <div>Accuracy</div>
+            </div>
+        </div>
+        
+        <div class="question-container" id="questionContainer"></div>
+        
+        <div class="navigation">
+            <button class="btn btn-primary" onclick="previousQuestion()" id="prevBtn">Previous</button>
+            <div>
+                <button class="btn btn-primary" onclick="showAnswer()" id="showAnswerBtn">Show Answer</button>
+                <button class="btn btn-success" onclick="nextQuestion()" id="nextBtn" style="display:none;">Next Question</button>
+            </div>
+            <button class="btn btn-primary" onclick="nextQuestion()" id="skipBtn">Skip</button>
+        </div>
+        
+        <div class="back-buttons">
+            <a href="../daily_study_launcher.html" class="btn btn-primary">📚 Back to Study Plan</a>
+            <a href="../../../master_study_launcher.html" class="btn btn-success">🏠 Master Hub</a>
+            <a href="../../../index.html" class="btn" style="background: #17a2b8; color: white;">🏡 Home Page</a>
+        </div>
+    </div>
+
+    <script>
+        const questions = [
+        {
+                "question_number": 91,
+                "question_text": "A company consists or two separate business units. Each business unit has its own AWS account within a single organization in AWS Organizations. The business units regularly share sensitive documents with each other. To facilitate sharing, the company created an Amazon S3 bucket in each account and configured low-way replication between the S3 buckets. The S3 buckets have millions of objects.Recently, a security audit identified that neither S3 bucket has encryption at rest enabled. Company policy requires that all documents must be stored with encryption at rest. The company wants to implement server-side encryption with Amazon S3 managed encryption keys (SSE-S3).What is the MOST operationally efficient solution that meets these requirements?",
+                "choices": [
+                        "Turn on SSE-S3 on both S3 buckets. Use S3 Batch Operations to copy and encrypt the objects in the same location.",
+                        "Create an AWS Key Management Service (AWS KMS) key in each account. Turn on server-side encryption with AWS KMS keys (SSE-KMS) on each S3 bucket by using the corresponding KMS key in that AWS account. Encrypt the existing objects by using an S3 copy command in the AWS CLI.",
+                        "Turn on SSE-S3 on both S3 buckets. Encrypt the existing objects by using an S3 copy command in the AWS CLI.",
+                        "Create an AWS Key Management Service, (AWS KMS) key in each account. Turn on server-side encryption with AWS KMS keys (SSE-KMS) on each S3 bucket by using the corresponding KMS key in that AWS account. Use S3 Batch Operations to copy the objects into the same location."
+                ],
+                "correct_answer": "A",
+                "is_multiple_choice": false,
+                "voting_data": {
+                        "A": 58,
+                        "C": 5,
+                        "D": 1
+                }
+        },
+        {
+                "question_number": 92,
+                "question_text": "A company is running an application in the AWS Cloud. The application collects and stores a large amount of unstructured data in an Amazon S3 bucket. The S3 bucket contains several terabytes of data and uses the S3 Standard storage class. The data increases in size by several gigabytes every day.The company needs to query and analyze the data. The company does not access data that is more than 1 year old. However, the company must retain all the data indefinitely for compliance reasons.Which solution will meet these requirements MOST cost-effectively?",
+                "choices": [
+                        "Use S3 Select to query the data. Create an S3 Lifecycle policy to transition data that is more than 1 year old to S3 Glacier Deep Archive.",
+                        "Use Amazon Redshift Spectrum to query the data. Create an S3 Lifecycle policy to transition data that is more than 1 year old 10 S3 Glacier Deep Archive.",
+                        "Use an AWS Glue Data Catalog and Amazon Athena to query the data. Create an S3 Lifecycle policy to transition data that is more than 1 year old to S3 Glacier Deep Archive.",
+                        "Use Amazon Redshift Spectrum to query the data. Create an S3 Lifecycle policy to transition data that is more than 1 year old to S3 Intelligent-Tiering."
+                ],
+                "correct_answer": "C",
+                "is_multiple_choice": false,
+                "voting_data": {
+                        "C": 49,
+                        "A": 3,
+                        "B": 1
+                }
+        },
+        {
+                "question_number": 93,
+                "question_text": "A video processing company wants to build a machine learning (ML) model by using 600 TB of compressed data that is stored as thousands of files in the company's on-premises network attached storage system. The company does not have the necessary compute resources on premises for ML experiments and wants to use AWS.The company needs to complete the data transfer to AWS within 3 weeks. The data transfer will be a one-time transfer. The data must be encrypted in transit. The measured upload speed of the company's internet connection is 100 Mbps. and multiple departments share the connection.Which solution will meet these requirements MOST cost-effectively?",
+                "choices": [
+                        "Order several AWS Snowball Edge Storage Optimized devices by using the AWS Management Console. Configure the devices with a destination S3 bucket. Copy the data to the devices. Ship the devices back to AWS.",
+                        "Set up a 10 Gbps AWS Direct Connect connection between the company location and the nearest AWS Region. Transfer the data over a VPN connection into the Region to store the data in Amazon S3.",
+                        "Create a VPN connection between the on-premises network attached storage and the nearest AWS Region. Transfer the data over the VPN connection.",
+                        "Deploy an AWS Storage Gateway file gateway on premises. Configure the file gateway with a destination S3 bucket. Copy the data to the file gateway."
+                ],
+                "correct_answer": "A",
+                "is_multiple_choice": false,
+                "voting_data": {
+                        "A": 29
+                }
+        },
+        {
+                "question_number": 94,
+                "question_text": "A company has migrated Its forms-processing application to AWS. When users interact with the application, they upload scanned forms as files through a web application. A database stores user metadata and references to files that are stored in Amazon S3. The web application runs on Amazon EC2 instances and an Amazon RDS for PostgreSQL database.When forms are uploaded, the application sends notifications to a team through Amazon Simple Notification Service (Amazon SNS). A team member then logs in and processes each form. The team member performs data validation on the form and extracts relevant data before entering the information into another system that uses an API.A solutions architect needs to automate the manual processing of the forms. The solution must provide accurate form extraction. minimize time to market, and minimize tong-term operational overhead.Which solution will meet these requirements?",
+                "choices": [
+                        "Develop custom libraries to perform optical character recognition (OCR) on the forms. Deploy the libraries to an Amazon Elastic Kubernetes Service (Amazon EKS) cluster as an application tier. Use this tier to process the forms when forms are uploaded. Store the output in Amazon S3. Parse this output by extracting the data into an Amazon DynamoDB table. Submit the data to the target system's APL. Host the new application tier on EC2 instances.",
+                        "Extend the system with an application tier that uses AWS Step Functions and AWS Lambda. Configure this tier to use artificial intelligence and machine learning (AI/ML) models that are trained and hosted on an EC2 instance to perform optical character recognition (OCR) on the forms when forms are uploaded. Store the output in Amazon S3. Parse this output by extracting the data that is required within the application tier. Submit the data to the target system's API.",
+                        "Host a new application tier on EC2 instances. Use this tier to call endpoints that host artificial intelligence and machine teaming (AI/ML) models that are trained and hosted in Amazon SageMaker to perform optical character recognition (OCR) on the forms. Store the output in Amazon ElastiCache. Parse this output by extracting the data that is required within the application tier. Submit the data to the target system's API.",
+                        "Extend the system with an application tier that uses AWS Step Functions and AWS Lambda. Configure this tier to use Amazon Textract and Amazon Comprehend to perform optical character recognition (OCR) on the forms when forms are uploaded. Store the output in Amazon S3. Parse this output by extracting the data that is required within the application tier. Submit the data to the target system's API."
+                ],
+                "correct_answer": "D",
+                "is_multiple_choice": false,
+                "voting_data": {
+                        "D": 23
+                }
+        },
+        {
+                "question_number": 95,
+                "question_text": "A company is refactoring its on-premises order-processing platform in the AWS Cloud. The platform includes a web front end that is hosted on a fleet of VMs, RabbitMQ to connect the front end to the backend, and a Kubernetes cluster to run a containerized backend system to process the orders. The company does not want to make any major changes to the application.Which solution will meet these requirements with the LEAST operational overhead?",
+                "choices": [
+                        "Create an AMI of the web server VM. Create an Amazon EC2 Auto Scaling group that uses the AMI and an Application Load Balancer. Set up Amazon MQ to replace the on-premises messaging queue. Configure Amazon Elastic Kubernetes Service (Amazon EKS) to host the order-processing backend.",
+                        "Create a custom AWS Lambda runtime to mimic the web server environment. Create an Amazon API Gateway API to replace the front-end web servers. Set up Amazon MQ to replace the on-premises messaging queue. Configure Amazon Elastic Kubernetes Service (Amazon EKS) to host the order-processing backend.",
+                        "Create an AMI of the web server VM. Create an Amazon EC2 Auto Scaling group that uses the AMI and an Application Load Balancer. Set up Amazon MQ to replace the on-premises messaging queue. Install Kubernetes on a fleet of different EC2 instances to host the order-processing backend.",
+                        "Create an AMI of the web server VM. Create an Amazon EC2 Auto Scaling group that uses the AMI and an Application Load Balancer. Set up an Amazon Simple Queue Service (Amazon SQS) queue to replace the on-premises messaging queue. Configure Amazon Elastic Kubernetes Service (Amazon EKS) to host the order-processing backend."
+                ],
+                "correct_answer": "A",
+                "is_multiple_choice": false,
+                "voting_data": {
+                        "A": 29,
+                        "B": 2
+                }
+        },
+        {
+                "question_number": 96,
+                "question_text": "A solutions architect needs to implement a client-side encryption mechanism for objects that will be stored in a new Amazon S3 bucket. The solutions architect created a CMK that is stored in AWS Key Management Service (AWS KMS) for this purpose.The solutions architect created the following IAM policy and attached it to an IAM role:During tests, the solutions architect was able to successfully get existing test objects in the S3 bucket. However, attempts to upload a new object resulted in an error message. The error message stated that the action was forbidden.Which action must the solutions architect add to the IAM policy to meet all the requirements?",
+                "choices": [
+                        "kms:GenerateDataKey",
+                        "kms:GetKeyPolicy",
+                        "kms:GetPublicKey",
+                        "kms:Sign"
+                ],
+                "correct_answer": "A",
+                "is_multiple_choice": false,
+                "voting_data": {
+                        "A": 26
+                }
+        },
+        {
+                "question_number": 97,
+                "question_text": "A company has developed a web application. The company is hosting the application on a group of Amazon EC2 instances behind an Application Load Balancer. The company wants to improve the security posture of the application and plans to use AWS WAF web ACLs. The solution must not adversely affect legitimate traffic to the application.How should a solutions architect configure the web ACLs to meet these requirements?",
+                "choices": [
+                        "Set the action of the web ACL rules to Count. Enable AWS WAF logging. Analyze the requests for false positives. Modify the rules to avoid any false positive. Over time, change the action of the web ACL rules from Count to Block.",
+                        "Use only rate-based rules in the web ACLs, and set the throttle limit as high as possible. Temporarily block all requests that exceed the limit. Define nested rules to narrow the scope of the rate tracking.",
+                        "Set the action of the web ACL rules to Block. Use only AWS managed rule groups in the web ACLs. Evaluate the rule groups by using Amazon CloudWatch metrics with AWS WAF sampled requests or AWS WAF logs.",
+                        "Use only custom rule groups in the web ACLs, and set the action to Allow. Enable AWS WAF logging. Analyze the requests for false positives. Modify the rules to avoid any false positive. Over time, change the action of the web ACL rules from Allow to Block."
+                ],
+                "correct_answer": "A",
+                "is_multiple_choice": false,
+                "voting_data": {
+                        "A": 32
+                }
+        },
+        {
+                "question_number": 98,
+                "question_text": "A company has an organization that has many AWS accounts in AWS Organizations. A solutions architect must improve how the company manages common security group rules for the AWS accounts in the organization.The company has a common set of IP CIDR ranges in an allow list in each AWS account to allow access to and from the company’s on-premises network. Developers within each account are responsible for adding new IP CIDR ranges to their security groups. The security team has its own AWS account. Currently, the security team notifies the owners of the other AWS accounts when changes are made to the allow list.The solutions architect must design a solution that distributes the common set of CIDR ranges across all accounts.Which solution meets these requirements with the LEAST amount of operational overhead?",
+                "choices": [
+                        "Set up an Amazon Simple Notification Service (Amazon SNS) topic in the security team's AWS account. Deploy an AWS Lambda function in each AWS account. Configure the Lambda function to run every time an SNS topic receives a message. Configure the Lambda function to take an IP address as input and add it to a list of security groups in the account. Instruct the security team to distribute changes by publishing messages to its SNS topic.",
+                        "Create new customer-managed prefix lists in each AWS account within the organization. Populate the prefix lists in each account with all internal CIDR ranges. Notify the owner of each AWS account to allow the new customer-managed prefix list IDs in their accounts in their security groups. Instruct the security team to share updates with each AWS account owner.",
+                        "Create a new customer-managed prefix list in the security team’s AWS account. Populate the customer-managed prefix list with all internal CIDR ranges. Share the customer-managed prefix list with the organization by using AWS Resource Access Manager. Notify the owner of each AWS account to allow the new customer-managed prefix list ID in their security groups.",
+                        "Create an IAM role in each account in the organization. Grant permissions to update security groups. Deploy an AWS Lambda function in the security team’s AWS account. Configure the Lambda function to take a list of internal IP addresses as input, assume a role in each organization account, and add the list of IP addresses to the security groups in each account."
+                ],
+                "correct_answer": "C",
+                "is_multiple_choice": false,
+                "voting_data": {
+                        "C": 23,
+                        "D": 3
+                }
+        },
+        {
+                "question_number": 99,
+                "question_text": "A company has introduced a new policy that allows employees to work remotely from their homes if they connect by using a VPN. The company is hosting internal applications with VPCs in multiple AWS accounts. Currently, the applications are accessible from the company's on-premises office network through an AWS Site-to-Site VPN connection. The VPC in the company's main AWS account has peering connections established with VPCs in other AWS accounts.A solutions architect must design a scalable AWS Client VPN solution for employees to use while they work from home.What is the MOST cost-effective solution that meets these requirements?",
+                "choices": [
+                        "Create a Client VPN endpoint in each AWS account. Configure required routing that allows access to internal applications.",
+                        "Create a Client VPN endpoint in the main AWS account. Configure required routing that allows access to internal applications.",
+                        "Create a Client VPN endpoint in the main AWS account. Provision a transit gateway that is connected to each AWS account. Configure required routing that allows access to internal applications.",
+                        "Create a Client VPN endpoint in the main AWS account. Establish connectivity between the Client VPN endpoint and the AWS Site-to-Site VPN."
+                ],
+                "correct_answer": "B",
+                "is_multiple_choice": false,
+                "voting_data": {
+                        "B": 72,
+                        "C": 69
+                }
+        },
+        {
+                "question_number": 100,
+                "question_text": "A company is running an application in the AWS Cloud. Recent application metrics show inconsistent response times and a significant increase in error rates. Calls to third-party services are causing the delays. Currently, the application calls third-party services synchronously by directly invoking an AWS Lambda function.A solutions architect needs to decouple the third-party service calls and ensure that all the calls are eventually completed.Which solution will meet these requirements?",
+                "choices": [
+                        "Use an Amazon Simple Queue Service (Amazon SQS) queue to store events and invoke the Lambda function.",
+                        "Use an AWS Step Functions state machine to pass events to the Lambda function.",
+                        "Use an Amazon EventBridge rule to pass events to the Lambda function.",
+                        "Use an Amazon Simple Notification Service (Amazon SNS) topic to store events and Invoke the Lambda function."
+                ],
+                "correct_answer": "A",
+                "is_multiple_choice": false,
+                "voting_data": {
+                        "A": 23
+                }
+        },
+        {
+                "question_number": 101,
+                "question_text": "A company is running applications on AWS in a multi-account environment. The company's sales team and marketing team use separate AWS accounts in AWS Organizations.The sales team stores petabytes of data in an Amazon S3 bucket. The marketing team uses Amazon QuickSight for data visualizations. The marketing team needs access to data that the sates team stores in the S3 bucket. The company has encrypted the S3 bucket with an AWS Key Management Service (AWS KMS) key. The marketing team has already created the IAM service role for QuickSight to provide QuickSight access in the marketing AWS account. The company needs a solution that will provide secure access to the data in the S3 bucket across AWS accounts.Which solution will meet these requirements with the LEAST operational overhead?",
+                "choices": [
+                        "Create a new S3 bucket in the marketing account. Create an S3 replication rule in the sales account to copy the objects to the new S3 bucket in the marketing account. Update the QuickSight permissions in the marketing account to grant access to the new S3 bucket.",
+                        "Create an SCP to grant access to the S3 bucket to the marketing account. Use AWS Resource Access Manager (AWS RAM) to share the KMS key from the sates account with the marketing account. Update the QuickSight permissions in the marketing account to grant access to the S3 bucket.",
+                        "Update the S3 bucket policy in the marketing account to grant access to the QuickSight role. Create a KMS grant for the encryption key that is used in the S3 bucket. Grant decrypt access to the QuickSight role. Update the QuickSight permissions in the marketing account to grant access to the S3 bucket.",
+                        "Create an IAM role in the sales account and grant access to the S3 bucket. From the marketing account, assume the IAM role in the sales account to access the S3 bucket. Update the QuickSight rote, to create a trust relationship with the new IAM role in the sales account."
+                ],
+                "correct_answer": "D",
+                "is_multiple_choice": false,
+                "voting_data": {
+                        "D": 61,
+                        "C": 28,
+                        "A": 8,
+                        "B": 2
+                }
+        },
+        {
+                "question_number": 102,
+                "question_text": "A company is planning to migrate its business-critical applications from an on-premises data center to AWS. The company has an on-premises installation of a Microsoft SQL Server Always On cluster. The company wants to migrate to an AWS managed database service. A solutions architect must design a heterogeneous database migration on AWS.Which solution will meet these requirements?",
+                "choices": [
+                        "Migrate the SQL Server databases to Amazon RDS for MySQL by using backup and restore utilities.",
+                        "Use an AWS Snowball Edge Storage Optimized device to transfer data to Amazon S3. Set up Amazon RDS for MySQL. Use S3 integration with SQL Server features, such as BULK INSERT.",
+                        "Use the AWS Schema Conversion Tool to translate the database schema to Amazon RDS for MySQL. Then use AWS Database Migration Service (AWS DMS) to migrate the data from on-premises databases to Amazon RDS.",
+                        "Use AWS DataSync to migrate data over the network between on-premises storage and Amazon S3. Set up Amazon RDS for MySQL. Use S3 integration with SQL Server features, such as BULK INSERT."
+                ],
+                "correct_answer": "C",
+                "is_multiple_choice": false,
+                "voting_data": {
+                        "C": 33
+                }
+        },
+        {
+                "question_number": 103,
+                "question_text": "A publishing company's design team updates the icons and other static assets that an ecommerce web application uses. The company serves the icons and assets from an Amazon S3 bucket that is hosted in the company's production account. The company also uses a development account that members of the design team can access.After the design team tests the static assets in the development account, the design team needs to load the assets into the S3 bucket in the production account. A solutions architect must provide the design team with access to the production account without exposing other parts of the web application to the risk of unwanted changes.Which combination of steps will meet these requirements? (Choose three.)",
+                "choices": [
+                        "In the production account, create a new IAM policy that allows read and write access to the S3 bucket.",
+                        "In the development account, create a new IAM policy that allows read and write access to the S3 bucket.",
+                        "In the production account, create a role Attach the new policy to the role. Define the development account as a trusted entity.",
+                        "In the development account, create a role. Attach the new policy to the role Define the production account as a trusted entity.",
+                        "In the development account, create a group that contains all the IAM users of the design team Attach a different IAM policy to the group to allow the sts:AssumeRole action on the role In the production account.",
+                        "In the development account, create a group that contains all the IAM users of the design team Attach a different IAM policy to the group to allow the sts:AssumeRole action on the role in the development account."
+                ],
+                "correct_answer": "ACE",
+                "is_multiple_choice": true,
+                "voting_data": {
+                        "ACE": 39,
+                        "ADE": 2
+                }
+        },
+        {
+                "question_number": 104,
+                "question_text": "A company developed a pilot application by using AWS Elastic Beanstalk and Java. To save costs during development, the company's development team deployed the application into a single-instance environment. Recent tests indicate that the application consumes more CPU than expected. CPU utilization is regularly greater than 85%, which causes some performance bottlenecks.A solutions architect must mitigate the performance issues before the company launches the application to production.Which solution will meet these requirements with the LEAST operational overhead?",
+                "choices": [
+                        "Create a new Elastic Beanstalk application. Select a load-balanced environment type. Select all Availability Zones. Add a scale-out rule that will run if the maximum CPU utilization is over 85% for 5 minutes.",
+                        "Create a second Elastic Beanstalk environment. Apply the traffic-splitting deployment policy. Specify a percentage of incoming traffic to direct to the new environment in the average CPU utilization is over 85% for 5 minutes.",
+                        "Modify the existing environment’s capacity configuration to use a load-balanced environment type. Select all Availability Zones. Add a scale-out rule that will run if the average CPU utilization is over 85% for 5 minutes.",
+                        "Select the Rebuild environment action with the load balancing option. Select an Availability Zones. Add a scale-out rule that will run if the sum CPU utilization is over 85% for 5 minutes."
+                ],
+                "correct_answer": "C",
+                "is_multiple_choice": false,
+                "voting_data": {
+                        "C": 51,
+                        "A": 2
+                }
+        },
+        {
+                "question_number": 105,
+                "question_text": "A finance company is running its business-critical application on current-generation Linux EC2 instances. The application includes a self-managed MySQL database performing heavy I/O operations. The application is working fine to handle a moderate amount of traffic during the month. However, it slows down during the final three days of each month due to month-end reporting, even though the company is using Elastic Load Balancers and Auto Scaling within its infrastructure to meet the increased demand.Which of the following actions would allow the database to handle the month-end load with the LEAST impact on performance?",
+                "choices": [
+                        "Pre-warming Elastic Load Balancers, using a bigger instance type, changing all Amazon EBS volumes to GP2 volumes.",
+                        "Performing a one-time migration of the database cluster to Amazon RDS, and creating several additional read replicas to handle the load during end of month.",
+                        "Using Amazon CloudWatch with AWS Lambda to change the type, size, or IOPS of Amazon EBS volumes in the cluster based on a specific CloudWatch metric.",
+                        "Replacing all existing Amazon EBS volumes with new PIOPS volumes that have the maximum available storage size and I/O per second by taking snapshots before the end of the month and reverting back afterwards."
+                ],
+                "correct_answer": "B",
+                "is_multiple_choice": false,
+                "voting_data": {
+                        "B": 27,
+                        "D": 2
+                }
+        },
+        {
+                "question_number": 106,
+                "question_text": "A company runs a Java application that has complex dependencies on VMs that are in the company's data center. The application is stable. but the company wants to modernize the technology stack. The company wants to migrate the application to AWS and minimize the administrative overhead to maintain the servers.Which solution will meet these requirements with the LEAST code changes?",
+                "choices": [
+                        "Migrate the application to Amazon Elastic Container Service (Amazon ECS) on AWS Fargate by using AWS App2Container. Store container images in Amazon Elastic Container Registry (Amazon ECR). Grant the ECS task execution role permission 10 access the ECR image repository. Configure Amazon ECS to use an Application Load Balancer (ALB). Use the ALB to interact with the application.",
+                        "Migrate the application code to a container that runs in AWS Lambda. Build an Amazon API Gateway REST API with Lambda integration. Use API Gateway to interact with the application.",
+                        "Migrate the application to Amazon Elastic Kubernetes Service (Amazon EKS) on EKS managed node groups by using AWS App2Container. Store container images in Amazon Elastic Container Registry (Amazon ECR). Give the EKS nodes permission to access the ECR image repository. Use Amazon API Gateway to interact with the application.",
+                        "Migrate the application code to a container that runs in AWS Lambda. Configure Lambda to use an Application Load Balancer (ALB). Use the ALB to interact with the application."
+                ],
+                "correct_answer": "A",
+                "is_multiple_choice": false,
+                "voting_data": {
+                        "A": 45,
+                        "B": 3
+                }
+        },
+        {
+                "question_number": 107,
+                "question_text": "A company has an asynchronous HTTP application that is hosted as an AWS Lambda function. A public Amazon API Gateway endpoint invokes the Lambda function. The Lambda function and the API Gateway endpoint reside in the us-east-1 Region. A solutions architect needs to redesign the application to support failover to another AWS Region.Which solution will meet these requirements?",
+                "choices": [
+                        "Create an API Gateway endpoint in the us-west-2 Region to direct traffic to the Lambda function in us-east-1. Configure Amazon Route 53 to use a failover routing policy to route traffic for the two API Gateway endpoints.",
+                        "Create an Amazon Simple Queue Service (Amazon SQS) queue. Configure API Gateway to direct traffic to the SQS queue instead of to the Lambda function. Configure the Lambda function to pull messages from the queue for processing.",
+                        "Deploy the Lambda function to the us-west-2 Region. Create an API Gateway endpoint in us-west-2 10 direct traffic to the Lambda function in us-west-2. Configure AWS Global Accelerator and an Application Load Balancer to manage traffic across the two API Gateway endpoints.",
+                        "Deploy the Lambda function and an API Gateway endpoint to the us-west-2 Region. Configure Amazon Route 53 to use a failover routing policy to route traffic for the two API Gateway endpoints."
+                ],
+                "correct_answer": "D",
+                "is_multiple_choice": false,
+                "voting_data": {
+                        "D": 32,
+                        "A": 2
+                }
+        },
+        {
+                "question_number": 108,
+                "question_text": "A retail company has structured its AWS accounts to be part of an organization in AWS Organizations. The company has set up consolidated billing and has mapped its departments to the following OUs: Finance, Sales, Human Resources (HR), Marketing, and Operations. Each OU has multiple AWS accounts, one for each environment within a department. These environments are development, test, pre-production, and production.The HR department is releasing a new system that will launch in 3 months. In preparation, the HR department has purchased several Reserved Instances (RIs) in its production AWS account. The HR department will install the new application on this account. The HR department wants to make sure that other departments cannot share the RI discounts.Which solution will meet these requirements?",
+                "choices": [
+                        "In the AWS Billing and Cost Management console for the HR department's production account turn off RI sharing.",
+                        "Remove the HR department's production AWS account from the organization. Add the account 10 the consolidating billing configuration only.",
+                        "In the AWS Billing and Cost Management console. use the organization’s management account 10 turn off RI Sharing for the HR departments production AWS account.",
+                        "Create an SCP in the organization to restrict access to the RIs. Apply the SCP to the OUs of the other departments."
+                ],
+                "correct_answer": "C",
+                "is_multiple_choice": false,
+                "voting_data": {
+                        "C": 26,
+                        "A": 4,
+                        "D": 3
+                }
+        }
+];
+        
+        let currentQuestionIndex = 0;
+        let correctAnswers = 0;
+        let answeredQuestions = new Set();
+        let selectedAnswers = {};
+        
+        function loadQuestion() {
+            const question = questions[currentQuestionIndex];
+            if (!question) return;
+            
+            const container = document.getElementById('questionContainer');
+            const isMultipleChoice = question.is_multiple_choice;
+            
+            let choicesHtml = '';
+            question.choices.forEach((choice, index) => {
+                const letter = String.fromCharCode(65 + index);
+                choicesHtml += `
+                    <li class="choice" onclick="selectChoice('${letter}', this)" data-choice="${letter}">
+                        <span class="choice-letter">${letter}</span>
+                        ${choice}
+                    </li>
+                `;
+            });
+            
+            const multiChoiceNote = isMultipleChoice ? 
+                '<div class="multi-choice-note">📝 Multiple Choice: You can select multiple answers</div>' : '';
+            
+            container.innerHTML = `
+                <div class="question-header">
+                    Question ${question.question_number} (Day 6 - ${currentQuestionIndex + 1} of ${questions.length})
+                </div>
+                <div class="question-content">
+                    <div class="question-text">${question.question_text}</div>
+                    ${multiChoiceNote}
+                    <ul class="choices">${choicesHtml}</ul>
+                    <div class="explanation" id="explanation"></div>
+                </div>
+            `;
+            
+            updateStats();
+        }
+        
+        function selectChoice(letter, element) {
+            const question = questions[currentQuestionIndex];
+            const isMultipleChoice = question.is_multiple_choice;
+            
+            if (!selectedAnswers[currentQuestionIndex]) {
+                selectedAnswers[currentQuestionIndex] = [];
+            }
+            
+            if (isMultipleChoice) {
+                // Multiple choice - toggle selection
+                if (element.classList.contains('selected')) {
+                    element.classList.remove('selected');
+                    selectedAnswers[currentQuestionIndex] = selectedAnswers[currentQuestionIndex].filter(ans => ans !== letter);
+                } else {
+                    element.classList.add('selected');
+                    selectedAnswers[currentQuestionIndex].push(letter);
+                }
+            } else {
+                // Single choice - clear others first
+                document.querySelectorAll('.choice').forEach(choice => {
+                    choice.classList.remove('selected');
+                });
+                element.classList.add('selected');
+                selectedAnswers[currentQuestionIndex] = [letter];
+            }
+        }
+        
+        function showAnswer() {
+            const question = questions[currentQuestionIndex];
+            const selectedAnswer = selectedAnswers[currentQuestionIndex];
+            
+            if (!selectedAnswer || selectedAnswer.length === 0) {
+                alert('Please select an answer first!');
+                return;
+            }
+            
+            answeredQuestions.add(currentQuestionIndex);
+            
+            document.querySelectorAll('.choice').forEach(choice => {
+                const choiceLetter = choice.getAttribute('data-choice');
+                if (question.correct_answer.includes(choiceLetter)) {
+                    choice.classList.add('correct');
+                } else if (selectedAnswer.includes(choiceLetter)) {
+                    choice.classList.add('incorrect');
+                }
+            });
+            
+            let isCorrect = false;
+            if (question.is_multiple_choice) {
+                const correctAnswers = question.correct_answer.split('').sort().join('');
+                const userAnswers = selectedAnswer.sort().join('');
+                isCorrect = correctAnswers === userAnswers;
+            } else {
+                isCorrect = selectedAnswer[0] === question.correct_answer;
+            }
+            
+            if (isCorrect) {
+                correctAnswers++;
+            }
+            
+            const explanationDiv = document.getElementById('explanation');
+            const yourAnswer = selectedAnswer.join(', ');
+            explanationDiv.innerHTML = `<strong>Correct Answer:</strong> ${question.correct_answer}<br><strong>Your Answer:</strong> ${yourAnswer}<br><strong>Result:</strong> ${isCorrect ? '✅ Correct' : '❌ Incorrect'}`;
+            explanationDiv.classList.add('show');
+            
+            document.getElementById('showAnswerBtn').style.display = 'none';
+            document.getElementById('nextBtn').style.display = 'inline-block';
+            
+            updateStats();
+        }
+        
+        function nextQuestion() {
+            if (currentQuestionIndex < questions.length - 1) {
+                currentQuestionIndex++;
+                loadQuestion();
+                document.getElementById('showAnswerBtn').style.display = 'inline-block';
+                document.getElementById('nextBtn').style.display = 'none';
+            } else {
+                const accuracy = Math.round((correctAnswers / answeredQuestions.size) * 100);
+                alert(`Day 6 Complete!\n\nCorrect: ${correctAnswers}/${answeredQuestions.size}\nAccuracy: ${accuracy}%\n\nGreat job!`);
+            }
+        }
+        
+        function previousQuestion() {
+            if (currentQuestionIndex > 0) {
+                currentQuestionIndex--;
+                loadQuestion();
+                document.getElementById('showAnswerBtn').style.display = 'inline-block';
+                document.getElementById('nextBtn').style.display = 'none';
+            }
+        }
+        
+        function updateStats() {
+            document.getElementById('currentQ').textContent = currentQuestionIndex + 1;
+            document.getElementById('totalQ').textContent = questions.length;
+            document.getElementById('correctCount').textContent = correctAnswers;
+            const accuracy = answeredQuestions.size > 0 ? Math.round((correctAnswers / answeredQuestions.size) * 100) : 0;
+            document.getElementById('accuracy').textContent = accuracy + '%';
+        }
+        
+        // Initialize
+        loadQuestion();
+    </script>
+</body>
+</html>

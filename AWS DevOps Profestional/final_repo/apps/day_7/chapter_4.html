@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AWS DevOps Study App</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f5f5f5; }
+        .container { max-width: 900px; margin: 0 auto; padding: 20px; }
+        .header { background: #232f3e; color: white; padding: 20px; border-radius: 10px; margin-bottom: 20px; }
+        .progress-bar { background: #ddd; height: 10px; border-radius: 5px; margin: 10px 0; }
+        .progress { background: #ff9900; height: 100%; border-radius: 5px; transition: width 0.3s; }
+        .question-card { background: white; padding: 30px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        .question-text { font-size: 18px; line-height: 1.6; margin-bottom: 20px; }
+        .question-type { background: #e3f2fd; color: #1976d2; padding: 8px 16px; border-radius: 20px; font-size: 14px; font-weight: bold; margin-bottom: 15px; display: inline-block; }
+        .options { margin: 20px 0; }
+        .option { background: #f8f9fa; border: 2px solid #e9ecef; padding: 15px; margin: 10px 0; border-radius: 8px; cursor: pointer; transition: all 0.3s; position: relative; }
+        .option:hover { border-color: #ff9900; }
+        .option.selected { border-color: #ff9900; background: #fff3cd; }
+        .option.correct { border-color: #28a745; background: #d4edda; }
+        .option.incorrect { border-color: #dc3545; background: #f8d7da; }
+        .option.partial { border-color: #ffc107; background: #fff3cd; }
+        .option-checkbox { position: absolute; right: 15px; top: 50%; transform: translateY(-50%); width: 20px; height: 20px; }
+        .controls { display: flex; gap: 15px; justify-content: center; margin-top: 20px; }
+        .btn { padding: 12px 24px; border: none; border-radius: 6px; cursor: pointer; font-size: 16px; transition: all 0.3s; }
+        .btn-primary { background: #ff9900; color: white; }
+        .btn-primary:hover { background: #e68900; }
+        .btn-secondary { background: #6c757d; color: white; }
+        .btn-secondary:hover { background: #545b62; }
+        .btn:disabled { background: #ccc; cursor: not-allowed; }
+        .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px; }
+        .stat-card { background: white; padding: 20px; border-radius: 8px; text-align: center; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .stat-number { font-size: 24px; font-weight: bold; color: #ff9900; }
+        .review-section { background: white; padding: 20px; border-radius: 10px; margin-top: 20px; }
+        .wrong-answer { background: #fff3cd; padding: 15px; margin: 10px 0; border-radius: 8px; border-left: 4px solid #ffc107; }
+        .hidden { display: none; }
+        .explanation { margin-top: 20px; padding: 15px; border-radius: 8px; }
+        .explanation.correct { background: #d4edda; border-left: 4px solid #28a745; }
+        .explanation.incorrect { background: #f8d7da; border-left: 4px solid #dc3545; }
+        .explanation.partial { background: #fff3cd; border-left: 4px solid #ffc107; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚀 AWS DevOps Professional Study App</h1>
+            <div class="progress-bar">
+                <div class="progress" id="progressBar"></div>
+            </div>
+            <p>Ngày <span id="currentDay">3</span> - Câu <span id="currentQuestion">1</span>/<span id="totalQuestions">0</span></p>
+        </div>
+
+        <div class="stats">
+            <div class="stat-card">
+                <div class="stat-number" id="correctCount">0</div>
+                <div>Câu đúng</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="wrongCount">0</div>
+                <div>Câu sai</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="accuracy">0%</div>
+                <div>Độ chính xác</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="timeSpent">0:00</div>
+                <div>Thời gian</div>
+            </div>
+        </div>
+
+        <div id="studyMode" class="question-card">
+            <div class="question-type" id="questionType">Single Choice</div>
+            <div class="question-text" id="questionText">
+                Đang tải câu hỏi...
+            </div>
+            <div class="options" id="optionsContainer">
+                <!-- Options will be loaded here -->
+            </div>
+            <div class="controls">
+                <button class="btn btn-secondary" onclick="previousQuestion()">⬅️ Câu trước</button>
+                <button class="btn btn-primary" onclick="submitAnswer()" id="submitBtn" disabled>Xác nhận</button>
+                <button class="btn btn-secondary" onclick="nextQuestion()" id="nextBtn" disabled>Câu tiếp ➡️</button>
+            </div>
+        </div>
+
+        <div id="reviewMode" class="review-section hidden">
+            <h2>📊 Kết quả học tập</h2>
+            <div id="reviewStats"></div>
+            <div id="wrongAnswers"></div>
+            <div class="controls">
+                <button class="btn btn-primary" onclick="restartStudy()">🔄 Học lại</button>
+                <button class="btn btn-secondary" onclick="exportResults()">💾 Xuất kết quả</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Sample questions with both single and multiple choice
+        let questions = [
+            {
+        "id": 31,
+        "text": "A company is using Amazon Elastic Kubernetes Service (Amazon EKS) to run its applications. The EKS cluster is successfully running multiple pods. The company stores the pod images in Amazon Elastic Container Registry (Amazon ECR).The company needs to configure Pod Identity access for the EKS cluster. The company has already updated the node IAM role by using the permissions for Pod Identity access.Which solution will meet these requirements?",
+        "options": [
+            "Configure the AWS Security Token Service (AWS STS) endpoint for the Kubernetes service account that the pods in the EKS cluster use.",
+            "Create an IAM OpenID Connect (OIDC) provider for the EKS cluster.",
+            "Ensure that the nodes can reach the EKS Auth API. Add and configure the EKS Pod Identity Agent add-on for the EKS cluster.",
+            "Create an EKS access entry that uses the API_AND-CONFIG_MAP cluster authentication mode."
+        ],
+        "correct": [
+            2
+        ],
+        "type": "single",
+        "explanation": "Đáp án được chọn nhiều nhất trong cộng đồng. Xem thêm giải thích trong file gốc."
+    },
+    {
+        "id": 32,
+        "text": "A company's DevOps engineer uses AWS Systems Manager to perform maintenance tasks. The company has a few Amazon EC2 instances that require a restart after notifications from AWS Health.The DevOps engineer must implement an automated solution that uses Amazon EventBridge to remediate the notifications during the company's scheduled maintenance windows.How should the DevOps engineer configure an EventBridge rule to meet these requirements?",
+        "options": [
+            "Configure an event source of Systems Manager. Configure an event type that indicates a maintenance window. Target the AWS-RestartEC2Instance Systems Manager Automation runbook to restart the EC2 instances.",
+            "Configure an event source of EC2. Configure an event type that indicates instance state notification. Target a newly created AWS Lambda function that registers a Systems Manager maintenance window task to restart the EC2 instances.",
+            "Configure an event source of AWS Health. Configure event types that indicate scheduled instance termination and retirement. Target a newly created AWS Lambda function that registers a Systems Manager maintenance window task to restart the EC2 instances.",
+            "Configure an event source of AWS Health. Configure event types that indicate scheduled instance termination and retirement. Target the AWS-RestartEC2Instance Systems Manager Automation runbook to restart the EC2 instances."
+        ],
+        "correct": [
+            3
+        ],
+        "type": "single",
+        "explanation": "Đáp án được chọn nhiều nhất trong cộng đồng. Xem thêm giải thích trong file gốc."
+    },
+    {
+        "id": 33,
+        "text": "A company uses Amazon Redshift as its data warehouse solution. The company wants to create a dashboard to view changes to the Redshift users and the queries the users perform.Which combination of steps will meet this requirement? (Choose two.)",
+        "options": [
+            "Configure the Redshift cluster database audit logging to include user activity logs. Configure Amazon CloudWatch as the target.",
+            "Create an Amazon CloudWatch log group. Create an AWS CloudTrail trail that writes to the CloudWatch log group.",
+            "Create a new Amazon S3 bucket. Configure default audit logging on the Redshift cluster. Configure the S3 bucket as the target.",
+            "Create an AWS Lambda function that uses Amazon Athena to query the Redshift logs. Create an Amazon CloudWatch dashboard that has a custom widget type that uses the Lambda function.",
+            "Create an Amazon CloudWatch dashboard that has a log widget. Configure the widget to display user details from the Redshift logs."
+        ],
+        "correct": [
+            0,
+            4
+        ],
+        "type": "multiple",
+        "explanation": "Đáp án được chọn nhiều nhất trong cộng đồng. Xem thêm giải thích trong file gốc."
+    },
+    {
+        "id": 34,
+        "text": "A DevOps administrator is configuring a repository to store a company's container images. The administrator needs to configure a lifecycle rule that automatically deletes container images that have a specific tag and that are older than 15 days.Which solution will meet these requirements with the MOST operational efficiency?",
+        "options": [
+            "Create an EC2 Image Builder container recipe. Add a build component to expire the container that has the matching tag after 15 days.",
+            "Create a bucket in Amazon S3. Add a bucket lifecycle policy to expire old objects that have the matching tag after 15 days",
+            "Create a repository in AWS CodeArtifact. Add a repository policy to the CodeArtifact repository to expire old assets that have the matching tag after 15 days.",
+            "Create a repository in Amazon Elastic Container Registry (Amazon ECR). Add a lifecycle policy to the repository to expire images that have the matching tag after 15 days."
+        ],
+        "correct": [
+            3
+        ],
+        "type": "single",
+        "explanation": "Đáp án được chọn nhiều nhất trong cộng đồng. Xem thêm giải thích trong file gốc."
+    },
+    {
+        "id": 35,
+        "text": "A company is using AWS Organizations and wants to implement a governance strategy with the following requirements:• AWS resource access is restricted to the same two Regions for all accounts.• AWS services are limited to a specific group of authorized services for all accounts.• Authentication is provided by Active Directory.• Access permissions are organized by job function and are identical in each account.Which solution will meet these requirements?",
+        "options": [
+            "Establish a service control policy in the management account to restrict Regions and authorized services. Use AWS Resource Access Manager (AWS RAM) to share management account roles with permissions for each job function, including AWS IAM Identity Center for authentication in each account.",
+            "Establish an organizational unit (OU) with group policies in the management account to restrict Regions and authorized services. Use AWS CloudFormation StackSets to provision roles with permissions for each job function, including an IAM trust policy for IAM identity provider authentication in each account.",
+            "Establish a permission boundary in the management account to restrict Regions and authorized services. Use AWS CloudFormation StackSets to provision roles with permissions for each job function, including an IAM trust policy for IAM identity provider authentication in each account.",
+            "Establish a service control policy in the management account to restrict Regions and authorized services. Use AWS CloudFormation StackSets to provision roles with permissions for each job function, including an IAM trust policy for IAM identity provider authentication in each account."
+        ],
+        "correct": [
+            3
+        ],
+        "type": "single",
+        "explanation": "Đáp án được chọn nhiều nhất trong cộng đồng. Xem thêm giải thích trong file gốc."
+    },
+    {
+        "id": 36,
+        "text": "A company use an organization in AWS Organizations to manage multiple AWS accounts. The company has enabled all features enabled for the organization. The company configured the organization as a hierarchy of OUs under the root OU. The company recently registered all its OUs and enrolled all its AWS accounts in AWS Control Tower.The company needs to customize the AWS Control Tower managed AWS Config configuration recorder in each of the company's AWS accounts. The company needs to apply the customizations to both the existing AWS accounts and to any new AWS accounts that the company enrolls in AWS Control Tower in the future.Which combination of steps will meet these requirements? (Choose three.)",
+        "options": [
+            "Configure the AWSControlTowerExecution IAM role in each AWS account in the organization to be assumable by an AWS Lambda function. Configure the Lambda function to assume the AWSControlTowerExecution IAM role.",
+            "Configure an Amazon EventBridge rule in the AWS Control Tower management account to invoke an AWS Lambda function when the Organizations OU is registered or reregistered. Re-register the root Organizations OU.",
+            "Create a new AWS account. Create an AWS Lambda function in the new account to apply the customizations to the AWS Config configuration recorder in each AWS account in the organization.",
+            "Create an IAM role in the AWS Control Tower management account that an AWS Lambda function can assume. Grant the IAM role permission to assume the AWSControlTowerExecution IAM role in any account in the organization. Configure the Lambda function to use the new IAM role.",
+            "Create a new AWS account as an AWS Config delegated administrator. Create an AWS Lambda function in the delegated administrator account to apply the customizations to the AWS Config configuration recorder in the delegated administrator account.",
+            "Configure an Amazon EventBridge rule in the AWS Control Tower management account to invoke an AWS Lambda function when an AWS account is updated or enrolled in AWS Control Tower or when the landing zone is updated. Re-register each Organizations OU in the organization."
+        ],
+        "correct": [
+            2,
+            3,
+            5
+        ],
+        "type": "multiple",
+        "explanation": "Đáp án được chọn nhiều nhất trong cộng đồng. Xem thêm giải thích trong file gốc."
+    },
+    {
+        "id": 37,
+        "text": "A DevOps team supports an application that runs in an Amazon Elastic Container Service (Amazon ECS) cluster behind an Application Load Balancer (ALB). Currently, the DevOps team uses AWS CodeDeploy to deploy the application by using a blue/green all-at-once strategy. Recently, the DevOps team had to roll back a deployment when a new version of the application dramatically increased response times for requests.The DevOps team needs use to a deployment strategy that will allow the team to monitor a new version of the application before the team shifts all traffic to the new version. If a new version of the application increases response times, the deployment should be rolled back as quickly as possible.Which combination of steps will meet these requirements? (Choose two.)",
+        "options": [
+            "Create an Amazon CloudWatch alarm to monitor the TargetResponseTime metric for the ALB. Set the alarm to activate if the metric is higher than the desired value. Associate the alarm with the CodeDeploy deployment group. Modify the deployment group to roll back when alarm thresholds are met.",
+            "Create an Amazon CloudWatch alarm to monitor the UnHealthyHostCount metric for the ALB. Set the alarm to activate if the metric is higher than the desired value. Associate the alarm with the CodeDeploy deployment group. Modify the deployment group to roll back when a deployment fails.",
+            "Modify the CodeDeploy deployment to use the CodeDeployDefault.ECSLinear10PercentEvery3Minutes configuration.",
+            "Modify the CodeDeploy deployment to use the CodeDeployDefault.ECSCanary10Percent5Minutes configuration.",
+            "Create an Amazon CloudWatch alarm to monitor the TargetConnectionErrorCount metric for the ALB. Set the alarm to activate if the metric is higher than the desired value. Associate the alarm with the CodeDeploy deployment group. Modify the deployment group to roll back when alarm thresholds are met."
+        ],
+        "correct": [
+            0,
+            3
+        ],
+        "type": "multiple",
+        "explanation": "Đáp án được chọn nhiều nhất trong cộng đồng. Xem thêm giải thích trong file gốc."
+    },
+    {
+        "id": 38,
+        "text": "A security team must record the configuration of AWS resources, detect issues, and send notifications for findings. The main workload in the AWS account consists of an Amazon EC2 Auto Scaling group that scales in and out several times during the day.The team wants to be notified within 2 days if any Amazon EC2 security group allows traffic on port 22 for 0.0.0.0/0. The team also needs a snapshot of the configuration of the AWS resources to be taken routinely.The security team has already created and subscribed to an Amazon Simple Notification Service (Amazon SNS) topic.Which solution meets these requirements?",
+        "options": [
+            "Configure AWS Config to use configuration change recording for the AWS account. Deploy the vpc-sg-open-only-to-authorized-ports AWS Config managed rule. Configure AWS Config to use the SNS topic as the target for notifications.",
+            "Configure AWS Config to use periodic recording for the AWS account. Deploy the vpc-sg-port-restriction-check AWS Config managed rule. Configure AWS Config to use the SNS topic as the target for notifications.",
+            "Configure AWS Config to use configuration change recording for the AWS account. Deploy the ssh-restricted AWS Config managed rule. Configure AWS Config to use the SNS topic as the target for notifications.",
+            "Create an AWS Lambda function to evaluate security groups and publish a message to the SNS topic. Use an Amazon EventBridge rule to schedule the Lambda function to run once a day."
+        ],
+        "correct": [
+            2
+        ],
+        "type": "single",
+        "explanation": "Đáp án được chọn nhiều nhất trong cộng đồng. Xem thêm giải thích trong file gốc."
+    },
+    {
+        "id": 39,
+        "text": "A DevOps engineer needs to troubleshoot a pipeline that uses a GitHub code repository. The pipeline contains a source stage, a build stage, and a deploy stage. The pipeline also has an AWS CodeStar connection to the GitHub code repository.The build stage uses an AWS CodeBuild build project. The build project needs to perform a git clone of the repository as part of the build process.The DevOps engineer validates that the source stage is working properly. However, the build stage fails each time the pipeline runs.What is the reason that the build stage fails in the pipeline?",
+        "options": [
+            "The AWS CodePipeline service role does not have permission to use the AWS CodeStar connection.",
+            "The AWS CodeStar connection to GitHub contains incorrect credentials.",
+            "The build stage within the pipeline needs to use the AWS CodeStar connection action.",
+            "The AWS CodeBuild service role does not have permission to use the AWS CodeStar connection."
+        ],
+        "correct": [
+            3
+        ],
+        "type": "single",
+        "explanation": "Đáp án được chọn nhiều nhất trong cộng đồng. Xem thêm giải thích trong file gốc."
+    },
+    {
+        "id": 40,
+        "text": "A DevOps engineer deployed multiple AWS accounts by using AWS Control Tower to support different business, technical, and administrative units in a company. A security team needs the DevOps engineer to automate AWS Control Tower guardrails for the company. The guardrails must be applied to all accounts in an OU of the company's organization in AWS Organizations.The security team needs a solution that has version control and can be reviewed and rolled back if necessary. The security team will maintain the management of the solution in its OU. The security team wants to limit the type of guardrails that are allowed and allow only new guardrails that are approved by the security team.Which solution will meet these requirements with the MOST operational efficiency?",
+        "options": [
+            "Create individual AWS CloudFormation templates that align to a guardrail. Store the templates in an AWS CodeCommit repository. Create an AWS::ControlTower::EnableControl logical resource in the template for each OU in the organization. Configure an AWS Code Build project that an Amazon EventBridge rule will invoke for the security team's AWS CodeCommit changes.",
+            "Configure an AWS CodePipeline pipeline in the security team's account that an Amazon EventBridge rule will invoke for PutObject events to an Amazon S3 bucket. Create individual AWS CloudFormation templates that align to a guardrail. Store the templates in the S3 bucket. Create an AWS::ControlTower::EnableControl logical resource in the template for each OU in the organization.",
+            "Create individual AWS CloudFormation templates that align to a guardrail. Store the templates in an AWS CodeCommit repository. Create an AWS::ControlTower::EnableControl logical resource in the template for each OU in the organization. Configure an AWS CodePipeline pipeline in the security team's account that an Amazon EventBridge rule will invoke for the security team's CodeCommit changes.",
+            "Create individual AWS CloudFormation templates that align to a guardrail. Store the templates in an AWS CodeCommit repository. Create an AWS::ControlTower::EnableControl logical resource in the template for each account in the organization. Configure an AWS CodePipeline pipeline in the security team's account. Advise the security team to invoke the pipeline and provide these parameters when starting the pipeline."
+        ],
+        "correct": [
+            2
+        ],
+        "type": "single",
+        "explanation": "Đáp án được chọn nhiều nhất trong cộng đồng. Xem thêm giải thích trong file gốc."
+    }
+        ]
+        let currentQuestionIndex = 0;
+        let userAnswers = [];
+        let startTime = Date.now();
+        let timer;
+
+        function initializeApp() {
+            document.getElementById('totalQuestions').textContent = questions.length;
+            loadQuestion();
+            startTimer();
+            updateStats();
+        }
+
+        function loadQuestion() {
+            const question = questions[currentQuestionIndex];
+            document.getElementById('questionText').innerHTML = `
+                <strong>Câu ${question.id}:</strong><br><br>
+                ${question.text}
+            `;
+            
+            // Set question type indicator
+            const typeElement = document.getElementById('questionType');
+            if (question.type === 'multiple') {
+                typeElement.textContent = `Multiple Choice (Choose ${question.correct.length})`;
+                typeElement.style.background = '#fff3cd';
+                typeElement.style.color = '#856404';
+            } else {
+                typeElement.textContent = 'Single Choice';
+                typeElement.style.background = '#e3f2fd';
+                typeElement.style.color = '#1976d2';
+            }
+            
+            const optionsContainer = document.getElementById('optionsContainer');
+            optionsContainer.innerHTML = '';
+            
+            question.options.forEach((option, index) => {
+                const optionDiv = document.createElement('div');
+                optionDiv.className = 'option';
+                optionDiv.innerHTML = `
+                    <strong>${String.fromCharCode(65 + index)}.</strong> ${option}
+                    ${question.type === 'multiple' ? '<input type="checkbox" class="option-checkbox">' : ''}
+                `;
+                
+                if (question.type === 'multiple') {
+                    optionDiv.onclick = () => toggleMultipleOption(index);
+                } else {
+                    optionDiv.onclick = () => selectSingleOption(index);
+                }
+                
+                optionDiv.dataset.index = index;
+                optionsContainer.appendChild(optionDiv);
+            });
+
+            document.getElementById('currentQuestion').textContent = currentQuestionIndex + 1;
+            document.getElementById('submitBtn').disabled = true;
+            document.getElementById('nextBtn').disabled = true;
+            updateProgressBar();
+        }
+
+        function selectSingleOption(index) {
+            document.querySelectorAll('.option').forEach(opt => opt.classList.remove('selected'));
+            document.querySelector(`[data-index="${index}"]`).classList.add('selected');
+            document.getElementById('submitBtn').disabled = false;
+        }
+
+        function toggleMultipleOption(index) {
+            const option = document.querySelector(`[data-index="${index}"]`);
+            const checkbox = option.querySelector('.option-checkbox');
+            
+            if (option.classList.contains('selected')) {
+                option.classList.remove('selected');
+                checkbox.checked = false;
+            } else {
+                option.classList.add('selected');
+                checkbox.checked = true;
+            }
+            
+            // Enable submit if at least one option is selected
+            const selectedCount = document.querySelectorAll('.option.selected').length;
+            document.getElementById('submitBtn').disabled = selectedCount === 0;
+        }
+
+        function getSelectedAnswers() {
+            const question = questions[currentQuestionIndex];
+            const selected = [];
+            
+            document.querySelectorAll('.option.selected').forEach(opt => {
+                selected.push(parseInt(opt.dataset.index));
+            });
+            
+            return selected.sort((a, b) => a - b); // Sort for comparison
+        }
+
+        function submitAnswer() {
+            const selectedAnswers = getSelectedAnswers();
+            if (selectedAnswers.length === 0) return;
+
+            const question = questions[currentQuestionIndex];
+            const correctAnswers = [...question.correct].sort((a, b) => a - b);
+            
+            // Calculate correctness
+            let isCorrect = false;
+            let isPartial = false;
+            
+            if (question.type === 'single') {
+                isCorrect = selectedAnswers.length === 1 && selectedAnswers[0] === correctAnswers[0];
+            } else {
+                // Multiple choice scoring
+                const selectedSet = new Set(selectedAnswers);
+                const correctSet = new Set(correctAnswers);
+                
+                if (selectedAnswers.length === correctAnswers.length && 
+                    selectedAnswers.every(ans => correctSet.has(ans))) {
+                    isCorrect = true;
+                } else {
+                    // Partial credit if some answers are correct
+                    const correctSelected = selectedAnswers.filter(ans => correctSet.has(ans));
+                    const incorrectSelected = selectedAnswers.filter(ans => !correctSet.has(ans));
+                    
+                    if (correctSelected.length > 0 && incorrectSelected.length === 0) {
+                        isPartial = true; // Selected some correct, no incorrect
+                    }
+                }
+            }
+
+            userAnswers[currentQuestionIndex] = {
+                questionId: question.id,
+                selected: selectedAnswers,
+                correct: correctAnswers,
+                isCorrect: isCorrect,
+                isPartial: isPartial,
+                timeSpent: Date.now() - startTime,
+                type: question.type
+            };
+
+            // Show results
+            document.querySelectorAll('.option').forEach((opt, index) => {
+                const isSelectedCorrect = correctAnswers.includes(index);
+                const isSelectedByUser = selectedAnswers.includes(index);
+                
+                if (isSelectedCorrect) {
+                    opt.classList.add('correct');
+                } else if (isSelectedByUser) {
+                    opt.classList.add('incorrect');
+                }
+                
+                opt.onclick = null; // Disable clicking
+            });
+
+            // Show explanation
+            const explanationDiv = document.createElement('div');
+            let resultClass = 'incorrect';
+            let resultText = '❌ Sai rồi!';
+            
+            if (isCorrect) {
+                resultClass = 'correct';
+                resultText = '✅ Chính xác!';
+            } else if (isPartial) {
+                resultClass = 'partial';
+                resultText = '⚠️ Đúng một phần!';
+            }
+            
+            explanationDiv.className = `explanation ${resultClass}`;
+            explanationDiv.innerHTML = `
+                <strong>${resultText}</strong><br>
+                <strong>Đáp án đúng:</strong> ${correctAnswers.map(i => String.fromCharCode(65 + i)).join(', ')}<br>
+                <strong>Bạn chọn:</strong> ${selectedAnswers.map(i => String.fromCharCode(65 + i)).join(', ')}<br>
+                <em>Giải thích:</em> ${question.explanation}
+            `;
+            document.getElementById('optionsContainer').appendChild(explanationDiv);
+
+            document.getElementById('submitBtn').style.display = 'none';
+            document.getElementById('nextBtn').disabled = false;
+            updateStats();
+        }
+
+        function nextQuestion() {
+            if (currentQuestionIndex < questions.length - 1) {
+                currentQuestionIndex++;
+                loadQuestion();
+                document.getElementById('submitBtn').style.display = 'inline-block';
+            } else {
+                showReview();
+            }
+        }
+
+        function previousQuestion() {
+            if (currentQuestionIndex > 0) {
+                currentQuestionIndex--;
+                loadQuestion();
+                document.getElementById('submitBtn').style.display = 'inline-block';
+            }
+        }
+
+        function updateStats() {
+            const answered = userAnswers.filter(a => a).length;
+            const correct = userAnswers.filter(a => a && a.isCorrect).length;
+            const partial = userAnswers.filter(a => a && a.isPartial).length;
+            const accuracy = answered > 0 ? Math.round(((correct + partial * 0.5) / answered) * 100) : 0;
+
+            document.getElementById('correctCount').textContent = correct + (partial > 0 ? ` (+${partial} partial)` : '');
+            document.getElementById('wrongCount').textContent = answered - correct - partial;
+            document.getElementById('accuracy').textContent = accuracy + '%';
+        }
+
+        function updateProgressBar() {
+            const progress = ((currentQuestionIndex + 1) / questions.length) * 100;
+            document.getElementById('progressBar').style.width = progress + '%';
+        }
+
+        function startTimer() {
+            timer = setInterval(() => {
+                const elapsed = Math.floor((Date.now() - startTime) / 1000);
+                const minutes = Math.floor(elapsed / 60);
+                const seconds = elapsed % 60;
+                document.getElementById('timeSpent').textContent = 
+                    `${minutes}:${seconds.toString().padStart(2, '0')}`;
+            }, 1000);
+        }
+
+        function showReview() {
+            clearInterval(timer);
+            document.getElementById('studyMode').classList.add('hidden');
+            document.getElementById('reviewMode').classList.remove('hidden');
+
+            const correct = userAnswers.filter(a => a.isCorrect).length;
+            const partial = userAnswers.filter(a => a.isPartial).length;
+            const total = userAnswers.length;
+            const accuracy = Math.round(((correct + partial * 0.5) / total) * 100);
+
+            document.getElementById('reviewStats').innerHTML = `
+                <div class="stats">
+                    <div class="stat-card">
+                        <div class="stat-number">${correct}/${total}</div>
+                        <div>Hoàn toàn đúng</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">${partial}</div>
+                        <div>Đúng một phần</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">${accuracy}%</div>
+                        <div>Điểm tổng</div>
+                    </div>
+                </div>
+            `;
+
+            // Show wrong answers for review
+            const wrongAnswers = userAnswers.filter(a => !a.isCorrect);
+            if (wrongAnswers.length > 0) {
+                document.getElementById('wrongAnswers').innerHTML = `
+                    <h3>🔄 Câu cần ôn lại (${wrongAnswers.length} câu):</h3>
+                    ${wrongAnswers.map(a => `
+                        <div class="wrong-answer">
+                            <strong>Câu ${a.questionId} (${a.type === 'multiple' ? 'Multiple' : 'Single'} Choice):</strong><br>
+                            Bạn chọn: ${a.selected.map(i => String.fromCharCode(65 + i)).join(', ')}<br>
+                            Đáp án đúng: ${a.correct.map(i => String.fromCharCode(65 + i)).join(', ')}
+                            ${a.isPartial ? ' <span style="color: #856404;">(Đúng một phần)</span>' : ''}
+                        </div>
+                    `).join('')}
+                `;
+            }
+        }
+
+        function restartStudy() {
+            currentQuestionIndex = 0;
+            userAnswers = [];
+            startTime = Date.now();
+            document.getElementById('studyMode').classList.remove('hidden');
+            document.getElementById('reviewMode').classList.add('hidden');
+            initializeApp();
+        }
+
+        function exportResults() {
+            const results = {
+                date: new Date().toLocaleDateString('vi-VN'),
+                day: 1,
+                questions: questions.length,
+                correct: userAnswers.filter(a => a.isCorrect).length,
+                partial: userAnswers.filter(a => a.isPartial).length,
+                accuracy: Math.round(((userAnswers.filter(a => a.isCorrect).length + userAnswers.filter(a => a.isPartial).length * 0.5) / userAnswers.length) * 100),
+                wrongQuestions: userAnswers.filter(a => !a.isCorrect).map(a => ({
+                    id: a.questionId,
+                    type: a.type,
+                    selected: a.selected,
+                    correct: a.correct,
+                    isPartial: a.isPartial
+                })),
+                timeSpent: document.getElementById('timeSpent').textContent
+            };
+
+            const blob = new Blob([JSON.stringify(results, null, 2)], {type: 'application/json'});
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `aws-devops-results-${new Date().toISOString().split('T')[0]}.json`;
+            a.click();
+        }
+
+        // Initialize app when page loads
+        window.onload = initializeApp;
+    </script>
+</body>
+</html>

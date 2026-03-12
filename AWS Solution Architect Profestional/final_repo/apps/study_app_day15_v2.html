@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SAP-C02 Day 15 Study</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', sans-serif; background: linear-gradient(135deg, #6f42c1, #5a32a3); min-height: 100vh; padding: 20px; }
+        .container { max-width: 1000px; margin: 0 auto; background: white; border-radius: 15px; box-shadow: 0 20px 40px rgba(0,0,0,0.1); overflow: hidden; }
+        .header { background: linear-gradient(135deg, #6f42c1, #5a32a3); color: white; padding: 30px; text-align: center; }
+        .header h1 { font-size: 2.5em; margin-bottom: 10px; }
+        .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 15px; padding: 20px 30px; background: #f8f9fa; }
+        .stat-card { background: white; padding: 15px; border-radius: 10px; text-align: center; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .stat-number { font-size: 1.8em; font-weight: bold; color: #6f42c1; }
+        .question-container { padding: 30px; }
+        .question-header { background: #6f42c1; color: white; padding: 15px 20px; border-radius: 10px 10px 0 0; font-weight: bold; }
+        .question-content { background: #f8f9fa; padding: 25px; border: 1px solid #dee2e6; border-top: none; border-radius: 0 0 10px 10px; }
+        .question-text { font-size: 1.1em; line-height: 1.6; margin-bottom: 25px; }
+        .multi-choice-note { background: #fff3cd; padding: 10px; border-radius: 5px; margin-bottom: 15px; font-size: 0.9em; color: #856404; }
+        .choices { list-style: none; }
+        .choice { background: white; margin: 10px 0; padding: 15px; border: 2px solid #dee2e6; border-radius: 8px; cursor: pointer; transition: all 0.3s ease; }
+        .choice:hover { border-color: #6f42c1; transform: translateY(-2px); }
+        .choice.selected { border-color: #6f42c1; background: #f3e5f5; }
+        .choice.correct { border-color: #28a745; background: #d4edda; }
+        .choice.incorrect { border-color: #dc3545; background: #f8d7da; }
+        .choice-letter { display: inline-block; width: 30px; height: 30px; background: #6f42c1; color: white; border-radius: 50%; text-align: center; line-height: 30px; margin-right: 15px; font-weight: bold; }
+        .choice.correct .choice-letter { background: #28a745; }
+        .choice.incorrect .choice-letter { background: #dc3545; }
+        .explanation { background: #fff3cd; border: 1px solid #ffeaa7; border-radius: 8px; padding: 20px; margin-top: 20px; display: none; }
+        .explanation.show { display: block; }
+        .navigation { padding: 30px; background: #f8f9fa; display: flex; justify-content: space-between; align-items: center; }
+        .btn { padding: 12px 24px; border: none; border-radius: 25px; cursor: pointer; font-weight: bold; transition: all 0.3s ease; text-decoration: none; display: inline-block; }
+        .btn-primary { background: linear-gradient(135deg, #6f42c1, #5a32a3); color: white; }
+        .btn-success { background: linear-gradient(135deg, #28a745, #1e7e34); color: white; }
+        .btn:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+        .back-buttons { text-align: center; padding: 20px; background: #f8f9fa; }
+        @media (max-width: 768px) { .navigation { flex-direction: column; gap: 15px; } }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📚 SAP-C02 Day 15</h1>
+            <p>18 questions for today's study session</p>
+        </div>
+        
+        <div class="stats">
+            <div class="stat-card">
+                <div class="stat-number" id="currentQ">1</div>
+                <div>Current</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="totalQ">18</div>
+                <div>Total</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="correctCount">0</div>
+                <div>Correct</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="accuracy">0%</div>
+                <div>Accuracy</div>
+            </div>
+        </div>
+        
+        <div class="question-container" id="questionContainer"></div>
+        
+        <div class="navigation">
+            <button class="btn btn-primary" onclick="previousQuestion()" id="prevBtn">Previous</button>
+            <div>
+                <button class="btn btn-primary" onclick="showAnswer()" id="showAnswerBtn">Show Answer</button>
+                <button class="btn btn-success" onclick="nextQuestion()" id="nextBtn" style="display:none;">Next Question</button>
+            </div>
+            <button class="btn btn-primary" onclick="nextQuestion()" id="skipBtn">Skip</button>
+        </div>
+        
+        <div class="back-buttons">
+            <a href="../daily_study_launcher.html" class="btn btn-primary">📚 Back to Study Plan</a>
+            <a href="../../../master_study_launcher.html" class="btn btn-success">🏠 Master Hub</a>
+            <a href="../../../index.html" class="btn" style="background: #17a2b8; color: white;">🏡 Home Page</a>
+        </div>
+    </div>
+
+    <script>
+        const questions = [
+        {
+                "question_number": 253,
+                "question_text": "An entertainment company recently launched a new game. To ensure a good experience for players during the launch period, the company deployed a static quantity of 12 r6g.16xlarge (memory optimized) Amazon EC2 instances behind a Network Load Balancer. The company's operations team used the Amazon CloudWatch agent and a custom metric to include memory utilization in its monitoring strategy.Analysis of the CloudWatch metrics from the launch period showed consumption at about one quarter of the CPU and memory that the company expected. Initial demand for the game has subsided and has become more variable. The company decides to use an Auto Scaling group that monitors the CPU and memory consumption to dynamically scale the instance fleet. A solutions architect needs to configure the Auto Scaling group to meet demand in the most cost-effective way.Which solution will meet these requirements?",
+                "choices": [
+                        "Configure the Auto Scaling group to deploy c6g.4xlarge (compute optimized) instances. Configure a minimum capacity of 3, a desired capacity of 3, and a maximum capacity of 12.",
+                        "Configure the Auto Scaling group to deploy m6g.4xlarge (general purpose) instances. Configure a minimum capacity of 3, a desired capacity of 3, and a maximum capacity of 12.",
+                        "Configure the Auto Scaling group to deploy r6g.4xlarge (memory optimized) instances. Configure a minimum capacity of 3, a desired capacity of 3, and a maximum capacity of 12.",
+                        "Configure the Auto Scaling group to deploy r6g.8xlarge (memory optimized) instances. Configure a minimum capacity of 2, a desired capacity of 2, and a maximum capacity of 6."
+                ],
+                "correct_answer": "C",
+                "is_multiple_choice": false,
+                "voting_data": {
+                        "C": 29,
+                        "D": 1
+                }
+        },
+        {
+                "question_number": 254,
+                "question_text": "A financial services company loaded millions of historical stock trades into an Amazon DynamoDB table. The table uses on-demand capacity mode. Once each day at midnight, a few million new records are loaded into the table. Application read activity against the table happens in bursts throughout the day. and a limited set of keys are repeatedly looked up. The company needs to reduce costs associated with DynamoDB.Which strategy should a solutions architect recommend to meet this requirement?",
+                "choices": [
+                        "Deploy an Amazon ElastiCache cluster in front of the DynamoDB table",
+                        "Deploy DynamoDB Accelerator (DAX). Configure DynamoDB auto scaling. Purchase Savings Plans in Cost Explorer.",
+                        "Use provisioned capacity mode. Purchase Savings Plans in Cost Explorer.",
+                        "Deploy DynamoDB Accelerator (DAX). Use provisioned capacity mode. Configure DynamoDB auto scaling."
+                ],
+                "correct_answer": "D",
+                "is_multiple_choice": false,
+                "voting_data": {
+                        "D": 32,
+                        "C": 3,
+                        "A": 1,
+                        "B": 1
+                }
+        },
+        {
+                "question_number": 255,
+                "question_text": "A company is creating a centralized logging service running on Amazon EC2 that will receive and analyze logs from hundreds of AWS accounts. AWS PrivateLink is being used to provide connectivity between the client services and the logging service.In each AWS account with a client, an interface endpoint has been created for the logging service and is available. The logging service running on EC2 instances with a Network Load Balancer (NLB) are deployed in different subnets. The clients are unable to submit logs using the VPC endpoint.Which combination of steps should a solutions architect take to resolve this issue? (Choose two.)",
+                "choices": [
+                        "Check that the NACL is attached to the logging service subnet to allow communications to and from the NLB subnets. Check that the NACL is attached to the NLB subnet to allow communications to and from the logging service subnets running on EC2 instances.",
+                        "Check that the NACL is attached to the logging service subnets to allow communications to and from the interface endpoint subnets. Check that the NACL is attached to the interface endpoint subnet to allow communications to and from the logging service subnets running on EC2 instances.",
+                        "Check the security group for the logging service running on the EC2 instances to ensure it allows ingress from the NLB subnets.",
+                        "Check the security group for the logging service running on EC2 instances to ensure it allows ingress from the clients.",
+                        "Check the security group for the NLB to ensure it allows ingress from the interface endpoint subnets."
+                ],
+                "correct_answer": "AC",
+                "is_multiple_choice": true,
+                "voting_data": {
+                        "AC": 40,
+                        "BD": 13,
+                        "BC": 4,
+                        "CE": 3,
+                        "BE": 1
+                }
+        },
+        {
+                "question_number": 256,
+                "question_text": "A company has millions of objects in an Amazon S3 bucket. The objects are in the S3 Standard storage class. All the S3 objects are accessed frequently. The number of users and applications that access the objects is increasing rapidly. The objects are encrypted with server-side encryption with AWS KMS keys (SSE-KMS).A solutions architect reviews the company’s monthly AWS invoice and notices that AWS KMS costs are increasing because of the high number of requests from Amazon S3. The solutions architect needs to optimize costs with minimal changes to the application.Which solution will meet these requirements with the LEAST operational overhead?",
+                "choices": [
+                        "Create a new S3 bucket that has server-side encryption with customer-provided keys (SSE-C) as the encryption type. Copy the existing objects to the new S3 bucket. Specify SSE-C.",
+                        "Create a new S3 bucket that has server-side encryption with Amazon S3 managed keys (SSE-S3) as the encryption type. Use S3 Batch Operations to copy the existing objects to the new S3 bucket. Specify SSE-S3.",
+                        "Use AWS CloudHSM to store the encryption keys. Create a new S3 bucket. Use S3 Batch Operations to copy the existing objects to the new S3 bucket. Encrypt the objects by using the keys from CloudHSM.",
+                        "Use the S3 Intelligent-Tiering storage class for the S3 bucket. Create an S3 Intelligent-Tiering archive configuration to transition objects that are not accessed for 90 days to S3 Glacier Deep Archive."
+                ],
+                "correct_answer": "B",
+                "is_multiple_choice": false,
+                "voting_data": {
+                        "B": 30
+                }
+        },
+        {
+                "question_number": 257,
+                "question_text": "A media storage application uploads user photos to Amazon S3 for processing by AWS Lambda functions. Application state is stored in Amazon DynamoDB tables. Users are reporting that some uploaded photos are not being processed properly. The application developers trace the logs and find that Lambda is experiencing photo processing issues when thousands of users upload photos simultaneously. The issues are the result of Lambda concurrency limits and the performance of DynamoDB when data is saved.Which combination of actions should a solutions architect take to increase the performance and reliability of the application? (Choose two.)",
+                "choices": [
+                        "Evaluate and adjust the RCUs for the DynamoDB tables.",
+                        "Evaluate and adjust the WCUs for the DynamoDB tables.",
+                        "Add an Amazon ElastiCache layer to increase the performance of Lambda functions.",
+                        "Add an Amazon Simple Queue Service (Amazon SQS) queue and reprocessing logic between Amazon S3 and the Lambda functions.",
+                        "Use S3 Transfer Acceleration to provide lower latency to users."
+                ],
+                "correct_answer": "BD",
+                "is_multiple_choice": true,
+                "voting_data": {
+                        "BD": 18
+                }
+        },
+        {
+                "question_number": 258,
+                "question_text": "A company runs an application in an on-premises data center. The application gives users the ability to upload media files. The files persist in a file server. The web application has many users. The application server is overutilized, which causes data uploads to fail occasionally. The company frequently adds new storage to the file server. The company wants to resolve these challenges by migrating the application to AWS.Users from across the United States and Canada access the application. Only authenticated users should have the ability to access the application to upload files. The company will consider a solution that refactors the application, and the company needs to accelerate application development.Which solution will meet these requirements with the LEAST operational overhead?",
+                "choices": [
+                        "Use AWS Application Migration Service to migrate the application server to Amazon EC2 instances. Create an Auto Scaling group for the EC2 instances. Use an Application Load Balancer to distribute the requests. Modify the application to use Amazon S3 to persist the files. Use Amazon Cognito to authenticate users.",
+                        "Use AWS Application Migration Service to migrate the application server to Amazon EC2 instances. Create an Auto Scaling group for the EC2 instances. Use an Application Load Balancer to distribute the requests. Set up AWS IAM Identity Center (AWS Single Sign-On) to give users the ability to sign in to the application. Modify the application to use Amazon S3 to persist the files.",
+                        "Create a static website for uploads of media files. Store the static assets in Amazon S3. Use AWS AppSync to create an API. Use AWS Lambda resolvers to upload the media files to Amazon S3. Use Amazon Cognito to authenticate users.",
+                        "Use AWS Amplify to create a static website for uploads of media files. Use Amplify Hosting to serve the website through Amazon CloudFront. Use Amazon S3 to store the uploaded media files. Use Amazon Cognito to authenticate users."
+                ],
+                "correct_answer": "D",
+                "is_multiple_choice": false,
+                "voting_data": {
+                        "D": 33,
+                        "A": 3
+                }
+        },
+        {
+                "question_number": 259,
+                "question_text": "A company has an application that is deployed on Amazon EC2 instances behind an Application Load Balancer (ALB). The instances are part of an Auto Scaling group. The application has unpredictable workloads and frequently scales out and in. The company’s development team wants to analyze application logs to find ways to improve the application's performance. However, the logs are no longer available after instances scale in.Which solution will give the development team the ability to view the application logs after a scale-in event?",
+                "choices": [
+                        "Enable access logs for the ALB. Store the logs in an Amazon S3 bucket.",
+                        "Configure the EC2 instances to publish logs to Amazon CloudWatch Logs by using the unified CloudWatch agent.",
+                        "Modify the Auto Scaling group to use a step scaling policy.",
+                        "Instrument the application with AWS X-Ray tracing."
+                ],
+                "correct_answer": "B",
+                "is_multiple_choice": false,
+                "voting_data": {
+                        "B": 15
+                }
+        },
+        {
+                "question_number": 260,
+                "question_text": "A company runs an unauthenticated static website (www.example.com) that includes a registration form for users. The website uses Amazon S3 for hosting and uses Amazon CloudFront as the content delivery network with AWS WAF configured. When the registration form is submitted, the website calls an Amazon API Gateway API endpoint that invokes an AWS Lambda function to process the payload and forward the payload to an external API call.During testing, a solutions architect encounters a cross-origin resource sharing (CORS) error. The solutions architect confirms that the CloudFront distribution origin has the Access-Control-Allow-Origin header set to www.example.com.What should the solutions architect do to resolve the error?",
+                "choices": [
+                        "Change the CORS configuration on the S3 bucket. Add rules for CORS to the AllowedOrigin element for www.example.com.",
+                        "Enable the CORS setting in AWS WAF. Create a web ACL rule in which the Access-Control-Allow-Origin header is set to www.example.com.",
+                        "Enable the CORS setting on the API Gateway API endpoint. Ensure that the API endpoint is configured to return all responses that have the Access-Control-Allow-Origin header set to www.example.com.",
+                        "Enable the CORS setting on the Lambda function. Ensure that the return code of the function has the Access-Control-Allow-Origin header set to www.example.com."
+                ],
+                "correct_answer": "C",
+                "is_multiple_choice": false,
+                "voting_data": {
+                        "C": 22,
+                        "A": 1
+                }
+        },
+        {
+                "question_number": 261,
+                "question_text": "A company has many separate AWS accounts and uses no central billing or management. Each AWS account hosts services for different departments in the company. The company has a Microsoft Azure Active Directory that is deployed.A solutions architect needs to centralize billing and management of the company’s AWS accounts. The company wants to start using identity federation instead of manual user management. The company also wants to use temporary credentials instead of long-lived access keys.Which combination of steps will meet these requirements? (Choose three.)",
+                "choices": [
+                        "Create a new AWS account to serve as a management account. Deploy an organization in AWS Organizations. Invite each existing AWS account to join the organization. Ensure that each account accepts the invitation.",
+                        "Configure each AWS account's email address to be aws+@example.com so that account management email messages and invoices are sent to the same place.",
+                        "Deploy AWS IAM Identity Center (AWS Single Sign-On) in the management account. Connect IAM Identity Center to the Azure Active Directory. Configure IAM Identity Center for automatic synchronization of users and groups.",
+                        "Deploy an AWS Managed Microsoft AD directory in the management account. Share the directory with all other accounts in the organization by using AWS Resource Access Manager (AWS RAM).",
+                        "Create AWS IAM Identity Center (AWS Single Sign-On) permission sets. Attach the permission sets to the appropriate IAM Identity Center groups and AWS accounts.",
+                        "Configure AWS Identity and Access Management (IAM) in each AWS account to use AWS Managed Microsoft AD for authentication and authorization."
+                ],
+                "correct_answer": "ACE",
+                "is_multiple_choice": true,
+                "voting_data": {
+                        "ACE": 30
+                }
+        },
+        {
+                "question_number": 262,
+                "question_text": "A company wants to manage the costs associated with a group of 20 applications that are infrequently used, but are still business-critical, by migrating to AWS. The applications are a mix of Java and Node.js spread across different instance clusters. The company wants to minimize costs while standardizing by using a single deployment methodology.Most of the applications are part of month-end processing routines with a small number of concurrent users, but they are occasionally run at other times. Average application memory consumption is less than 1 GB. though some applications use as much as 2.5 GB of memory during peak processing. The most important application in the group is a billing report written in Java that accesses multiple data sources and often runs for several hours.Which is the MOST cost-effective solution?",
+                "choices": [
+                        "Deploy a separate AWS Lambda function for each application. Use AWS CloudTrail logs and Amazon CloudWatch alarms to verify completion of critical jobs.",
+                        "Deploy Amazon ECS containers on Amazon EC2 with Auto Scaling configured for memory utilization of 75%. Deploy an ECS task for each application being migrated with ECS task scaling. Monitor services and hosts by using Amazon CloudWatch.",
+                        "Deploy AWS Elastic Beanstalk for each application with Auto Scaling to ensure that all requests have sufficient resources. Monitor each AWS Elastic Beanstalk deployment by using CloudWatch alarms.",
+                        "Deploy a new Amazon EC2 instance cluster that co-hosts all applications by using EC2 Auto Scaling and Application Load Balancers. Scale cluster size based on a custom metric set on instance memory utilization. Purchase 3-year Reserved Instance reservations equal to the GroupMaxSize parameter of the Auto Scaling group."
+                ],
+                "correct_answer": "B",
+                "is_multiple_choice": false,
+                "voting_data": {
+                        "B": 32,
+                        "C": 5
+                }
+        },
+        {
+                "question_number": 263,
+                "question_text": "A solutions architect needs to review the design of an Amazon EMR cluster that is using the EMR File System (EMRFS). The cluster performs tasks that are critical to business needs. The cluster is running Amazon EC2 On-Demand Instances at all times for all task, primary, and core nodes. The EMR tasks run each morning, starting at 1:00 AM. and take 6 hours to finish running. The amount of time to complete the processing is not a priority because the data is not referenced until late in the day.The solutions architect must review the architecture and suggest a solution to minimize the compute costs.Which solution should the solutions architect recommend to meet these requirements?",
+                "choices": [
+                        "Launch all task, primary, and core nodes on Spot Instances in an instance fleet. Terminate the cluster, including all instances, when the processing is completed.",
+                        "Launch the primary and core nodes on On-Demand Instances. Launch the task nodes on Spot Instances in an instance fleet. Terminate the cluster, including all instances, when the processing is completed. Purchase Compute Savings Plans to cover the On-Demand Instance usage.",
+                        "Continue to launch all nodes on On-Demand Instances. Terminate the cluster, including all instances, when the processing is completed. Purchase Compute Savings Plans to cover the On-Demand Instance usage.",
+                        "Launch the primary and core nodes on On-Demand Instances. Launch the task nodes on Spot Instances in an instance fleet. Terminate only the task node instances when the processing is completed. Purchase Compute Savings Plans to cover the On-Demand Instance usage."
+                ],
+                "correct_answer": "D",
+                "is_multiple_choice": false,
+                "voting_data": {
+                        "D": 83,
+                        "B": 60,
+                        "A": 1
+                }
+        },
+        {
+                "question_number": 264,
+                "question_text": "A company has migrated a legacy application to the AWS Cloud. The application runs on three Amazon EC2 instances that are spread across three Availability Zones. One EC2 instance is in each Availability Zone. The EC2 instances are running in three private subnets of the VPC and are set up as targets for an Application Load Balancer (ALB) that is associated with three public subnets.The application needs to communicate with on-premises systems. Only traffic from IP addresses in the company's IP address range are allowed to access the on-premises systems. The company’s security team is bringing only one IP address from its internal IP address range to the cloud. The company has added this IP address to the allow list for the company firewall. The company also has created an Elastic IP address for this IP address.A solutions architect needs to create a solution that gives the application the ability to communicate with the on-premises systems. The solution also must be able to mitigate failures automatically.Which solution will meet these requirements?",
+                "choices": [
+                        "Deploy three NAT gateways, one in each public subnet. Assign the Elastic IP address to the NAT gateways. Turn on health checks for the NAT gateways. If a NAT gateway fails a health check, recreate the NAT gateway and assign the Elastic IP address to the new NAT gateway.",
+                        "Replace the ALB with a Network Load Balancer (NLB). Assign the Elastic IP address to the NLTurn on health checks for the NLIn the case of a failed health check, redeploy the NLB in different subnets.",
+                        "Deploy a single NAT gateway in a public subnet. Assign the Elastic IP address to the NAT gateway. Use Amazon CloudWatch with a custom metric to monitor the NAT gateway. If the NAT gateway is unhealthy, invoke an AWS Lambda function to create a new NAT gateway in a different subnet. Assign the Elastic IP address to the new NAT gateway.",
+                        "Assign the Elastic IP address to the ALB. Create an Amazon Route 53 simple record with the Elastic IP address as the value. Create a Route 53 health check. In the case of a failed health check, recreate the ALB in different subnets."
+                ],
+                "correct_answer": "C",
+                "is_multiple_choice": false,
+                "voting_data": {
+                        "C": 21
+                }
+        },
+        {
+                "question_number": 265,
+                "question_text": "A company uses AWS Organizations to manage more than 1,000 AWS accounts. The company has created a new developer organization. There are 540 developer member accounts that must be moved to the new developer organization. All accounts are set up with all the required information so that each account can be operated as a standalone account.Which combination of steps should a solutions architect take to move all of the developer accounts to the new developer organization? (Choose three.)",
+                "choices": [
+                        "Call the MoveAccount operation in the Organizations API from the old organization's management account to migrate the developer accounts to the new developer organization.",
+                        "From the management account, remove each developer account from the old organization using the RemoveAccountFromOrganization operation in the Organizations API.",
+                        "From each developer account, remove the account from the old organization using the RemoveAccountFromOrganization operation in the Organizations API.",
+                        "Sign in to the new developer organization's management account and create a placeholder member account that acts as a target for the developer account migration.",
+                        "Call the InviteAccountToOrganization operation in the Organizations API from the new developer organization's management account to send invitations to the developer accounts.",
+                        "Have each developer sign in to their account and confirm to join the new developer organization."
+                ],
+                "correct_answer": "BEF",
+                "is_multiple_choice": true,
+                "voting_data": {
+                        "BEF": 33,
+                        "BDE": 2,
+                        "AEF": 1,
+                        "ABF": 1
+                }
+        },
+        {
+                "question_number": 266,
+                "question_text": "A company’s interactive web application uses an Amazon CloudFront distribution to serve images from an Amazon S3 bucket. Occasionally, third-party tools ingest corrupted images into the S3 bucket. This image corruption causes a poor user experience in the application later. The company has successfully implemented and tested Python logic to detect corrupt images.A solutions architect must recommend a solution to integrate the detection logic with minimal latency between the ingestion and serving.Which solution will meet these requirements?",
+                "choices": [
+                        "Use a Lambda@Edge function that is invoked by a viewer-response event.",
+                        "Use a Lambda@Edge function that is invoked by an origin-response event.",
+                        "Use an S3 event notification that invokes an AWS Lambda function.",
+                        "Use an S3 event notification that invokes an AWS Step Functions state machine."
+                ],
+                "correct_answer": "C",
+                "is_multiple_choice": false,
+                "voting_data": {
+                        "C": 30,
+                        "B": 1
+                }
+        },
+        {
+                "question_number": 267,
+                "question_text": "A company has an application that runs on Amazon EC2 instances in an Amazon EC2 Auto Scaling group. The company uses AWS CodePipeline to deploy the application. The instances that run in the Auto Scaling group are constantly changing because of scaling events.When the company deploys new application code versions, the company installs the AWS CodeDeploy agent on any new target EC2 instances and associates the instances with the CodeDeploy deployment group. The application is set to go live within the next 24 hours.What should a solutions architect recommend to automate the application deployment process with the LEAST amount of operational overhead?",
+                "choices": [
+                        "Configure Amazon EventBridge to invoke an AWS Lambda function when a new EC2 instance is launched into the Auto Scaling group. Code the Lambda function to associate the EC2 instances with the CodeDeploy deployment group.",
+                        "Write a script to suspend Amazon EC2 Auto Scaling operations before the deployment of new code. When the deployment is complete, create a new AMI and configure the Auto Scaling group's launch template to use the new AMI for new launches. Resume Amazon EC2 Auto Scaling operations.",
+                        "Create a new AWS CodeBuild project that creates a new AMI that contains the new code. Configure CodeBuild to update the Auto Scaling group’s launch template to the new AMI. Run an Amazon EC2 Auto Scaling instance refresh operation.",
+                        "Create a new AMI that has the CodeDeploy agent installed. Configure the Auto Scaling group’s launch template to use the new AMI. Associate the CodeDeploy deployment group with the Auto Scaling group instead of the EC2 instances."
+                ],
+                "correct_answer": "D",
+                "is_multiple_choice": false,
+                "voting_data": {
+                        "D": 20,
+                        "C": 1
+                }
+        },
+        {
+                "question_number": 268,
+                "question_text": "A company has a website that runs on four Amazon EC2 instances that are behind an Application Load Balancer (ALB). When the ALB detects that an EC2 instance is no longer available, an Amazon CloudWatch alarm enters the ALARM state. A member of the company's operations team then manually adds a new EC2 instance behind the ALB.A solutions architect needs to design a highly available solution that automatically handles the replacement of EC2 instances. The company needs to minimize downtime during the switch to the new solution.Which set of steps should the solutions architect take to meet these requirements?",
+                "choices": [
+                        "Delete the existing ALB. Create an Auto Scaling group that is configured to handle the web application traffic. Attach a new launch template to the Auto Scaling group. Create a new ALB. Attach the Auto Scaling group to the new ALB. Attach the existing EC2 instances to the Auto Scaling group.",
+                        "Create an Auto Scaling group that is configured to handle the web application traffic. Attach a new launch template to the Auto Scaling group. Attach the Auto Scaling group to the existing ALAttach the existing EC2 instances to the Auto Scaling group.",
+                        "Delete the existing ALB and the EC2 instances. Create an Auto Scaling group that is configured to handle the web application traffic. Attach a new launch template to the Auto Scaling group. Create a new ALB. Attach the Auto Scaling group to the new ALB. Wait for the Auto Scaling group to launch the minimum number of EC2 instances.",
+                        "Create an Auto Scaling group that is configured to handle the web application traffic. Attach a new launch template to the Auto Scaling group. Attach the Auto Scaling group to the existing ALB. Wait for the existing ALB to register the existing EC2 instances with the Auto Scaling group."
+                ],
+                "correct_answer": "B",
+                "is_multiple_choice": false,
+                "voting_data": {
+                        "B": 21,
+                        "D": 2
+                }
+        },
+        {
+                "question_number": 269,
+                "question_text": "A company wants to optimize AWS data-transfer costs and compute costs across developer accounts within the company's organization in AWS Organizations. Developers can configure VPCs and launch Amazon EC2 instances in a single AWS Region. The EC2 instances retrieve approximately 1 TB of data each day from Amazon S3.The developer activity leads to excessive monthly data-transfer charges and NAT gateway processing charges between EC2 instances and S3 buckets, along with high compute costs. The company wants to proactively enforce approved architectural patterns for any EC2 instance and VPC infrastructure that developers deploy within the AWS accounts. The company does not want this enforcement to negatively affect the speed at which the developers can perform their tasks.Which solution will meet these requirements MOST cost-effectively?",
+                "choices": [
+                        "Create SCPs to prevent developers from launching unapproved EC2 instance types. Provide the developers with an AWS CloudFormation template to deploy an approved VPC configuration with S3 interface endpoints. Scope the developers' IAM permissions so that the developers can launch VPC resources only with CloudFormation.",
+                        "Create a daily forecasted budget with AWS Budgets to monitor EC2 compute costs and S3 data-transfer costs across the developer accounts. When the forecasted cost is 75% of the actual budget cost, send an alert to the developer teams. If the actual budget cost is 100%, create a budget action to terminate the developers' EC2 instances and VPC infrastructure.",
+                        "Create an AWS Service Catalog portfolio that users can use to create an approved VPC configuration with S3 gateway endpoints and approved EC2 instances. Share the portfolio with the developer accounts. Configure an AWS Service Catalog launch constraint to use an approved IAM role. Scope the developers' IAM permissions to allow access only to AWS Service Catalog.",
+                        "Create and deploy AWS Config rules to monitor the compliance of EC2 and VPC resources in the developer AWS accounts. If developers launch unapproved EC2 instances or if developers create VPCs without S3 gateway endpoints, perform a remediation action to terminate the unapproved resources."
+                ],
+                "correct_answer": "C",
+                "is_multiple_choice": false,
+                "voting_data": {
+                        "C": 18,
+                        "A": 1,
+                        "D": 1
+                }
+        },
+        {
+                "question_number": 270,
+                "question_text": "A company is expanding. The company plans to separate its resources into hundreds of different AWS accounts in multiple AWS Regions. A solutions architect must recommend a solution that denies access to any operations outside of specifically designated Regions.Which solution will meet these requirements?",
+                "choices": [
+                        "Create IAM roles for each account. Create IAM policies with conditional allow permissions that include only approved Regions for the accounts.",
+                        "Create an organization in AWS Organizations. Create IAM users for each account. Attach a policy to each user to block access to Regions where an account cannot deploy infrastructure.",
+                        "Launch an AWS Control Tower landing zone. Create OUs and attach SCPs that deny access to run services outside of the approved Regions.",
+                        "Enable AWS Security Hub in each account. Create controls to specify the Regions where an account can deploy infrastructure."
+                ],
+                "correct_answer": "C",
+                "is_multiple_choice": false,
+                "voting_data": {
+                        "C": 12
+                }
+        }
+];
+        
+        let currentQuestionIndex = 0;
+        let correctAnswers = 0;
+        let answeredQuestions = new Set();
+        let selectedAnswers = {};
+        
+        function loadQuestion() {
+            const question = questions[currentQuestionIndex];
+            if (!question) return;
+            
+            const container = document.getElementById('questionContainer');
+            const isMultipleChoice = question.is_multiple_choice;
+            
+            let choicesHtml = '';
+            question.choices.forEach((choice, index) => {
+                const letter = String.fromCharCode(65 + index);
+                choicesHtml += `
+                    <li class="choice" onclick="selectChoice('${letter}', this)" data-choice="${letter}">
+                        <span class="choice-letter">${letter}</span>
+                        ${choice}
+                    </li>
+                `;
+            });
+            
+            const multiChoiceNote = isMultipleChoice ? 
+                '<div class="multi-choice-note">📝 Multiple Choice: You can select multiple answers</div>' : '';
+            
+            container.innerHTML = `
+                <div class="question-header">
+                    Question ${question.question_number} (Day 15 - ${currentQuestionIndex + 1} of ${questions.length})
+                </div>
+                <div class="question-content">
+                    <div class="question-text">${question.question_text}</div>
+                    ${multiChoiceNote}
+                    <ul class="choices">${choicesHtml}</ul>
+                    <div class="explanation" id="explanation"></div>
+                </div>
+            `;
+            
+            updateStats();
+        }
+        
+        function selectChoice(letter, element) {
+            const question = questions[currentQuestionIndex];
+            const isMultipleChoice = question.is_multiple_choice;
+            
+            if (!selectedAnswers[currentQuestionIndex]) {
+                selectedAnswers[currentQuestionIndex] = [];
+            }
+            
+            if (isMultipleChoice) {
+                // Multiple choice - toggle selection
+                if (element.classList.contains('selected')) {
+                    element.classList.remove('selected');
+                    selectedAnswers[currentQuestionIndex] = selectedAnswers[currentQuestionIndex].filter(ans => ans !== letter);
+                } else {
+                    element.classList.add('selected');
+                    selectedAnswers[currentQuestionIndex].push(letter);
+                }
+            } else {
+                // Single choice - clear others first
+                document.querySelectorAll('.choice').forEach(choice => {
+                    choice.classList.remove('selected');
+                });
+                element.classList.add('selected');
+                selectedAnswers[currentQuestionIndex] = [letter];
+            }
+        }
+        
+        function showAnswer() {
+            const question = questions[currentQuestionIndex];
+            const selectedAnswer = selectedAnswers[currentQuestionIndex];
+            
+            if (!selectedAnswer || selectedAnswer.length === 0) {
+                alert('Please select an answer first!');
+                return;
+            }
+            
+            answeredQuestions.add(currentQuestionIndex);
+            
+            document.querySelectorAll('.choice').forEach(choice => {
+                const choiceLetter = choice.getAttribute('data-choice');
+                if (question.correct_answer.includes(choiceLetter)) {
+                    choice.classList.add('correct');
+                } else if (selectedAnswer.includes(choiceLetter)) {
+                    choice.classList.add('incorrect');
+                }
+            });
+            
+            let isCorrect = false;
+            if (question.is_multiple_choice) {
+                const correctAnswers = question.correct_answer.split('').sort().join('');
+                const userAnswers = selectedAnswer.sort().join('');
+                isCorrect = correctAnswers === userAnswers;
+            } else {
+                isCorrect = selectedAnswer[0] === question.correct_answer;
+            }
+            
+            if (isCorrect) {
+                correctAnswers++;
+            }
+            
+            const explanationDiv = document.getElementById('explanation');
+            const yourAnswer = selectedAnswer.join(', ');
+            explanationDiv.innerHTML = `<strong>Correct Answer:</strong> ${question.correct_answer}<br><strong>Your Answer:</strong> ${yourAnswer}<br><strong>Result:</strong> ${isCorrect ? '✅ Correct' : '❌ Incorrect'}`;
+            explanationDiv.classList.add('show');
+            
+            document.getElementById('showAnswerBtn').style.display = 'none';
+            document.getElementById('nextBtn').style.display = 'inline-block';
+            
+            updateStats();
+        }
+        
+        function nextQuestion() {
+            if (currentQuestionIndex < questions.length - 1) {
+                currentQuestionIndex++;
+                loadQuestion();
+                document.getElementById('showAnswerBtn').style.display = 'inline-block';
+                document.getElementById('nextBtn').style.display = 'none';
+            } else {
+                const accuracy = Math.round((correctAnswers / answeredQuestions.size) * 100);
+                alert(`Day 15 Complete!\n\nCorrect: ${correctAnswers}/${answeredQuestions.size}\nAccuracy: ${accuracy}%\n\nGreat job!`);
+            }
+        }
+        
+        function previousQuestion() {
+            if (currentQuestionIndex > 0) {
+                currentQuestionIndex--;
+                loadQuestion();
+                document.getElementById('showAnswerBtn').style.display = 'inline-block';
+                document.getElementById('nextBtn').style.display = 'none';
+            }
+        }
+        
+        function updateStats() {
+            document.getElementById('currentQ').textContent = currentQuestionIndex + 1;
+            document.getElementById('totalQ').textContent = questions.length;
+            document.getElementById('correctCount').textContent = correctAnswers;
+            const accuracy = answeredQuestions.size > 0 ? Math.round((correctAnswers / answeredQuestions.size) * 100) : 0;
+            document.getElementById('accuracy').textContent = accuracy + '%';
+        }
+        
+        // Initialize
+        loadQuestion();
+    </script>
+</body>
+</html>

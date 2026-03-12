@@ -1,0 +1,194 @@
+[
+  {
+    "id": 269,
+    "text": "A company's video streaming platform usage has increased from 10,000 users each day to 50,000 users each day in multiple countries. The company deploys the streaming platform on Amazon Elastic Kubernetes Service (Amazon EKS). The EKS workload scales up to thousands of nodes during peak viewing time.The company's users report occurrences of unauthorized logins. Users also report sudden interruptions and logouts from the platform.The company wants additional security measures for the entire platform. The company also needs a summarized view of the resource behaviors and interactions across the company's entire AWS environment. The summarized view must show login attempts, API calls, and network traffic. The solution must permit network traffic analysis while minimizing the overhead of managing logs. The solution must also quickly investigate any potential malicious behavior that is associated with the EKS workload.Which solution will meet these requirements?",
+    "options": [
+      "Enable Amazon GuardDuty for EKS Audit Log Monitoring. Enable AWS CloudTrail logs. Store the EKS audit logs and CloudTrail log files in an Amazon S3 bucket. Use Amazon Athena to create an external table. Use Amazon QuickSight to create a dashboard.",
+      "Enable Amazon GuardDuty for EKS Audit Log Monitoring. Enable Amazon Detective in the company's AWS account. Enable EKS audit logs from optional source packages in Detective.",
+      "Enable Amazon CloudWatch Container Insights. Enable AWS CloudTrail logs. Store the EKS audit logs and CloudTrail log files in an Amazon S3 bucket. Use Amazon Athena to create an external table. Use Amazon QuickSight to create a dashboard.",
+      "Enable Amazon GuardDuty for EKS Audit Log Monitoring. Enable Amazon CloudWatch Container Insights and VPC Flow Logs. Enable AWS CloudTrail logs."
+    ],
+    "correct": 1,
+    "explanation": "Đáp án được chọn nhiều nhất trong cộng đồng. Xem thêm giải thích trong file gốc."
+  },
+  {
+    "id": 270,
+    "text": "A company uses AWS Organizations to manage hundreds of AWS accounts. The company has a team that is responsible for AWS Identity and Access Management (IAM).The IAM team wants to implement AWS IAM Identity Center (AWS Single Sign-On). The IAM team must have only the minimum needed permissions to manage IAM Identity Center. The IAM team must not be able to gain unneeded access to the Organizations management account. The IAM team must be able to provision new IAM Identity Center permission sets and assignments for existing and new member accounts.Which combination of steps will meet these requirements? (Choose three.)",
+    "options": [
+      "Create a new AWS account for the IAM team. In the new account, enable IAM Identity Center. In the Organizations management account, register the new account as a delegated administrator for IAM Identity Center.",
+      "Create a new AWS account for the IAM team. In the Organizations management account, enable IAM Identity Center. In the Organizations management account, register the new account as a delegated administrator for IAM Identity Center.",
+      "In IAM Identity Center, create users and a group for the IAM team. Add the users to the group. Create a new permission set. Attach the AWSSSODirectoryAdministrator managed IAM policy to the group.",
+      "In IAM Identity Center, create users and a group for the IAM team. Add the users to the group. Create a new permission set. Attach the AWSSSOMemberAccountAdministrator managed IAM policy to the group."
+    ],
+    "correct": 0,
+    "explanation": "Đáp án được chọn nhiều nhất trong cộng đồng. Xem thêm giải thích trong file gốc."
+  },
+  {
+    "id": 271,
+    "text": "A company uses an organization in AWS Organizations that has all features enabled. The company uses AWS Backup in a primary account and uses an AWS Key Management Service (AWS KMS) key to encrypt the backups.The company needs to automate a cross-account backup of the resources that AWS Backup backs up in the primary account. The company configures cross-account backup in the Organizations management account. The company creates a new AWS account in the organization and configures an AWS Backup backup vault in the new account. The company creates a KMS key in the new account to encrypt the backups. Finally, the company configures a new backup plan in the primary account. The destination for the new backup plan is the backup vault in the new account.When the AWS Backup job in the primary account is invoked, the job creates backups in the primary account. However, the backups are not copied to the new account's backup vault.Which combination of steps must the company take so that backups can be copied to the new account's backup vault? (Choose two.)",
+    "options": [
+      "Edit the backup vault access policy in the new account to allow access to the primary account.",
+      "Edit the backup vault access policy in the primary account to allow access to the new account.",
+      "Edit the backup vault access policy in the primary account to allow access to the KMS key in the new account.",
+      "Edit the key policy of the KMS key in the primary account to share the key with the new account."
+    ],
+    "correct": 0,
+    "explanation": "Đáp án được chọn nhiều nhất trong cộng đồng. Xem thêm giải thích trong file gốc."
+  },
+  {
+    "id": 272,
+    "text": "A company runs an application that uses an Amazon S3 bucket to store images. A DevOps engineer needs to implement a multi-Region strategy for the objects that are stored in the S3 bucket. The company needs to be able to fail over to an S3 bucket in another AWS Region. When an image is added to either S3 bucket, the image must be replicated to the other S3 bucket within 15 minutes.The DevOps engineer enables two-way replication between the S3 buckets.Which combination of steps should the DevOps engineer take next to meet the requirements? (Choose three.)",
+    "options": [
+      "Enable S3 Replication Time Control (S3 RTC) on each replication rule.",
+      "Create an S3 Multi-Region Access Point in an active-passive configuration.",
+      "Call the SubmitMultiRegionAccessPointRoutes operation in the AWS API when the company needs to fail over to the S3 bucket in the other Region.",
+      "Enable S3 Transfer Acceleration on both S3 buckets."
+    ],
+    "correct": 0,
+    "explanation": "Đáp án được chọn nhiều nhất trong cộng đồng. Xem thêm giải thích trong file gốc."
+  },
+  {
+    "id": 273,
+    "text": "A company uses the AWS Cloud Development Kit (AWS CDK) to define its application. The company uses a pipeline that consists of AWS CodePipeline and AWS CodeBuild to deploy the CDK application.The company wants to introduce unit tests to the pipeline to test various infrastructure components. The company wants to ensure that a deployment proceeds if no unit tests result in a failure.Which combination of steps will enforce the testing requirement in the pipeline? (Choose two.)",
+    "options": [
+      "Update the CodeBuild build phase commands to run the tests then to deploy the application. Set the OnFailure phase property to ABORT.",
+      "Update the CodeBuild build phase commands to run the tests then to deploy the application. Add the --rollback true flag to the cdk deploy command.",
+      "Update the CodeBuild build phase commands to run the tests then to deploy the application. Add the --require-approval any-change flag to the cdk deploy command.",
+      "Create a test that uses the AWS CDK assertions module. Use the template.hasResourceProperties assertion to test that resources have the expected properties."
+    ],
+    "correct": 0,
+    "explanation": "Đáp án được chọn nhiều nhất trong cộng đồng. Xem thêm giải thích trong file gốc."
+  },
+  {
+    "id": 274,
+    "text": "A company has an application that runs on Amazon EC2 instances behind an Application Load Balancer (ALB). The EC2 instances are in multiple Availability Zones. The application was misconfigured in a single Availability Zone, which caused a partial outage of the application.A DevOps engineer made changes to ensure that the unhealthy EC2 instances in one Availability Zone do not affect the healthy EC2 instances in the other Availability Zones. The DevOps engineer needs to test the application's failover and shift where the ALB sends traffic. During failover, the ALB must avoid sending traffic to the Availability Zone where the failure has occurred.Which solution will meet these requirements?",
+    "options": [
+      "Turn off cross-zone load balancing on the ALB. Use Amazon Route 53 Application Recovery Controller to start a zonal shift away from the Availability Zone.",
+      "Turn off cross-zone load balancing on the ALB’s target group. Use Amazon Route 53 Application Recovery Controller to start a zonal shift away from the Availability Zone.",
+      "Create an Amazon Route 53 Application Recovery Controller resource set that uses the DNS hostname of the ALB. Start a zonal shift for the resource set away from the Availability Zone.",
+      "Create an Amazon Route 53 Application Recovery Controller resource set that uses the ARN of the ALB’s target group. Create a readiness check that uses the ElbV2TargetGroupsCanServeTraffic rule."
+    ],
+    "correct": 0,
+    "explanation": "Đáp án được chọn nhiều nhất trong cộng đồng. Xem thêm giải thích trong file gốc."
+  },
+  {
+    "id": 275,
+    "text": "A company sends its AWS Network Firewall flow logs to an Amazon S3 bucket. The company then analyzes the flow logs by using Amazon Athena.The company needs to transform the flow logs and add additional data before the flow logs are delivered to the existing S3 bucket.Which solution will meet these requirements?",
+    "options": [
+      "Create an AWS Lambda function to transform the data and to write a new object to the existing S3 bucket. Configure the Lambda function with an S3 trigger for the existing S3 bucket. Specify all object create events for the event type. Acknowledge the recursive invocation.",
+      "Enable Amazon EventBridge notifications on the existing S3 bucket. Create a custom EventBridge event bus. Create an EventBridge rule that is associated with the custom event bus. Configure the rule to react to all object create events for the existing S3 bucket and to invoke an AWS Step Functions workflow. Configure a Step Functions task to transform the data and to write the data into a new S3 bucket.",
+      "Create an Amazon EventBridge rule that is associated with the default EventBridge event bus. Configure the rule to react to all object create events for the existing S3 bucket. Define a new S3 bucket as the target for the rule. Create an EventBridge input transformation to customize the event before passing the event to the rule target.",
+      "Create an Amazon Kinesis Data Firehose delivery stream that is configured with an AWS Lambda transformer. Specify the existing S3 bucket as the destination. Change the Network Firewall logging destination from Amazon S3 to Kinesis Data Firehose."
+    ],
+    "correct": 3,
+    "explanation": "Đáp án được chọn nhiều nhất trong cộng đồng. Xem thêm giải thích trong file gốc."
+  },
+  {
+    "id": 276,
+    "text": "A DevOps engineer needs to implement integration tests into an existing AWS CodePipeline CI/CD workflow for an Amazon Elastic Container Service (Amazon ECS) service. The CI/CD workflow retrieves new application code from an AWS CodeCommit repository and builds a container image. The Cl/CD workflow then uploads the container image to Amazon Elastic Container Registry (Amazon ECR) with a new image tag version.The integration tests must ensure that new versions of the service endpoint are reachable and that various API methods return successful response data. The DevOps engineer has already created an ECS cluster to test the service.Which combination of steps will meet these requirements with the LEAST management overhead? (Choose three.)",
+    "options": [
+      "Add a deploy stage to the pipeline. Configure Amazon ECS as the action provider.",
+      "Add a deploy stage to the pipeline. Configure AWS CodeDeploy as the action provider.",
+      "Add an appspec.yml file to the CodeCommit repository.",
+      "Update the image build pipeline stage to output an imagedefinitions.json file that references the new image tag."
+    ],
+    "correct": 0,
+    "explanation": "Đáp án được chọn nhiều nhất trong cộng đồng. Xem thêm giải thích trong file gốc."
+  },
+  {
+    "id": 277,
+    "text": "A company runs applications on Windows and Linux Amazon EC2 instances. The instances run across multiple Availability Zones in an AWS Region. The company uses Auto Scaling groups for each application.The company needs a durable storage solution for the instances. The solution must use SMB for Windows and must use NFS for Linux. The solution must also have sub-millisecond latencies. All instances will read and write the data.Which combination of steps will meet these requirements? (Choose three.)",
+    "options": [
+      "Create an Amazon Elastic File System (Amazon EFS) file system that has targets in multiple Availability Zones.",
+      "Create an Amazon FSx for NetApp ONTAP Multi-AZ file system.",
+      "Create a General Purpose SSD (gp3) Amazon Elastic Block Store (Amazon EBS) volume to use for shared storage.",
+      "Update the user data for each application’s launch template to mount the file system."
+    ],
+    "correct": 1,
+    "explanation": "Đáp án được chọn nhiều nhất trong cộng đồng. Xem thêm giải thích trong file gốc."
+  },
+  {
+    "id": 278,
+    "text": "A company uses an organization in AWS Organizations that a security team and a DevOps team manage. Both teams access the accounts by using AWS IAM Identity Center.A dedicated group has been created for each team. The DevOps team's group has been assigned a permission set named DevOps. The permission set has the AdministratorAccess managed IAM policy attached. The permission set has been applied to all accounts in the organization.The security team wants to ensure that the DevOps team does not have access to IAM Identity Center in the organization's management account. The security team has attached the following SCP to the organization root:After implementing the policy, the security team discovers that the DevOps team can still access IAM Identity Center.Which solution will fix the problem?",
+    "options": [
+      "In the organization's management account, create a new OU. Move the organization's management account to the new OU. Detach the SCP from the organization root. Attach the SCP to the new OU.",
+      "In the organization's management account, update the SCP condition reference to the ARN of the DevOps team's group role to include the AWS account ID of the organization's management account.",
+      "In IAM Identity Center, create a new permission set. Ensure that the assigned policy has full access but explicitly denies permission for the sso:* action and the sso-directory:* action. Update the assigned permission set for the DevOps team's group role in the organization's management account. Delete the SCP.",
+      "In IAM Identity Center, update the DevOps permission set. Ensure that the assigned policy has full access but explicitly denies permission for the sso:* action and the sso-directory:* action. In the Deny statement, add a StringEquals condition that compares the aws:SourceAccount global condition context key with the organization's management account IDelete the SCP."
+    ],
+    "correct": 3,
+    "explanation": "Đáp án được chọn nhiều nhất trong cộng đồng. Xem thêm giải thích trong file gốc."
+  },
+  {
+    "id": 279,
+    "text": "An Amazon EC2 Auto Scaling group manages EC2 instances that were created from an AMI. The AMI has the AWS Systems Manager Agent installed. When an EC2 instance is launched into the Auto Scaling group, tags are applied to the EC2 instance.EC2 instances that are launched by the Auto Scaling group must have the correct operating system configuration.Which solution will meet these requirements?",
+    "options": [
+      "Create a Systems Manager Run Command document that configures the desired instance configuration. Set up Systems Manager Compliance to invoke the Run Command document when the EC2 instances are not in compliance with the most recent patches.",
+      "Create a Systems Manager State Manager association that links to the Systems Manager command document. Create a tag query that runs immediately.",
+      "Create a Systems Manager Run Command task that specifies the desired instance configuration. Create a maintenance window in Systems Manager Maintenance Windows that runs daily. Register the Run Command task against the maintenance window. Designate the targets.",
+      "Create a Systems Manager Patch Manager patch baseline and a patch group that use the same tags that the Auto Scaling group applies. Register the patch group with the patch baseline. Define a Systems Manager command document to patch the instances Invoke the document by using Systems Manager Run Command."
+    ],
+    "correct": 1,
+    "explanation": "Đáp án được chọn nhiều nhất trong cộng đồng. Xem thêm giải thích trong file gốc."
+  },
+  {
+    "id": 280,
+    "text": "A company uses AWS Organizations to manage its AWS accounts. The organization root has a child OU that is named Department. The Department OU has a child OU that is named Engineering. The default FullAWSAccess policy is attached to the root, the Department OU, and the Engineering OU.The company has many AWS accounts in the Engineering OU. Each account has an administrative IAM role with the AdministratorAccess IAM policy attached. The default FullAWSAccessPolicy is also attached to each account.A DevOps engineer plans to remove the FullAWSAccess policy from the Department OU. The DevOps engineer will replace the policy with a policy that contains an Allow statement for all Amazon EC2 API operations.What will happen to the permissions of the administrative 1AM roles as a result of this change?",
+    "options": [
+      "All API actions on all resources will be allowed.",
+      "All API actions on EC2 resources will be allowed. All other API actions will be denied.",
+      "All API actions on all resources will be denied.",
+      "All API actions on EC2 resources will be denied. All other API actions will be allowed."
+    ],
+    "correct": 1,
+    "explanation": "Đáp án được chọn nhiều nhất trong cộng đồng. Xem thêm giải thích trong file gốc."
+  },
+  {
+    "id": 281,
+    "text": "A company manages AWS accounts in AWS Organizations. The company needs a solution to send Amazon CloudWatch Logs data to an Amazon S3 bucket in a dedicated AWS account. The solution must support all existing and future CloudWatch Logs log groups.Which solution will meet these requirements?",
+    "options": [
+      "Enable Organizations backup policies to back up all log groups to a dedicated S3 bucket. Add an S3 bucket policy that allows access from all accounts that belong to the company.",
+      "Create a backup plan in AWS Backup. Specify a dedicated S3 bucket as a backup vault. Assign all CloudWatch Logs log group resources to the backup plan. Create resource assignments in the backup plan for all accounts that belong to the company.",
+      "Create a backup plan in AWS Backup. Specify a dedicated S3 bucket as a backup vault. Assign all existing log groups to the backup plan. Create resource assignments in the backup plan for all accounts that belong to the company. Create an AWS Systems Manager Automation runbook to assign log groups to a backup plan. Create an AWS Config rule that has an automatic remediation action for all noncompliant log groups. Specify the runbook as the rule's target.",
+      "Create a CloudWatch Logs destination and an Amazon Kinesis Data Firehose delivery stream in the dedicated AWS account. Specify the S3 bucket as the destination of the delivery stream. Create subscription filters for all existing log groups in all accounts. Create an AWS Lambda function to call the CloudWatch Logs PutSubscriptionFilter API operation. Create an Amazon EventBridge rule to invoke the Lambda function when a CreateLogGroup event occurs."
+    ],
+    "correct": 3,
+    "explanation": "Đáp án được chọn nhiều nhất trong cộng đồng. Xem thêm giải thích trong file gốc."
+  },
+  {
+    "id": 282,
+    "text": "A DevOps engineer manages a Java-based application that runs in an Amazon Elastic Container Service (Amazon ECS) cluster on AWS Fargate. Auto scaling has not been configured for the application.The DevOps engineer has determined that the Java Virtual Machine (JVM) thread count is a good indicator of when to scale the application. The application serves customer traffic on port 8080 and makes JVM metrics available on port 9404.Application use has recently increased. The DevOps engineer needs to configure auto scaling for the application.Which solution will meet these requirements with the LEAST operational overhead? (Choose two.)",
+    "options": [
+      "Deploy the Amazon CloudWatch agent as a container sidecar. Configure the CloudWatch agent to retrieve JVM metrics from port 9404. Create CloudWatch alarms on the JVM thread count metric to scale the application. Add a step scaling policy in Fargate to scale up and scale down based on the CloudWatch alarms.",
+      "Deploy the Amazon CloudWatch agent as a container sidecar. Configure a metric filter for the JVM thread count metric on the CloudWatch log group for the CloudWatch agent. Add a target tracking policy in Fargate. Select the metric from the metric filter as a scale target.",
+      "Create an Amazon Managed Service for Prometheus workspace. Deploy AWS Distro for OpenTelemetry as a container sidecar to publish the JVM metrics from port 9404 to the Prometheus workspace. Configure rules for the workspace to use the JVM thread count metric to scale the application. Add a step scaling policy in Fargate. Select the Prometheus rules to scale up and scaling down.",
+      "Create an Amazon Managed Service for Prometheus workspace. Deploy AWS Distro for OpenTelemetry as a container sidecar to retrieve JVM metrics from port 9404 to publish the JVM metrics from port 9404 to the Prometheus workspace. Add a target tracking policy in Fargate. Select the Prometheus metric as a scale target."
+    ],
+    "correct": 0,
+    "explanation": "Đáp án được chọn nhiều nhất trong cộng đồng. Xem thêm giải thích trong file gốc."
+  },
+  {
+    "id": 283,
+    "text": "A company has an application that runs in a single AWS Region. The application runs on an Amazon Elastic Kubernetes Service (Amazon EKS) cluster and connects to an Amazon Aurora MySQL cluster. The application is built in an AWS CodeBuild project. The container images are published to Amazon Elastic Container Registry (Amazon ECR).The company needs to replicate the state of the application for the container images and the database to a second Region.Which solution will meet these requirements in the MOST operationally efficient way?",
+    "options": [
+      "Turn on Amazon S3 Cross-Region Replication (CRR) on the bucket that holds the ECR container images. Deploy the application to an EKS cluster in the second Region by referencing the new S3 bucket object URL for the container image in a Kubernetes deployment file. Configure a cross-Region Aurora Replica in the second Region. Configure the new application deployment to use the endpoints for the cross-Region Aurora Replica.",
+      "Create an Amazon EventBridge rule that reacts to image pushes to the ECR repository. Configure the EventBridge rule to invoke an AWS Lambda function to replicate the image to a new ECR repository in the second Region. Deploy the application to an EKS cluster in the second Region by referencing the new ECR repository in a Kubernetes deployment file. Configure a cross-Region Aurora Replica in the second Region. Configure the new application deployment to use the endpoints for the cross-Region Aurora Replica.",
+      "Turn on Cross-Region Replication to replicate the ECR repository to the second Region. Deploy the application to an EKS cluster in the second Region by referencing the new ECR repository in a Kubernetes deployment file. Configure an Aurora global database with clusters in the initial Region and the second Region. Configure the new application deployment to use the endpoints for the second Region's cluster in the Aurora global database.",
+      "Configure the CodeBuild project to also push the container image to an ECR repository in the second Region. Deploy the application to an EKS cluster in the second Region by referencing the new ECR repository in a Kubernetes deployment file. Configure an Aurora MySQL cluster in the second Region as the target for binary log replication from the Aurora MySQL cluster in the initial Region. Configure the new application deployment to use the endpoints for the second Region's cluster."
+    ],
+    "correct": 2,
+    "explanation": "Đáp án được chọn nhiều nhất trong cộng đồng. Xem thêm giải thích trong file gốc."
+  },
+  {
+    "id": 284,
+    "text": "A company is building a serverless application that uses AWS Lambda functions to process data.A BeginResponse Lambda function initializes data in response to specific application events. The company needs to ensure that a large number of Lambda functions are invoked after the BeginResponse Lambda function runs. Each Lambda function must be invoked in parallel and depends on only the outputs of the BeginResponse Lambda function. Each Lambda function has retry logic for invocation and must be able to fine-tune concurrency without losing data.Which solution will meet these requirements with the MOST operational efficiency?",
+    "options": [
+      "Create an Amazon Simple Notification Service (Amazon SNS) topic. Modify the BeginResponse Lambda function to publish to the SNS topic before the BeginResponse Lambda function finishes running. Subscribe all Lambda functions that need to invoke after the BeginResponse Lambda function runs to the SNS topic. Subscribe any new Lambda functions to the SNS topic.",
+      "Create an Amazon Simple Queue Service (Amazon SQS) queue for each Lambda function that needs to run after the BeginResponse Lambda function runs. Subscribe each Lambda function to its own SQS queue. Create an Amazon Simple Notification Service (Amazon SNS) topic. Subscribe each SQS queue to the SNS topic. Modify the BeginResponse function to publish to the SNS topic when it finishes running.",
+      "Create an Amazon Simple Queue Service (Amazon SQS) queue for each Lambda function that needs to run after the BeginResponse Lambda function runs. Subscribe the Lambda function to the SQS queue. Create an Amazon Simple Notification Service (Amazon SNS) topic for each SQS queue. Subscribe the SQS queues to the SNS topics. Modify the BeginResponse function to publish to the SNS topics when the function finishes running.",
+      "Create an AWS Step Functions Standard Workflow. Configure states in the workflow to invoke the Lambda functions sequentially. Create an Amazon Simple Notification Service (Amazon SNS) topic. Modify the BeginResponse Lambda function to publish to the SNS topic before the Lambda function finishes running. Create a new Lambda function that is subscribed to the SNS topic and that invokes the Step Functions workflow."
+    ],
+    "correct": 1,
+    "explanation": "Đáp án được chọn nhiều nhất trong cộng đồng. Xem thêm giải thích trong file gốc."
+  }
+]

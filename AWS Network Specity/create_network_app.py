@@ -1,0 +1,332 @@
+#!/usr/bin/env python3
+import json
+
+def create_network_specialty_app():
+    """Create AWS Network Specialty study app"""
+    
+    # Sample questions for Network Specialty (you'll need to extract real ones from PDF)
+    sample_questions = [
+        {
+            "id": 1,
+            "text": "A company needs to connect their on-premises data center to AWS VPC with predictable bandwidth and low latency. Which service should they use?",
+            "options": [
+                "AWS VPN",
+                "AWS Direct Connect",
+                "AWS Transit Gateway",
+                "AWS PrivateLink"
+            ],
+            "correct": [1],
+            "type": "single",
+            "explanation": "AWS Direct Connect provides dedicated network connection with predictable bandwidth and low latency."
+        },
+        {
+            "id": 2,
+            "text": "Which AWS services can be used to implement network segmentation? (Choose three)",
+            "options": [
+                "Security Groups",
+                "Network ACLs", 
+                "AWS WAF",
+                "VPC Subnets",
+                "Route Tables",
+                "AWS Shield"
+            ],
+            "correct": [0, 1, 3],
+            "type": "multiple",
+            "explanation": "Security Groups, NACLs, and VPC Subnets are primary tools for network segmentation in AWS."
+        }
+    ]
+    
+    app_content = f'''<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AWS Network Specialty Study App</title>
+    <style>
+        * {{ margin: 0; padding: 0; box-sizing: border-box; }}
+        body {{ font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f0f8ff; }}
+        .container {{ max-width: 900px; margin: 0 auto; padding: 20px; }}
+        .header {{ background: #1e3a8a; color: white; padding: 20px; border-radius: 10px; margin-bottom: 20px; }}
+        .cert-badge {{ background: #3b82f6; padding: 8px 16px; border-radius: 20px; font-size: 14px; margin-bottom: 10px; display: inline-block; }}
+        .progress-bar {{ background: #ddd; height: 10px; border-radius: 5px; margin: 10px 0; }}
+        .progress {{ background: #3b82f6; height: 100%; border-radius: 5px; transition: width 0.3s; }}
+        .question-card {{ background: white; padding: 30px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 20px; border-left: 5px solid #3b82f6; }}
+        .question-text {{ font-size: 18px; line-height: 1.6; margin-bottom: 20px; }}
+        .question-type {{ background: #dbeafe; color: #1e40af; padding: 8px 16px; border-radius: 20px; font-size: 14px; font-weight: bold; margin-bottom: 15px; display: inline-block; }}
+        .options {{ margin: 20px 0; }}
+        .option {{ background: #f8fafc; border: 2px solid #e2e8f0; padding: 15px; margin: 10px 0; border-radius: 8px; cursor: pointer; transition: all 0.3s; position: relative; }}
+        .option:hover {{ border-color: #3b82f6; }}
+        .option.selected {{ border-color: #3b82f6; background: #dbeafe; }}
+        .option.correct {{ border-color: #10b981; background: #d1fae5; }}
+        .option.incorrect {{ border-color: #ef4444; background: #fee2e2; }}
+        .option-checkbox {{ position: absolute; right: 15px; top: 50%; transform: translateY(-50%); width: 20px; height: 20px; }}
+        .controls {{ display: flex; gap: 15px; justify-content: center; margin-top: 20px; }}
+        .btn {{ padding: 12px 24px; border: none; border-radius: 6px; cursor: pointer; font-size: 16px; transition: all 0.3s; }}
+        .btn-primary {{ background: #3b82f6; color: white; }}
+        .btn-primary:hover {{ background: #2563eb; }}
+        .btn-secondary {{ background: #6b7280; color: white; }}
+        .btn:disabled {{ background: #ccc; cursor: not-allowed; }}
+        .stats {{ display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px; }}
+        .stat-card {{ background: white; padding: 20px; border-radius: 8px; text-align: center; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }}
+        .stat-number {{ font-size: 24px; font-weight: bold; color: #3b82f6; }}
+        .explanation {{ margin-top: 20px; padding: 15px; border-radius: 8px; }}
+        .explanation.correct {{ background: #d1fae5; border-left: 4px solid #10b981; }}
+        .explanation.incorrect {{ background: #fee2e2; border-left: 4px solid #ef4444; }}
+        .hidden {{ display: none; }}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="cert-badge">🌐 AWS Certified Advanced Networking - Specialty</div>
+            <h1>Network Specialty Study App</h1>
+            <div class="progress-bar">
+                <div class="progress" id="progressBar"></div>
+            </div>
+            <p>Câu <span id="currentQuestion">1</span>/<span id="totalQuestions">2</span></p>
+        </div>
+
+        <div class="stats">
+            <div class="stat-card">
+                <div class="stat-number" id="correctCount">0</div>
+                <div>Câu đúng</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="wrongCount">0</div>
+                <div>Câu sai</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="accuracy">0%</div>
+                <div>Độ chính xác</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="timeSpent">0:00</div>
+                <div>Thời gian</div>
+            </div>
+        </div>
+
+        <div id="studyMode" class="question-card">
+            <div class="question-type" id="questionType">Single Choice</div>
+            <div class="question-text" id="questionText">
+                Đang tải câu hỏi...
+            </div>
+            <div class="options" id="optionsContainer">
+                <!-- Options will be loaded here -->
+            </div>
+            <div class="controls">
+                <button class="btn btn-secondary" onclick="previousQuestion()">⬅️ Câu trước</button>
+                <button class="btn btn-primary" onclick="submitAnswer()" id="submitBtn" disabled>Xác nhận</button>
+                <button class="btn btn-secondary" onclick="nextQuestion()" id="nextBtn" disabled>Câu tiếp ➡️</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const questions = {json.dumps(sample_questions, ensure_ascii=False, indent=8)};
+        
+        let currentQuestionIndex = 0;
+        let userAnswers = [];
+        let startTime = Date.now();
+        let timer;
+
+        function initializeApp() {{
+            document.getElementById('totalQuestions').textContent = questions.length;
+            loadQuestion();
+            startTimer();
+            updateStats();
+        }}
+
+        function loadQuestion() {{
+            const question = questions[currentQuestionIndex];
+            document.getElementById('questionText').innerHTML = `
+                <strong>Câu ${{question.id}}:</strong><br><br>
+                ${{question.text}}
+            `;
+            
+            const typeElement = document.getElementById('questionType');
+            if (question.type === 'multiple') {{
+                typeElement.textContent = `Multiple Choice (Choose ${{question.correct.length}})`;
+                typeElement.style.background = '#fef3c7';
+                typeElement.style.color = '#92400e';
+            }} else {{
+                typeElement.textContent = 'Single Choice';
+                typeElement.style.background = '#dbeafe';
+                typeElement.style.color = '#1e40af';
+            }}
+            
+            const optionsContainer = document.getElementById('optionsContainer');
+            optionsContainer.innerHTML = '';
+            
+            question.options.forEach((option, index) => {{
+                const optionDiv = document.createElement('div');
+                optionDiv.className = 'option';
+                optionDiv.innerHTML = `
+                    <strong>${{String.fromCharCode(65 + index)}}.</strong> ${{option}}
+                    ${{question.type === 'multiple' ? '<input type="checkbox" class="option-checkbox">' : ''}}
+                `;
+                
+                if (question.type === 'multiple') {{
+                    optionDiv.onclick = () => toggleMultipleOption(index);
+                }} else {{
+                    optionDiv.onclick = () => selectSingleOption(index);
+                }}
+                
+                optionDiv.dataset.index = index;
+                optionsContainer.appendChild(optionDiv);
+            }});
+
+            document.getElementById('currentQuestion').textContent = currentQuestionIndex + 1;
+            document.getElementById('submitBtn').disabled = true;
+            document.getElementById('nextBtn').disabled = true;
+            updateProgressBar();
+        }}
+
+        function selectSingleOption(index) {{
+            document.querySelectorAll('.option').forEach(opt => opt.classList.remove('selected'));
+            document.querySelector(`[data-index="${{index}}"]`).classList.add('selected');
+            document.getElementById('submitBtn').disabled = false;
+        }}
+
+        function toggleMultipleOption(index) {{
+            const option = document.querySelector(`[data-index="${{index}}"]`);
+            const checkbox = option.querySelector('.option-checkbox');
+            
+            if (option.classList.contains('selected')) {{
+                option.classList.remove('selected');
+                checkbox.checked = false;
+            }} else {{
+                option.classList.add('selected');
+                checkbox.checked = true;
+            }}
+            
+            const selectedCount = document.querySelectorAll('.option.selected').length;
+            document.getElementById('submitBtn').disabled = selectedCount === 0;
+        }}
+
+        function getSelectedAnswers() {{
+            const selected = [];
+            document.querySelectorAll('.option.selected').forEach(opt => {{
+                selected.push(parseInt(opt.dataset.index));
+            }});
+            return selected.sort((a, b) => a - b);
+        }}
+
+        function submitAnswer() {{
+            const selectedAnswers = getSelectedAnswers();
+            if (selectedAnswers.length === 0) return;
+
+            const question = questions[currentQuestionIndex];
+            const correctAnswers = [...question.correct].sort((a, b) => a - b);
+            
+            let isCorrect = false;
+            
+            if (question.type === 'single') {{
+                isCorrect = selectedAnswers.length === 1 && selectedAnswers[0] === correctAnswers[0];
+            }} else {{
+                isCorrect = selectedAnswers.length === correctAnswers.length && 
+                    selectedAnswers.every(ans => correctAnswers.includes(ans));
+            }}
+
+            userAnswers[currentQuestionIndex] = {{
+                questionId: question.id,
+                selected: selectedAnswers,
+                correct: correctAnswers,
+                isCorrect: isCorrect,
+                type: question.type
+            }};
+
+            // Show results
+            document.querySelectorAll('.option').forEach((opt, index) => {{
+                const isSelectedCorrect = correctAnswers.includes(index);
+                const isSelectedByUser = selectedAnswers.includes(index);
+                
+                if (isSelectedCorrect) {{
+                    opt.classList.add('correct');
+                }} else if (isSelectedByUser) {{
+                    opt.classList.add('incorrect');
+                }}
+                
+                opt.onclick = null;
+            }});
+
+            // Show explanation
+            const explanationDiv = document.createElement('div');
+            const resultClass = isCorrect ? 'correct' : 'incorrect';
+            const resultText = isCorrect ? '✅ Chính xác!' : '❌ Sai rồi!';
+            
+            explanationDiv.className = `explanation ${{resultClass}}`;
+            explanationDiv.innerHTML = `
+                <strong>${{resultText}}</strong><br>
+                <strong>Đáp án đúng:</strong> ${{correctAnswers.map(i => String.fromCharCode(65 + i)).join(', ')}}<br>
+                <em>Giải thích:</em> ${{question.explanation}}
+            `;
+            document.getElementById('optionsContainer').appendChild(explanationDiv);
+
+            document.getElementById('submitBtn').style.display = 'none';
+            document.getElementById('nextBtn').disabled = false;
+            updateStats();
+        }}
+
+        function nextQuestion() {{
+            if (currentQuestionIndex < questions.length - 1) {{
+                currentQuestionIndex++;
+                loadQuestion();
+                document.getElementById('submitBtn').style.display = 'inline-block';
+            }} else {{
+                showResults();
+            }}
+        }}
+
+        function previousQuestion() {{
+            if (currentQuestionIndex > 0) {{
+                currentQuestionIndex--;
+                loadQuestion();
+                document.getElementById('submitBtn').style.display = 'inline-block';
+            }}
+        }}
+
+        function updateStats() {{
+            const answered = userAnswers.filter(a => a).length;
+            const correct = userAnswers.filter(a => a && a.isCorrect).length;
+            const accuracy = answered > 0 ? Math.round((correct / answered) * 100) : 0;
+
+            document.getElementById('correctCount').textContent = correct;
+            document.getElementById('wrongCount').textContent = answered - correct;
+            document.getElementById('accuracy').textContent = accuracy + '%';
+        }}
+
+        function updateProgressBar() {{
+            const progress = ((currentQuestionIndex + 1) / questions.length) * 100;
+            document.getElementById('progressBar').style.width = progress + '%';
+        }}
+
+        function startTimer() {{
+            timer = setInterval(() => {{
+                const elapsed = Math.floor((Date.now() - startTime) / 1000);
+                const minutes = Math.floor(elapsed / 60);
+                const seconds = elapsed % 60;
+                document.getElementById('timeSpent').textContent = 
+                    `${{minutes}}:${{seconds.toString().padStart(2, '0')}}`;
+            }}, 1000);
+        }}
+
+        function showResults() {{
+            const correct = userAnswers.filter(a => a.isCorrect).length;
+            const total = userAnswers.length;
+            const accuracy = Math.round((correct / total) * 100);
+            
+            alert(`🎉 Hoàn thành!\\n\\nKết quả: ${{correct}}/${{total}} (${{accuracy}}%)\\n\\nAWS Network Specialty - Keep studying!`);
+        }}
+
+        window.onload = initializeApp;
+    </script>
+</body>
+</html>'''
+    
+    with open('network_study_app.html', 'w', encoding='utf-8') as f:
+        f.write(app_content)
+    
+    print("✅ Created AWS Network Specialty study app")
+
+if __name__ == "__main__":
+    create_network_specialty_app()

@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SAP-C02 Day 4 Study</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', sans-serif; background: linear-gradient(135deg, #6f42c1, #5a32a3); min-height: 100vh; padding: 20px; }
+        .container { max-width: 1000px; margin: 0 auto; background: white; border-radius: 15px; box-shadow: 0 20px 40px rgba(0,0,0,0.1); overflow: hidden; }
+        .header { background: linear-gradient(135deg, #6f42c1, #5a32a3); color: white; padding: 30px; text-align: center; }
+        .header h1 { font-size: 2.5em; margin-bottom: 10px; }
+        .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 15px; padding: 20px 30px; background: #f8f9fa; }
+        .stat-card { background: white; padding: 15px; border-radius: 10px; text-align: center; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .stat-number { font-size: 1.8em; font-weight: bold; color: #6f42c1; }
+        .question-container { padding: 30px; }
+        .question-header { background: #6f42c1; color: white; padding: 15px 20px; border-radius: 10px 10px 0 0; font-weight: bold; }
+        .question-content { background: #f8f9fa; padding: 25px; border: 1px solid #dee2e6; border-top: none; border-radius: 0 0 10px 10px; }
+        .question-text { font-size: 1.1em; line-height: 1.6; margin-bottom: 25px; }
+        .multi-choice-note { background: #fff3cd; padding: 10px; border-radius: 5px; margin-bottom: 15px; font-size: 0.9em; color: #856404; }
+        .choices { list-style: none; }
+        .choice { background: white; margin: 10px 0; padding: 15px; border: 2px solid #dee2e6; border-radius: 8px; cursor: pointer; transition: all 0.3s ease; }
+        .choice:hover { border-color: #6f42c1; transform: translateY(-2px); }
+        .choice.selected { border-color: #6f42c1; background: #f3e5f5; }
+        .choice.correct { border-color: #28a745; background: #d4edda; }
+        .choice.incorrect { border-color: #dc3545; background: #f8d7da; }
+        .choice-letter { display: inline-block; width: 30px; height: 30px; background: #6f42c1; color: white; border-radius: 50%; text-align: center; line-height: 30px; margin-right: 15px; font-weight: bold; }
+        .choice.correct .choice-letter { background: #28a745; }
+        .choice.incorrect .choice-letter { background: #dc3545; }
+        .explanation { background: #fff3cd; border: 1px solid #ffeaa7; border-radius: 8px; padding: 20px; margin-top: 20px; display: none; }
+        .explanation.show { display: block; }
+        .navigation { padding: 30px; background: #f8f9fa; display: flex; justify-content: space-between; align-items: center; }
+        .btn { padding: 12px 24px; border: none; border-radius: 25px; cursor: pointer; font-weight: bold; transition: all 0.3s ease; text-decoration: none; display: inline-block; }
+        .btn-primary { background: linear-gradient(135deg, #6f42c1, #5a32a3); color: white; }
+        .btn-success { background: linear-gradient(135deg, #28a745, #1e7e34); color: white; }
+        .btn:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+        .back-buttons { text-align: center; padding: 20px; background: #f8f9fa; }
+        @media (max-width: 768px) { .navigation { flex-direction: column; gap: 15px; } }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📚 SAP-C02 Day 4</h1>
+            <p>18 questions for today's study session</p>
+        </div>
+        
+        <div class="stats">
+            <div class="stat-card">
+                <div class="stat-number" id="currentQ">1</div>
+                <div>Current</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="totalQ">18</div>
+                <div>Total</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="correctCount">0</div>
+                <div>Correct</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="accuracy">0%</div>
+                <div>Accuracy</div>
+            </div>
+        </div>
+        
+        <div class="question-container" id="questionContainer"></div>
+        
+        <div class="navigation">
+            <button class="btn btn-primary" onclick="previousQuestion()" id="prevBtn">Previous</button>
+            <div>
+                <button class="btn btn-primary" onclick="showAnswer()" id="showAnswerBtn">Show Answer</button>
+                <button class="btn btn-success" onclick="nextQuestion()" id="nextBtn" style="display:none;">Next Question</button>
+            </div>
+            <button class="btn btn-primary" onclick="nextQuestion()" id="skipBtn">Skip</button>
+        </div>
+        
+        <div class="back-buttons">
+            <a href="../daily_study_launcher.html" class="btn btn-primary">📚 Back to Study Plan</a>
+            <a href="../../../master_study_launcher.html" class="btn btn-success">🏠 Master Hub</a>
+            <a href="../../../index.html" class="btn" style="background: #17a2b8; color: white;">🏡 Home Page</a>
+        </div>
+    </div>
+
+    <script>
+        const questions = [
+        {
+                "question_number": 55,
+                "question_text": "A company’s factory and automation applications are running in a single VPC. More than 20 applications run on a combination of Amazon EC2, Amazon Elastic Container Service (Amazon ECS), and Amazon RDS.The company has software engineers spread across three teams. One of the three teams owns each application, and each time is responsible for the cost and performance of all of its applications. Team resources have tags that represent their application and team. The teams use IAM access for daily activities.The company needs to determine which costs on the monthly AWS bill are attributable to each application or team. The company also must be able to create reports to compare costs from the last 12 months and to help forecast costs for the next 12 months. A solutions architect must recommend an AWS Billing and Cost Management solution that provides these cost reports.Which combination of actions will meet these requirements? (Choose three.)",
+                "choices": [
+                        "Activate the user-define cost allocation tags that represent the application and the team.",
+                        "Activate the AWS generated cost allocation tags that represent the application and the team.",
+                        "Create a cost category for each application in Billing and Cost Management.",
+                        "Activate IAM access to Billing and Cost Management.",
+                        "Create a cost budget.",
+                        "Enable Cost Explorer."
+                ],
+                "correct_answer": "ACF",
+                "is_multiple_choice": true,
+                "voting_data": {
+                        "ACF": 90,
+                        "ADF": 64
+                }
+        },
+        {
+                "question_number": 56,
+                "question_text": "An AWS customer has a web application that runs on premises. The web application fetches data from a third-party API that is behind a firewall. The third party accepts only one public CIDR block in each client’s allow list.The customer wants to migrate their web application to the AWS Cloud. The application will be hosted on a set of Amazon EC2 instances behind an Application Load Balancer (ALB) in a VPC. The ALB is located in public subnets. The EC2 instances are located in private subnets. NAT gateways provide internet access to the private subnets.How should a solutions architect ensure that the web application can continue to call the third-party API after the migration?",
+                "choices": [
+                        "Associate a block of customer-owned public IP addresses to the VPC. Enable public IP addressing for public subnets in the VPC.",
+                        "Register a block of customer-owned public IP addresses in the AWS account. Create Elastic IP addresses from the address block and assign them to the NAT gateways in the VPC.",
+                        "Create Elastic IP addresses from the block of customer-owned IP addresses. Assign the static Elastic IP addresses to the ALB.",
+                        "Register a block of customer-owned public IP addresses in the AWS account. Set up AWS Global Accelerator to use Elastic IP addresses from the address block. Set the ALB as the accelerator endpoint."
+                ],
+                "correct_answer": "B",
+                "is_multiple_choice": false,
+                "voting_data": {
+                        "B": 33
+                }
+        },
+        {
+                "question_number": 57,
+                "question_text": "A company with several AWS accounts is using AWS Organizations and service control policies (SCPs). An administrator created the following SCP and has attached it to an organizational unit (OU) that contains AWS account 1111-1111-1111:Developers working in account 1111-1111-1111 complain that they cannot create Amazon S3 buckets. How should the administrator address this problem?",
+                "choices": [
+                        "Add s3:CreateBucket with “Allow” effect to the SCP.",
+                        "Remove the account from the OU, and attach the SCP directly to account 1111-1111-1111.",
+                        "Instruct the developers to add Amazon S3 permissions to their IAM entities.",
+                        "Remove the SCP from account 1111-1111-1111."
+                ],
+                "correct_answer": "C",
+                "is_multiple_choice": false,
+                "voting_data": {
+                        "C": 51,
+                        "A": 6
+                }
+        },
+        {
+                "question_number": 58,
+                "question_text": "A company has a monolithic application that is critical to the company’s business. The company hosts the application on an Amazon EC2 instance that runs Amazon Linux 2. The company’s application team receives a directive from the legal department to back up the data from the instance’s encrypted Amazon Elastic Block Store (Amazon EBS) volume to an Amazon S3 bucket. The application team does not have the administrative SSH key pair for the instance. The application must continue to serve the users.Which solution will meet these requirements?",
+                "choices": [
+                        "Attach a role to the instance with permission to write to Amazon S3. Use the AWS Systems Manager Session Manager option to gain access to the instance and run commands to copy data into Amazon S3.",
+                        "Create an image of the instance with the reboot option turned on. Launch a new EC2 instance from the image. Attach a role to the new instance with permission to write to Amazon S3. Run a command to copy data into Amazon S3.",
+                        "Take a snapshot of the EBS volume by using Amazon Data Lifecycle Manager (Amazon DLM). Copy the data to Amazon S3.",
+                        "Create an image of the instance. Launch a new EC2 instance from the image. Attach a role to the new instance with permission to write to Amazon S3. Run a command to copy data into Amazon S3."
+                ],
+                "correct_answer": "A",
+                "is_multiple_choice": false,
+                "voting_data": {
+                        "A": 92,
+                        "C": 85,
+                        "D": 4
+                }
+        },
+        {
+                "question_number": 59,
+                "question_text": "A solutions architect needs to copy data from an Amazon S3 bucket m an AWS account to a new S3 bucket in a new AWS account. The solutions architect must implement a solution that uses the AWS CLI.Which combination of steps will successfully copy the data? (Choose three.)",
+                "choices": [
+                        "Create a bucket policy to allow the source bucket to list its contents and to put objects and set object ACLs in the destination bucket. Attach the bucket policy to the destination bucket.",
+                        "Create a bucket policy to allow a user in the destination account to list the source bucket’s contents and read the source bucket’s objects. Attach the bucket policy to the source bucket.",
+                        "Create an IAM policy in the source account. Configure the policy to allow a user in the source account to list contents and get objects in the source bucket, and to list contents, put objects, and set object ACLs in the destination bucket. Attach the policy to the user.",
+                        "Create an IAM policy in the destination account. Configure the policy to allow a user in the destination account to list contents and get objects in the source bucket, and to list contents, put objects, and set objectACLs in the destination bucket. Attach the policy to the user.",
+                        "Run the aws s3 sync command as a user in the source account. Specify the source and destination buckets to copy the data.",
+                        "Run the aws s3 sync command as a user in the destination account. Specify the source and destination buckets to copy the data."
+                ],
+                "correct_answer": "BDF",
+                "is_multiple_choice": true,
+                "voting_data": {
+                        "BDF": 62,
+                        "BDE": 2,
+                        "BCE": 1
+                }
+        },
+        {
+                "question_number": 60,
+                "question_text": "A company built an application based on AWS Lambda deployed in an AWS CloudFormation stack. The last production release of the web application introduced an issue that resulted in an outage lasting several minutes. A solutions architect must adjust the deployment process to support a canary release.Which solution will meet these requirements?",
+                "choices": [
+                        "Create an alias for every new deployed version of the Lambda function. Use the AWS CLI update-alias command with the routing-config parameter to distribute the load.",
+                        "Deploy the application into a new CloudFormation stack. Use an Amazon Route 53 weighted routing policy to distribute the load.",
+                        "Create a version for every new deployed Lambda function. Use the AWS CLI update-function-configuration command with the routing-config parameter to distribute the load.",
+                        "Configure AWS CodeDeploy and use CodeDeployDefault.OneAtATime in the Deployment configuration to distribute the load."
+                ],
+                "correct_answer": "A",
+                "is_multiple_choice": false,
+                "voting_data": {
+                        "A": 57,
+                        "D": 1
+                }
+        },
+        {
+                "question_number": 61,
+                "question_text": "A finance company hosts a data lake in Amazon S3. The company receives financial data records over SFTP each night from several third parties. The company runs its own SFTP server on an Amazon EC2 instance in a public subnet of a VPC. After the files are uploaded, they are moved to the data lake by a cron job that runs on the same instance. The SFTP server is reachable on DNS sftp.example.com through the use of Amazon Route 53.What should a solutions architect do to improve the reliability and scalability of the SFTP solution?",
+                "choices": [
+                        "Move the EC2 instance into an Auto Scaling group. Place the EC2 instance behind an Application Load Balancer (ALB). Update the DNS record sftp.example.com in Route 53 to point to the ALB.",
+                        "Migrate the SFTP server to AWS Transfer for SFTP. Update the DNS record sftp.example.com in Route 53 to point to the server endpoint hostname.",
+                        "Migrate the SFTP server to a file gateway in AWS Storage Gateway. Update the DNS record sftp.example.com in Route 53 to point to the file gateway endpoint.",
+                        "Place the EC2 instance behind a Network Load Balancer (NLB). Update the DNS record sftp.example.com in Route 53 to point to the NLB."
+                ],
+                "correct_answer": "B",
+                "is_multiple_choice": false,
+                "voting_data": {
+                        "B": 50
+                }
+        },
+        {
+                "question_number": 62,
+                "question_text": "A company wants to migrate an application to Amazon EC2 from VMware Infrastructure that runs in an on-premises data center. A solutions architect must preserve the software and configuration settings during the migration.What should the solutions architect do to meet these requirements?",
+                "choices": [
+                        "Configure the AWS DataSync agent to start replicating the data store to Amazon FSx for Windows File Server. Use the SMB share to host the VMware data store. Use VM Import/Export to move the VMs to Amazon EC2.",
+                        "Use the VMware vSphere client to export the application as an image in Open Virtualization Format (OVF) format. Create an Amazon S3 bucket to store the image in the destination AWS Region. Create and apply an IAM role for VM Import. Use the AWS CLI to run the EC2 import command.",
+                        "Configure AWS Storage Gateway for files service to export a Common Internet File System (CIFS) share. Create a backup copy to the shared folder. Sign in to the AWS Management Console and create an AMI from the backup copy. Launch an EC2 instance that is based on the AMI.",
+                        "Create a managed-instance activation for a hybrid environment in AWS Systems Manager. Download and install Systems Manager Agent on the on-premises VM. Register the VM with Systems Manager to be a managed instance. Use AWS Backup to create a snapshot of the VM and create an AMI. Launch an EC2 instance that is based on the AMI."
+                ],
+                "correct_answer": "B",
+                "is_multiple_choice": false,
+                "voting_data": {
+                        "B": 32
+                }
+        },
+        {
+                "question_number": 63,
+                "question_text": "A video processing company has an application that downloads images from an Amazon S3 bucket, processes the images, stores a transformed image in a second S3 bucket, and updates metadata about the image in an Amazon DynamoDB table. The application is written in Node.js and runs by using an AWS Lambda function. The Lambda function is invoked when a new image is uploaded to Amazon S3.The application ran without incident for a while. However, the size of the images has grown significantly. The Lambda function is now failing frequently with timeout errors. The function timeout is set to its maximum value. A solutions architect needs to refactor the application’s architecture to prevent invocation failures. The company does not want to manage the underlying infrastructure.Which combination of steps should the solutions architect take to meet these requirements? (Choose two.)",
+                "choices": [
+                        "Modify the application deployment by building a Docker image that contains the application code. Publish the image to Amazon Elastic Container Registry (Amazon ECR).",
+                        "Create a new Amazon Elastic Container Service (Amazon ECS) task definition with a compatibility type of AWS Fargate. Configure the task definition to use the new image in Amazon Elastic Container Registry (Amazon ECR). Adjust the Lambda function to invoke an ECS task by using the ECS task definition when a new file arrives in Amazon S3.",
+                        "Create an AWS Step Functions state machine with a Parallel state to invoke the Lambda function. Increase the provisioned concurrency of the Lambda function.",
+                        "Create a new Amazon Elastic Container Service (Amazon ECS) task definition with a compatibility type of Amazon EC2. Configure the task definition to use the new image in Amazon Elastic Container Registry (Amazon ECR). Adjust the Lambda function to invoke an ECS task by using the ECS task definition when a new file arrives in Amazon S3.",
+                        "Modify the application to store images on Amazon Elastic File System (Amazon EFS) and to store metadata on an Amazon RDS DB instance. Adjust the Lambda function to mount the EFS file share."
+                ],
+                "correct_answer": "AB",
+                "is_multiple_choice": true,
+                "voting_data": {
+                        "AB": 34,
+                        "BC": 3,
+                        "B": 2
+                }
+        },
+        {
+                "question_number": 64,
+                "question_text": "A company has an organization in AWS Organizations. The company is using AWS Control Tower to deploy a landing zone for the organization. The company wants to implement governance and policy enforcement. The company must implement a policy that will detect Amazon RDS DB instances that are not encrypted at rest in the company’s production OU.Which solution will meet this requirement?",
+                "choices": [
+                        "Turn on mandatory guardrails in AWS Control Tower. Apply the mandatory guardrails to the production OU.",
+                        "Enable the appropriate guardrail from the list of strongly recommended guardrails in AWS Control Tower. Apply the guardrail to the production OU.",
+                        "Use AWS Config to create a new mandatory guardrail. Apply the rule to all accounts in the production OU.",
+                        "Create a custom SCP in AWS Control Tower. Apply the SCP to the production OU."
+                ],
+                "correct_answer": "B",
+                "is_multiple_choice": false,
+                "voting_data": {
+                        "B": 43,
+                        "C": 3
+                }
+        },
+        {
+                "question_number": 65,
+                "question_text": "A startup company hosts a fleet of Amazon EC2 instances in private subnets using the latest Amazon Linux 2 AMI. The company’s engineers rely heavily on SSH access to the instances for troubleshooting.The company’s existing architecture includes the following:•\tA VPC with private and public subnets, and a NAT gateway.•\tSite-to-Site VPN for connectivity with the on-premises environment.•\tEC2 security groups with direct SSH access from the on-premises environment.The company needs to increase security controls around SSH access and provide auditing of commands run by the engineers.Which strategy should a solutions architect use?",
+                "choices": [
+                        "Install and configure EC2 Instance Connect on the fleet of EC2 instances. Remove all security group rules attached to EC2 instances that allow inbound TCP on port 22. Advise the engineers to remotely access the instances by using the EC2 Instance Connect CLI.",
+                        "Update the EC2 security groups to only allow inbound TCP on port 22 to the IP addresses of the engineer’s devices. Install the Amazon CloudWatch agent on all EC2 instances and send operating system audit logs to CloudWatch Logs.",
+                        "Update the EC2 security groups to only allow inbound TCP on port 22 to the IP addresses of the engineer’s devices. Enable AWS Config for EC2 security group resource changes. Enable AWS Firewall Manager and apply a security group policy that automatically remediates changes to rules.",
+                        "Create an IAM role with the AmazonSSMManagedInstanceCore managed policy attached. Attach the IAM role to all the EC2 instances. Remove all security group rules attached to the EC2 instances that allow inbound TCP on port 22. Have the engineers install the AWS Systems Manager Session Manager plugin for their devices and remotely access the instances by using the start-session API call from Systems Manager."
+                ],
+                "correct_answer": "D",
+                "is_multiple_choice": false,
+                "voting_data": {
+                        "D": 42,
+                        "B": 4
+                }
+        },
+        {
+                "question_number": 66,
+                "question_text": "A company that uses AWS Organizations allows developers to experiment on AWS. As part of the landing zone that the company has deployed, developers use their company email address to request an account. The company wants to ensure that developers are not launching costly services or running services unnecessarily. The company must give developers a fixed monthly budget to limit their AWS costs.Which combination of steps will meet these requirements? (Choose three.)",
+                "choices": [
+                        "Create an SCP to set a fixed monthly account usage limit. Apply the SCP to the developer accounts.",
+                        "Use AWS Budgets to create a fixed monthly budget for each developer’s account as part of the account creation process.",
+                        "Create an SCP to deny access to costly services and components. Apply the SCP to the developer accounts.",
+                        "Create an IAM policy to deny access to costly services and components. Apply the IAM policy to the developer accounts.",
+                        "Create an AWS Budgets alert action to terminate services when the budgeted amount is reached. Configure the action to terminate all services.",
+                        "Create an AWS Budgets alert action to send an Amazon Simple Notification Service (Amazon SNS) notification when the budgeted amount is reached. Invoke an AWS Lambda function to terminate all services."
+                ],
+                "correct_answer": "BCF",
+                "is_multiple_choice": true,
+                "voting_data": {
+                        "BCF": 77,
+                        "BDF": 17,
+                        "ACF": 1
+                }
+        },
+        {
+                "question_number": 67,
+                "question_text": "A company has applications in an AWS account that is named Source. The account is in an organization in AWS Organizations. One of the applications uses AWS Lambda functions and stores inventory data in an Amazon Aurora database. The application deploys the Lambda functions by using a deployment package. The company has configured automated backups for Aurora.The company wants to migrate the Lambda functions and the Aurora database to a new AWS account that is named Target. The application processes critical data, so the company must minimize downtime.Which solution will meet these requirements?",
+                "choices": [
+                        "Download the Lambda function deployment package from the Source account. Use the deployment package and create new Lambda functions in the Target account. Share the automated Aurora DB cluster snapshot with the Target account.",
+                        "Download the Lambda function deployment package from the Source account. Use the deployment package and create new Lambda functions in the Target account. Share the Aurora DB cluster with the Target account by using AWS Resource Access Manager {AWS RAM). Grant the Target account permission to clone the Aurora DB cluster.",
+                        "Use AWS Resource Access Manager (AWS RAM) to share the Lambda functions and the Aurora DB cluster with the Target account. Grant the Target account permission to clone the Aurora DB cluster.",
+                        "Use AWS Resource Access Manager (AWS RAM) to share the Lambda functions with the Target account. Share the automated Aurora DB cluster snapshot with the Target account."
+                ],
+                "correct_answer": "B",
+                "is_multiple_choice": false,
+                "voting_data": {
+                        "B": 68,
+                        "C": 2,
+                        "A": 1
+                }
+        },
+        {
+                "question_number": 68,
+                "question_text": "A company runs a Python script on an Amazon EC2 instance to process data. The script runs every 10 minutes. The script ingests files from an Amazon S3 bucket and processes the files. On average, the script takes approximately 5 minutes to process each file The script will not reprocess a file that the script has already processed.The company reviewed Amazon CloudWatch metrics and noticed that the EC2 instance is idle for approximately 40% of the time because of the file processing speed. The company wants to make the workload highly available and scalable. The company also wants to reduce long-term management overhead.Which solution will meet these requirements MOST cost-effectively?",
+                "choices": [
+                        "Migrate the data processing script to an AWS Lambda function. Use an S3 event notification to invoke the Lambda function to process the objects when the company uploads the objects.",
+                        "Create an Amazon Simple Queue Service (Amazon SQS) queue. Configure Amazon S3 to send event notifications to the SQS queue. Create an EC2 Auto Scaling group with a minimum size of one instance. Update the data processing script to poll the SQS queue. Process the S3 objects that the SQS message identifies.",
+                        "Migrate the data processing script to a container image. Run the data processing container on an EC2 instance. Configure the container to poll the S3 bucket for new objects and to process the resulting objects.",
+                        "Migrate the data processing script to a container image that runs on Amazon Elastic Container Service (Amazon ECS) on AWS Fargate. Create an AWS Lambda function that calls the Fargate RunTaskAPI operation when the container processes the file. Use an S3 event notification to invoke the Lambda function."
+                ],
+                "correct_answer": "A",
+                "is_multiple_choice": false,
+                "voting_data": {
+                        "A": 42,
+                        "D": 19
+                }
+        },
+        {
+                "question_number": 69,
+                "question_text": "A financial services company in North America plans to release a new online web application to its customers on AWS. The company will launch the application in the us-east-1 Region on Amazon EC2 instances. The application must be highly available and must dynamically scale to meet user traffic. The company also wants to implement a disaster recovery environment for the application in the us-west-1 Region by using active-passive failover.Which solution will meet these requirements?",
+                "choices": [
+                        "Create a VPC in us-east-1 and a VPC in us-west-1. Configure VPC peering. In the us-east-1 VPC, create an Application Load Balancer (ALB) that extends across multiple Availability Zones in both VPCs. Create an Auto Scaling group that deploys the EC2 instances across the multiple Availability Zones in both VPCs. Place the Auto Scaling group behind the ALB.",
+                        "Create a VPC in us-east-1 and a VPC in us-west-1. In the us-east-1 VPC, create an Application Load Balancer (ALB) that extends across multiple Availability Zones in that VPC. Create an Auto Scaling group that deploys the EC2 instances across the multiple Availability Zones in the us-east-1 VPC. Place the Auto Scaling group behind the ALSet up the same configuration in the us-west-1 VPC. Create an Amazon Route 53 hosted zone. Create separate records for each ALEnable health checks to ensure high availability between Regions.",
+                        "Create a VPC in us-east-1 and a VPC in us-west-1. In the us-east-1 VPC, create an Application Load Balancer (ALB) that extends across multiple Availability Zones in that VPCreate an Auto Scaling group that deploys the EC2 instances across the multiple Availability Zones in the us-east-1 VPPlace the Auto Scaling group behind the ALB. Set up the same configuration in the us-west-1 VPCreate an Amazon Route 53 hosted zone. Create separate records for each ALB. Enable health checks and configure a failover routing policy for each record.",
+                        "Create a VPC in us-east-1 and a VPC in us-west-1. Configure VPC peering. In the us-east-1 VPC, create an Application Load Balancer (ALB) that extends across multiple Availability Zones in both VPCs. Create an Auto Scaling group that deploys the EC2 instances across the multiple Availability Zones in both VPCs. Place the Auto Scaling group behind the ALB. Create an Amazon Route 53 hosted zone. Create a record for the ALB."
+                ],
+                "correct_answer": "C",
+                "is_multiple_choice": false,
+                "voting_data": {
+                        "C": 34
+                }
+        },
+        {
+                "question_number": 70,
+                "question_text": "A company has an environment that has a single AWS account. A solutions architect is reviewing the environment to recommend what the company could improve specifically in terms of access to the AWS Management Console. The company’s IT support workers currently access the console for administrative tasks, authenticating with named IAM users that have been mapped to their job role.The IT support workers no longer want to maintain both their Active Directory and IAM user accounts. They want to be able to access the console by using their existing Active Directory credentials. The solutions architect is using AWS IAM Identity Center (AWS Single Sign-On) to implement this functionality.Which solution will meet these requirements MOST cost-effectively?",
+                "choices": [
+                        "Create an organization in AWS Organizations. Turn on the IAM Identity Center feature in Organizations. Create and configure a directory in AWS Directory Service for Microsoft Active Directory (AWS Managed Microsoft AD) with a two-way trust to the company’s on-premises Active Directory. Configure IAM Identity Center and set the AWS Managed Microsoft AD directory as the identity source. Create permission sets and map them to the existing groups within the AWS Managed Microsoft AD directory.",
+                        "Create an organization in AWS Organizations. Turn on the IAM Identity Center feature in Organizations. Create and configure an AD Connector to connect to the company’s on-premises Active Directory. Configure IAM Identity Center and select the AD Connector as the identity source. Create permission sets and map them to the existing groups within the company’s Active Directory.",
+                        "Create an organization in AWS Organizations. Turn on all features for the organization. Create and configure a directory in AWS Directory Service for Microsoft Active Directory (AWS Managed Microsoft AD) with a two-way trust to the company’s on-premises Active Directory. Configure IAM Identity Center and select the AWS Managed Microsoft AD directory as the identity source. Create permission sets and map them to the existing groups within the AWS Managed Microsoft AD directory.",
+                        "Create an organization in AWS Organizations. Turn on all features for the organization. Create and configure an AD Connector to connect to the company’s on-premises Active Directory. Configure IAM Identity Center and set the AD Connector as the identity source. Create permission sets and map them to the existing groups within the company’s Active Directory."
+                ],
+                "correct_answer": "D",
+                "is_multiple_choice": false,
+                "voting_data": {
+                        "D": 83,
+                        "B": 16,
+                        "A": 3
+                }
+        },
+        {
+                "question_number": 71,
+                "question_text": "A video streaming company recently launched a mobile app for video sharing. The app uploads various files to an Amazon S3 bucket in the us-east-1 Region. The files range in size from 1 GB to 10 GB.Users who access the app from Australia have experienced uploads that take long periods of time. Sometimes the files fail to completely upload for these users. A solutions architect must improve the app’s performance for these uploads.Which solutions will meet these requirements? (Choose two.)",
+                "choices": [
+                        "Enable S3 Transfer Acceleration on the S3 bucket. Configure the app to use the Transfer Acceleration endpoint for uploads.",
+                        "Configure an S3 bucket in each Region to receive the uploads. Use S3 Cross-Region Replication to copy the files to the distribution S3 bucket.",
+                        "Set up Amazon Route 53 with latency-based routing to route the uploads to the nearest S3 bucket Region.",
+                        "Configure the app to break the video files into chunks. Use a multipart upload to transfer files to Amazon S3.",
+                        "Modify the app to add random prefixes to the files before uploading."
+                ],
+                "correct_answer": "AD",
+                "is_multiple_choice": true,
+                "voting_data": {
+                        "AD": 32,
+                        "DE": 1
+                }
+        },
+        {
+                "question_number": 72,
+                "question_text": "An application is using an Amazon RDS for MySQL Multi-AZ DB instance in the us-east-1 Region. After a failover test, the application lost the connections to the database and could not re-establish the connections. After a restart of the application, the application re-established the connections.A solutions architect must implement a solution so that the application can re-establish connections to the database without requiring a restart.Which solution will meet these requirements?",
+                "choices": [
+                        "Create an Amazon Aurora MySQL Serverless v1 DB instance. Migrate the RDS DB instance to the Aurora Serverless v1 DB instance. Update the connection settings in the application to point to the Aurora reader endpoint.",
+                        "Create an RDS proxy. Configure the existing RDS endpoint as a target. Update the connection settings in the application to point to the RDS proxy endpoint.",
+                        "Create a two-node Amazon Aurora MySQL DB cluster. Migrate the RDS DB instance to the Aurora DB cluster. Create an RDS proxy. Configure the existing RDS endpoint as a target. Update the connection settings in the application to point to the RDS proxy endpoint.",
+                        "Create an Amazon S3 bucket. Export the database to Amazon S3 by using AWS Database Migration Service (AWS DMS). Configure Amazon Athena to use the S3 bucket as a data store. Install the latest Open Database Connectivity (ODBC) driver for the application. Update the connection settings in the application to point to the Athena endpoint"
+                ],
+                "correct_answer": "B",
+                "is_multiple_choice": false,
+                "voting_data": {
+                        "B": 23
+                }
+        }
+];
+        
+        let currentQuestionIndex = 0;
+        let correctAnswers = 0;
+        let answeredQuestions = new Set();
+        let selectedAnswers = {};
+        
+        function loadQuestion() {
+            const question = questions[currentQuestionIndex];
+            if (!question) return;
+            
+            const container = document.getElementById('questionContainer');
+            const isMultipleChoice = question.is_multiple_choice;
+            
+            let choicesHtml = '';
+            question.choices.forEach((choice, index) => {
+                const letter = String.fromCharCode(65 + index);
+                choicesHtml += `
+                    <li class="choice" onclick="selectChoice('${letter}', this)" data-choice="${letter}">
+                        <span class="choice-letter">${letter}</span>
+                        ${choice}
+                    </li>
+                `;
+            });
+            
+            const multiChoiceNote = isMultipleChoice ? 
+                '<div class="multi-choice-note">📝 Multiple Choice: You can select multiple answers</div>' : '';
+            
+            container.innerHTML = `
+                <div class="question-header">
+                    Question ${question.question_number} (Day 4 - ${currentQuestionIndex + 1} of ${questions.length})
+                </div>
+                <div class="question-content">
+                    <div class="question-text">${question.question_text}</div>
+                    ${multiChoiceNote}
+                    <ul class="choices">${choicesHtml}</ul>
+                    <div class="explanation" id="explanation"></div>
+                </div>
+            `;
+            
+            updateStats();
+        }
+        
+        function selectChoice(letter, element) {
+            const question = questions[currentQuestionIndex];
+            const isMultipleChoice = question.is_multiple_choice;
+            
+            if (!selectedAnswers[currentQuestionIndex]) {
+                selectedAnswers[currentQuestionIndex] = [];
+            }
+            
+            if (isMultipleChoice) {
+                // Multiple choice - toggle selection
+                if (element.classList.contains('selected')) {
+                    element.classList.remove('selected');
+                    selectedAnswers[currentQuestionIndex] = selectedAnswers[currentQuestionIndex].filter(ans => ans !== letter);
+                } else {
+                    element.classList.add('selected');
+                    selectedAnswers[currentQuestionIndex].push(letter);
+                }
+            } else {
+                // Single choice - clear others first
+                document.querySelectorAll('.choice').forEach(choice => {
+                    choice.classList.remove('selected');
+                });
+                element.classList.add('selected');
+                selectedAnswers[currentQuestionIndex] = [letter];
+            }
+        }
+        
+        function showAnswer() {
+            const question = questions[currentQuestionIndex];
+            const selectedAnswer = selectedAnswers[currentQuestionIndex];
+            
+            if (!selectedAnswer || selectedAnswer.length === 0) {
+                alert('Please select an answer first!');
+                return;
+            }
+            
+            answeredQuestions.add(currentQuestionIndex);
+            
+            document.querySelectorAll('.choice').forEach(choice => {
+                const choiceLetter = choice.getAttribute('data-choice');
+                if (question.correct_answer.includes(choiceLetter)) {
+                    choice.classList.add('correct');
+                } else if (selectedAnswer.includes(choiceLetter)) {
+                    choice.classList.add('incorrect');
+                }
+            });
+            
+            let isCorrect = false;
+            if (question.is_multiple_choice) {
+                const correctAnswers = question.correct_answer.split('').sort().join('');
+                const userAnswers = selectedAnswer.sort().join('');
+                isCorrect = correctAnswers === userAnswers;
+            } else {
+                isCorrect = selectedAnswer[0] === question.correct_answer;
+            }
+            
+            if (isCorrect) {
+                correctAnswers++;
+            }
+            
+            const explanationDiv = document.getElementById('explanation');
+            const yourAnswer = selectedAnswer.join(', ');
+            explanationDiv.innerHTML = `<strong>Correct Answer:</strong> ${question.correct_answer}<br><strong>Your Answer:</strong> ${yourAnswer}<br><strong>Result:</strong> ${isCorrect ? '✅ Correct' : '❌ Incorrect'}`;
+            explanationDiv.classList.add('show');
+            
+            document.getElementById('showAnswerBtn').style.display = 'none';
+            document.getElementById('nextBtn').style.display = 'inline-block';
+            
+            updateStats();
+        }
+        
+        function nextQuestion() {
+            if (currentQuestionIndex < questions.length - 1) {
+                currentQuestionIndex++;
+                loadQuestion();
+                document.getElementById('showAnswerBtn').style.display = 'inline-block';
+                document.getElementById('nextBtn').style.display = 'none';
+            } else {
+                const accuracy = Math.round((correctAnswers / answeredQuestions.size) * 100);
+                alert(`Day 4 Complete!\n\nCorrect: ${correctAnswers}/${answeredQuestions.size}\nAccuracy: ${accuracy}%\n\nGreat job!`);
+            }
+        }
+        
+        function previousQuestion() {
+            if (currentQuestionIndex > 0) {
+                currentQuestionIndex--;
+                loadQuestion();
+                document.getElementById('showAnswerBtn').style.display = 'inline-block';
+                document.getElementById('nextBtn').style.display = 'none';
+            }
+        }
+        
+        function updateStats() {
+            document.getElementById('currentQ').textContent = currentQuestionIndex + 1;
+            document.getElementById('totalQ').textContent = questions.length;
+            document.getElementById('correctCount').textContent = correctAnswers;
+            const accuracy = answeredQuestions.size > 0 ? Math.round((correctAnswers / answeredQuestions.size) * 100) : 0;
+            document.getElementById('accuracy').textContent = accuracy + '%';
+        }
+        
+        // Initialize
+        loadQuestion();
+    </script>
+</body>
+</html>

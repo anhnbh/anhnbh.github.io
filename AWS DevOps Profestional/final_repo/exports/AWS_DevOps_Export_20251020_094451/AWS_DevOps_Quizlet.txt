@@ -1,0 +1,360 @@
+Q1: A company has a mobile application that makes HTTP API calls to an Application Load Balancer (ALB). ...	Answer: A
+Q2: A company provides an application to customers. The application has an Amazon API Gateway REST API t...	Answer: C
+Q3: A company is adopting AWS CodeDeploy to automate its application deployments for a Java-Apache Tomca...	Answer: B
+Q4: A company requires its developers to tag all Amazon Elastic Block Store (Amazon EBS) volumes in an a...	Answer: B
+Q5: A company is using an Amazon Aurora cluster as the data store for its application. The Aurora cluste...	Answer: A
+Q6: A company must encrypt all AMIs that the company shares across accounts. A DevOps engineer has acces...	Answer: A, D, F
+Q7: A company uses AWS CodePipeline pipelines to automate releases of its application A typical pipeline...	Answer: A, D
+Q8: A company’s security team requires that all external Application Load Balancers (ALBs) and Amazon AP...	Answer: A, C
+Q9: A company uses AWS Key Management Service (AWS KMS) keys and manual key rotation to meet regulatory ...	Answer: C
+Q10: A security review has identified that an AWS CodeBuild project is downloading a database population ...	Answer: C
+Q11: An ecommerce company has chosen AWS to host its new platform. The company's DevOps team has started ...	Answer: B, C, F
+Q12: An ecommerce company is receiving reports that its order history page is experiencing delays in refl...	Answer: A, D
+Q13: A company has a single AWS account that runs hundreds of Amazon EC2 instances in a single AWS Region...	Answer: B
+Q14: A DevOps engineer is building a continuous deployment pipeline for a serverless application that use...	Answer: A
+Q15: To run an application, a DevOps engineer launches an Amazon EC2 instance with public IP addresses in...	Answer: C
+Q16: A development team is using AWS CodeCommit to version control application code and AWS CodePipeline ...	Answer: A
+Q17: A company's developers use Amazon EC2 instances as remote workstations. The company is concerned tha...	Answer: C
+Q18: A DevOps engineer is creating an AWS CloudFormation template to deploy a web service. The web servic...	Answer: D
+Q19: A company uses AWS Organizations and AWS Control Tower to manage all the company's AWS accounts. The...	Answer: D
+Q20: A company's DevOps engineer uses AWS Systems Manager to perform maintenance tasks during maintenance...	Answer: A
+Q21: A company has containerized all of its in-house quality control applications. The company is running...	Answer: D
+Q22: An IT team has built an AWS CloudFormation template so others in the company can quickly and reliabl...	Answer: B
+Q23: A company has an AWS CodePipeline pipeline that is configured with an Amazon S3 bucket in the eu-wes...	Answer: C, E
+Q24: A company runs an application on one Amazon EC2 instance. Application metadata is stored in Amazon S...	Answer: B
+Q26: A company hosts a security auditing application in an AWS account. The auditing application uses an ...	Answer: A
+Q27: A company has an on-premises application that is written in Go. A DevOps engineer must move the appl...	Answer: D
+Q28: A developer is maintaining a fleet of 50 Amazon EC2 Linux servers. The servers are part of an Amazon...	Answer: D
+Q29: A company has an organization in AWS Organizations. The organization includes workload accounts that...	Answer: B, D, E
+Q30: A company has multiple accounts in an organization in AWS Organizations. The company's SecOps team n...	Answer: C
+Q31: A company has migrated its container-based applications to Amazon EKS and want to establish automate...	Answer: A
+Q32: A company is implementing an Amazon Elastic Container Service (Amazon ECS) cluster to run its worklo...	Answer: B, D, F
+Q33: A company that uses electronic health records is running a fleet of Amazon EC2 instances with an Ama...	Answer: A
+Q34: A company is using AWS CodePipeline to automate its release pipeline. AWS CodeDeploy is being used i...	Answer: C
+Q35: A company uses AWS Storage Gateway in file gateway mode in front of an Amazon S3 bucket that is used...	Answer: A
+Q36: A DevOps engineer needs to back up sensitive Amazon S3 objects that are stored within an S3 bucket w...	Answer: A, D, E
+Q37: A company has multiple member accounts that are part of an organization in AWS Organizations. The se...	Answer: B, C, E
+Q38: A space exploration company receives telemetry data from multiple satellites. Small packets of data ...	Answer: C
+Q39: A company wants to use AWS CloudFormation for infrastructure deployment. The company has strict tagg...	Answer: D
+Q40: A company requires that its internally facing web application be highly available. The architecture ...	Answer: B, D
+Q41: A DevOps engineer is building a multistage pipeline with AWS CodePipeline to build, verify, stage, t...	Answer: C
+Q42: A company's application development team uses Linux-based Amazon EC2 instances as bastion hosts. Inb...	Answer: C
+Q43: A DevOps team manages an API running on-premises that serves as a backend for an Amazon API Gateway ...	Answer: A, C
+Q44: A company has an application that is using a MySQL-compatible Amazon Aurora Multi-AZ DB cluster as t...	Answer: D
+Q45: A company hosts its staging website using an Amazon EC2 instance backed with Amazon EBS storage. The...	Answer: C
+Q46: A company wants to use AWS development tools to replace its current bash deployment scripts. The com...	Answer: D
+Q47: A company runs an application with an Amazon EC2 and on-premises configuration. A DevOps engineer ne...	Answer: A, B, F
+Q48: A company has chosen AWS to host a new application. The company needs to implement a multi-account s...	Answer: D
+Q49: An online retail company based in the United States plans to expand its operations to Europe and Asi...	Answer: C
+Q50: A company is implementing a well-architected design for its globally accessible API stack. The desig...	Answer: B
+Q51: A rapidly growing company wants to scale for developer demand for AWS development environments. Deve...	Answer: C
+Q52: A company uses AWS Organizations to manage multiple accounts. Information security policies require ...	Answer: B
+Q53: A company is performing vulnerability scanning for all Amazon EC2 instances across many accounts. Th...	Answer: A, B, E
+Q54: A development team uses AWS CodeCommit for version control for applications. The development team us...	Answer: C
+Q55: A company has deployed an application in a production VPC in a single AWS account. The application i...	Answer: A
+Q56: A DevOps engineer has automated a web service deployment by using AWS CodePipeline with the followin...	Answer: A, E
+Q57: A company is hosting a web application in an AWS Region. For disaster recovery purposes, a second re...	Answer: A
+Q58: A company runs an application on Amazon EC2 instances. The company uses a series of AWS CloudFormati...	Answer: A, D
+Q59: A DevOps engineer manages a web application that runs on Amazon EC2 instances behind an Application ...	Answer: C
+Q60: A video-sharing company stores its videos in Amazon S3. The company has observed a sudden increase i...	Answer: B
+Q61: A development team wants to use AWS CloudFormation stacks to deploy an application. However, the dev...	Answer: D
+Q62: A production account has a requirement that any Amazon EC2 instance that has been logged in to manua...	Answer: D
+Q63: A company has enabled all features for its organization in AWS Organizations. The organization conta...	Answer: B
+Q64: A company has many applications. Different teams in the company developed the applications by using ...	Answer: D
+Q65: A company's application is currently deployed to a single AWS Region. Recently, the company opened a...	Answer: C, D, F
+Q66: A DevOps engineer needs to apply a core set of security controls to an existing set of AWS accounts....	Answer: C
+Q67: A company has its AWS accounts in an organization in AWS Organizations. AWS Config is manually confi...	Answer: A, E
+Q68: A company wants to migrate its content sharing web application hosted on Amazon EC2 to a serverless ...	Answer: B
+Q69: A development team uses AWS CodeCommit, AWS CodePipeline, and AWS CodeBuild to develop and deploy an...	Answer: B
+Q70: A company has an application that runs on a fleet of Amazon EC2 instances. The application requires ...	Answer: D
+Q71: A DevOps engineer at a company is supporting an AWS environment in which all users use AWS IAM Ident...	Answer: A, C, E
+Q72: A company wants to set up a continuous delivery pipeline. The company stores application code in a p...	Answer: B
+Q73: A company has an application that runs on Amazon EC2 instances that are in an Auto Scaling group. Wh...	Answer: A
+Q74: A company is using an AWS CodeBuild project to build and package an application. The packages are co...	Answer: D
+Q75: A company has developed a serverless web application that is hosted on AWS. The application consists...	Answer: B
+Q76: A company is using Amazon S3 buckets to store important documents. The company discovers that some S...	Answer: B
+Q77: A DevOps engineer is architecting a continuous development strategy for a company’s software as a se...	Answer: C
+Q78: A company is hosting a static website from an Amazon S3 bucket. The website is available to customer...	Answer: D
+Q79: A company is implementing AWS CodePipeline to automate its testing process. The company wants to be ...	Answer: B
+Q80: An application running on a set of Amazon EC2 instances in an Auto Scaling group requires a configur...	Answer: D
+Q81: A company manages an application that stores logs in Amazon CloudWatch Logs. The company wants to ar...	Answer: B, D
+Q82: A company is developing a new application. The application uses AWS Lambda functions for its compute...	Answer: B, C, F
+Q83: A DevOps engineer is deploying a new version of a company’s application in an AWS CodeDeploy deploym...	Answer: A, D
+Q84: A company has a guideline that every Amazon EC2 instance must be launched from an AMI that the compa...	Answer: C
+Q85: An application runs on Amazon EC2 instances behind an Application Load Balancer (ALB). A DevOps engi...	Answer: C
+Q86: A company has 20 service teams. Each service team is responsible for its own microservice. Each serv...	Answer: B
+Q87: An Amazon EC2 instance is running in a VPC and needs to download an object from a restricted Amazon ...	Answer: B, D
+Q88: A company wants to use a grid system for a proprietary enterprise in-memory data store on top of AWS...	Answer: A
+Q89: A DevOps engineer is working on a data archival project that requires the migration of on-premises d...	Answer: B, D
+Q90: A company deploys updates to its Amazon API Gateway API several times a week by using an AWS CodePip...	Answer: A
+Q91: A company has developed an AWS Lambda function that handles orders received through an API. The comp...	Answer: A
+Q92: A company uses a single AWS account to test applications on Amazon EC2 instances. The company has tu...	Answer: A
+Q93: A company requires an RPO of 2 hours and an RTO of 10 minutes for its data and application at all ti...	Answer: B, D
+Q94: A business has an application that consists of five independent AWS Lambda functions.The DevOps engi...	Answer: C
+Q95: A company uses AWS CloudFormation stacks to deploy updates to its application. The stacks consist of...	Answer: B
+Q96: A company is deploying a new application that uses Amazon EC2 instances. The company needs a solutio...	Answer: B
+Q97: A company wants to ensure that their EC2 instances are secure. They want to be notified if any new v...	Answer: D
+Q98: A company is running an application on Amazon EC2 instances in an Auto Scaling group. Recently, an i...	Answer: B
+Q99: A company is using AWS Organizations to centrally manage its AWS accounts. The company has turned on...	Answer: D
+Q100: A DevOps engineer manages a large commercial website that runs on Amazon EC2. The website uses Amazo...	Answer: B
+Q101: A company recently created a new AWS Control Tower landing zone in a new organization in AWS Organiz...	Answer: A, C, E
+Q102: A company runs applications in AWS accounts that are in an organization in AWS Organizations. The ap...	Answer: A
+Q103: A company’s DevOps engineer is working in a multi-account environment. The company uses AWS Transit ...	Answer: B
+Q104: A company is divided into teams. Each team has an AWS account, and all the accounts are in an organi...	Answer: D
+Q105: A DevOps engineer used an AWS CloudFormation custom resource to set up AD Connector. The AWS Lambda ...	Answer: B
+Q106: A company uses AWS CodeCommit for source code control. Developers apply their changes to various fea...	Answer: A
+Q107: A company manages a web application that runs on Amazon EC2 instances behind an Application Load Bal...	Answer: D
+Q108: A large enterprise is deploying a web application on AWS. The application runs on Amazon EC2 instanc...	Answer: B
+Q109: The security team depends on AWS CloudTrail to detect sensitive security issues in the company’s AWS...	Answer: A
+Q110: A company uses AWS CodeArtifact to centrally store Python packages. The CodeArtifact repository is c...	Answer: A, D
+Q111: A company uses a series of individual Amazon CloudFormation templates to deploy its multi-Region app...	Answer: D
+Q112: A DevOps engineer has implemented a CI/CD pipeline to deploy an AWS CloudFormation template that pro...	Answer: A
+Q113: A company has a data ingestion application that runs across multiple AWS accounts. The accounts are ...	Answer: C
+Q114: A company uses Amazon S3 to store proprietary information. The development team creates buckets for ...	Answer: B
+Q115: A DevOps engineer is researching the least expensive way to implement an image batch processing clus...	Answer: D
+Q116: A company recently migrated its legacy application from on-premises to AWS. The application is hoste...	Answer: A
+Q117: A company is storing 100 GB of log data in .csv format in an Amazon S3 bucket. SQL developers want t...	Answer: B, C, E
+Q118: A company deploys its corporate infrastructure on AWS across multiple AWS Regions and Availability Z...	Answer: C, E, F
+Q119: A company is testing a web application that runs on Amazon EC2 instances behind an Application Load ...	Answer: D
+Q120: A DevOps engineer needs to configure a blue/green deployment for an existing three-tier application....	Answer: A
+Q121: A company is building a new pipeline by using AWS CodePipeline and AWS CodeBuild in a build account....	Answer: B, E
+Q122: A company is using an organization in AWS Organizations to manage multiple AWS accounts. The company...	Answer: A, D, E
+Q123: A media company has several thousand Amazon EC2 instances in an AWS account. The company is using Sl...	Answer: B
+Q124: An AWS CodePipeline pipeline has implemented a code release process. The pipeline is integrated with...	Answer: B
+Q125: A global company manages multiple AWS accounts by using AWS Control Tower. The company hosts interna...	Answer: A
+Q126: A highly regulated company has a policy that DevOps engineers should not log in to their Amazon EC2 ...	Answer: B
+Q127: A company updated the AWS CloudFormation template for a critical business application. The stack upd...	Answer: C, D
+Q128: A development team manually builds an artifact locally and then places it in an Amazon S3 bucket. Th...	Answer: B, D, E
+Q129: A DevOps engineer is working on a project that is hosted on Amazon Linux and has failed a security r...	Answer: B, C, E
+Q130: A company has a legacy application. A DevOps engineer needs to automate the process of building the ...	Answer: A
+Q131: A company builds a container image in an AWS CodeBuild project by running Docker commands. After the...	Answer: A
+Q132: A company manually provisions IAM access for its employees. The company wants to replace the manual ...	Answer: A
+Q133: A company is using AWS to run digital workloads. Each application team in the company has its own AW...	Answer: C
+Q134: A company uses AWS Organizations to manage its AWS accounts. The organization root has an OU that is...	Answer: B
+Q135: A company is examining its disaster recovery capability and wants the ability to switch over its dai...	Answer: A
+Q136: A DevOps team is merging code revisions for an application that uses an Amazon RDS Multi-AZ DB clust...	Answer: A
+Q137: A company manages a multi-tenant environment in its VPC and has configured Amazon GuardDuty for the ...	Answer: C
+Q138: A company uses AWS Secrets Manager to store a set of sensitive API keys that an AWS Lambda function ...	Answer: B, D
+Q139: A company's DevOps engineer is creating an AWS Lambda function to process notifications from an Amaz...	Answer: C, D
+Q140: A company has an application that runs on Amazon EC2 instances. The company uses an AWS CodePipeline...	Answer: A
+Q141: A company plans to use Amazon CloudWatch to monitor its Amazon EC2 instances. The company needs to s...	Answer: B
+Q142: A company manages 500 AWS accounts that are in an organization in AWS Organizations. The company dis...	Answer: C
+Q143: A company's production environment uses an AWS CodeDeploy blue/green deployment to deploy an applica...	Answer: C
+Q144: A company has an application that includes AWS Lambda functions. The Lambda functions run Python cod...	Answer: B
+Q146: A company uses AWS and has a VPC that contains critical compute infrastructure with predictable traf...	Answer: B
+Q147: AnyCompany is using AWS Organizations to create and manage multiple AWS accounts. AnyCompany recentl...	Answer: C
+Q148: A DevOps engineer is designing an application that integrates with a legacy REST API. The applicatio...	Answer: B
+Q149: A company has microservices running in AWS Lambda that read data from Amazon DynamoDB. The Lambda co...	Answer: C
+Q150: A company is building a web and mobile application that uses a serverless architecture powered by AW...	Answer: C
+Q151: A DevOps engineer wants to find a solution to migrate an application from on premises to AWS. The ap...	Answer: D
+Q152: A DevOps engineer is using AWS CodeDeploy across a fleet of Amazon EC2 instances in an EC2 Auto Scal...	Answer: D
+Q153: A security team is concerned that a developer can unintentionally attach an Elastic IP address to an...	Answer: B
+Q154: A company is using AWS Organizations to create separate AWS accounts for each of its departments. Th...	Answer: B
+Q155: A company has a mission-critical application on AWS that uses automatic scaling. The company wants t...	Answer: B
+Q156: A company has a single developer writing code for an automated deployment pipeline. The developer is...	Answer: A
+Q157: A DevOps engineer notices that all Amazon EC2 instances running behind an Application Load Balancer ...	Answer: A, E
+Q158: An ecommerce company uses a large number of Amazon Elastic Block Store (Amazon EBS) backed Amazon EC...	Answer: D
+Q159: A company manages AWS accounts for application teams in AWS Control Tower. Individual application te...	Answer: A
+Q160: A company has an AWS Control Tower landing zone. The company's DevOps team creates a workload OU. A ...	Answer: B, E
+Q161: A company hired a penetration tester to simulate an internal security breach. The tester performed p...	Answer: A
+Q162: A company runs applications in an Amazon Elastic Kubernetes Service (Amazon EKS) cluster. The EKS cl...	Answer: B
+Q163: A company has an AWS Control Tower landing zone that manages its organization in AWS Organizations. ...	Answer: B, C, F
+Q164: A company runs a workload on Amazon EC2 instances. The company needs a control that requires the use...	Answer: A
+Q165: A company builds an application that uses an Application Load Balancer in front of Amazon EC2 instan...	Answer: A, B, E
+Q166: A company deploys a web application on Amazon EC2 instances that are behind an Application Load Bala...	Answer: B, C
+Q167: A company uses an organization in AWS Organizations to manage its AWS accounts. The company's automa...	Answer: A
+Q168: A DevOps engineer is building a solution that uses Amazon Simple Queue Service (Amazon SQS) standard...	Answer: C
+Q169: A company has a new AWS account that teams will use to deploy various applications. The teams will c...	Answer: A, D
+Q170: A company uses an organization in AWS Organizations to manage its AWS accounts. The company recently...	Answer: B, C
+Q171: A company has an application and a CI/CD pipeline. The CI/CD pipeline consists of an AWS CodePipelin...	Answer: B
+Q172: A company uses an Amazon API Gateway regional REST API to host its application API. The REST API has...	Answer: A, E
+Q173: A company uses AWS Directory Service for Microsoft Active Directory as its identity provider (IdP). ...	Answer: B
+Q174: A company uses AWS Organizations to manage its AWS accounts. The company has a root OU that has a ch...	Answer: C
+Q175: A company's security policies require the use of security hardened AMIs in production environments. ...	Answer: D
+Q176: A company has configured an Amazon S3 event source on an AWS Lambda function. The company needs the ...	Answer: B
+Q177: A company has deployed a critical application in two AWS Regions. The application uses an Applicatio...	Answer: A
+Q178: A healthcare services company is concerned about the growing costs of software licensing for an appl...	Answer: C
+Q179: A DevOps engineer is planning to deploy a Ruby-based application to production. The application need...	Answer: B, C, E
+Q180: A company is using AWS CodePipeline to deploy an application. According to a new guideline, a member...	Answer: C, E
+Q181: A company requires its internal business teams to launch resources through pre-approved AWS CloudFor...	Answer: C
+Q182: A company has multiple development groups working in a single shared AWS account. The senior manager...	Answer: B
+Q183: A DevOps engineer is setting up a container-based architecture. The engineer has decided to use AWS ...	Answer: B
+Q184: A DevOps engineer is implementing governance controls for a company that requires its infrastructure...	Answer: A, B
+Q185: A company sells products through an ecommerce web application. The company wants a dashboard that sh...	Answer: A
+Q186: A company is launching an application. The application must use only approved AWS services. The acco...	Answer: A
+Q187: A company has multiple development teams in different business units that work in a shared single AW...	Answer: D
+Q188: A company runs an application for multiple environments in a single AWS account. An AWS CodePipeline...	Answer: D
+Q189: A company needs to ensure that flow logs remain configured for all existing and new VPCs in its AWS ...	Answer: C
+Q190: A company's application teams use AWS CodeCommit repositories for their applications. The applicatio...	Answer: A, D, E
+Q191: A company uses AWS WAF to protect its cloud infrastructure. A DevOps engineer needs to give an opera...	Answer: A
+Q192: A software team is using AWS CodePipeline to automate its Java application release pipeline. The pip...	Answer: B
+Q193: A company uses an organization in AWS Organizations to manage several AWS accounts that the company'...	Answer: C
+Q194: A company is reviewing its IAM policies. One policy written by the DevOps engineer has been flagged ...	Answer: B
+Q195: A company is developing an application that will generate log events. The log events consist of five...	Answer: A, D, F
+Q196: A DevOps engineer has created an AWS CloudFormation template that deploys an application on Amazon E...	Answer: B, E
+Q197: A company is refactoring applications to use AWS. The company identifies an internal web application...	Answer: B, D, E
+Q198: A company uses Amazon RDS for all databases in its AWS accounts. The company uses AWS Control Tower ...	Answer: A
+Q199: A company is migrating from its on-premises data center to AWS. The company currently uses a custom ...	Answer: B, D
+Q200: A DevOps team uses AWS CodePipeline, AWS CodeBuild, and AWS CodeDeploy to deploy an application. The...	Answer: B
+Q201: A company recently deployed its web application on AWS. The company is preparing for a large-scale s...	Answer: B, C, F
+Q202: A company runs a web application that extends across multiple Availability Zones. The company uses a...	Answer: B
+Q203: A company's application runs on Amazon EC2 instances. The application writes to a log file that reco...	Answer: C
+Q204: A company has an AWS CodeDeploy application. The application has a deployment group that uses a sing...	Answer: A
+Q205: A company is launching an application that stores raw data in an Amazon S3 bucket. Three application...	Answer: D
+Q206: A company uses AWS Control Tower and AWS CloudFormation to manage its AWS accounts and to create AWS...	Answer: B
+Q207: A DevOps engineer has developed an AWS Lambda function. The Lambda function starts an AWS CloudForma...	Answer: D
+Q208: A company has deployed a complex container-based workload on AWS. The workload uses Amazon Managed S...	Answer: B, C, D
+Q209: A company's organization in AWS Organizations has a single OU. The company runs Amazon EC2 instances...	Answer: B
+Q210: A company has a fleet of Amazon EC2 instances that run Linux in a single AWS account. The company is...	Answer: A, D
+Q211: A DevOps engineer is building an application that uses an AWS Lambda function to query an Amazon Aur...	Answer: A, C, E
+Q212: A company has an AWS CloudFormation stack that is deployed in a single AWS account. The company has ...	Answer: C
+Q213: A company deploys an application to two AWS Regions. The application creates and stores objects in a...	Answer: D
+Q214: A company needs to implement failover for its application. The application includes an Amazon CloudF...	Answer: B
+Q215: A cloud team uses AWS Organizations and AWS IAM Identity Center (AWS Single Sign-On) to manage a com...	Answer: C
+Q216: A company releases a new application in a new AWS account. The application includes an AWS Lambda fu...	Answer: D
+Q217: A company has an application that runs on AWS Lambda and sends logs to Amazon CloudWatch Logs. An Am...	Answer: A, B, F
+Q218: A company operates sensitive workloads across the AWS accounts that are in the company's organizatio...	Answer: B
+Q219: A company deploys an application in two AWS Regions. The application currently uses an Amazon S3 buc...	Answer: A, D, F
+Q220: A company uses an organization in AWS Organizations to manage multiple AWS accounts. The company nee...	Answer: A, E
+Q221: A company manages multiple AWS accounts by using AWS Organizations with OUs for the different busine...	Answer: C
+Q222: A company has started using AWS across several teams. Each team has multiple accounts and unique sec...	Answer: B
+Q223: A company uses an AWS CodeCommit repository to store its source code and corresponding unit tests. T...	Answer: A
+Q224: A DevOps engineer manages a company's Amazon Elastic Container Service (Amazon ECS) cluster. The clu...	Answer: A
+Q225: A company wants to deploy a workload on several hundred Amazon EC2 instances. The company will provi...	Answer: A, B
+Q226: A company is using AWS CodeDeploy to automate software deployment. The deployment must meet these re...	Answer: C
+Q227: A company needs to adopt a multi-account strategy to deploy its applications and the associated CI/C...	Answer: A
+Q228: A DevOps team has created a Custom Lambda rule in AWS Config. The rule monitors Amazon Elastic Conta...	Answer: A
+Q229: A developer is creating a proof of concept for a new software as a service (SaaS) application. The a...	Answer: D
+Q230: A company uses AWS Organizations to manage its AWS accounts. The company wants its monitoring system...	Answer: C, E, F
+Q231: A company uses AWS Organizations to manage its AWS accounts. A DevOps engineer must ensure that all ...	Answer: B, E
+Q232: A company has deployed a new platform that runs on Amazon Elastic Kubernetes Service (Amazon EKS). T...	Answer: B, D
+Q233: A company groups its AWS accounts in OUs in an organization in AWS Organizations. The company has de...	Answer: A, E
+Q234: A company wants to decrease the time it takes to develop new features. The company uses AWS CodeBuil...	Answer: B
+Q235: A company has developed a static website hosted on an Amazon S3 bucket. The website is deployed usin...	Answer: B
+Q236: A company uses Amazon EC2 as its primary compute platform. A DevOps team wants to audit the company'...	Answer: B
+Q237: A company has an event-driven JavaScript application. The application uses decoupled AWS managed ser...	Answer: B, C, E
+Q238: A company is migrating its container-based workloads to an AWS Organizations multi-account environme...	Answer: A, E
+Q239: A company uses an Amazon Elastic Kubernetes Service (Amazon EKS) cluster to deploy its web applicati...	Answer: B
+Q240: A company is migrating its product development teams from an on-premises data center to a hybrid env...	Answer: C
+Q241: A company has an application that stores data that includes personally identifiable information (PII...	Answer: A, D
+Q242: A company uses an Amazon Elastic Kubernetes Service (Amazon EKS) cluster to host its machine learnin...	Answer: C
+Q243: A company's application has an API that retrieves workload metrics. The company needs to audit, anal...	Answer: A, C, E
+Q244: A DevOps engineer is building the infrastructure for an application. The application needs to run on...	Answer: B, C, E
+Q245: A company deploys an application on on-premises devices in the company’s on-premises data center. Th...	Answer: B, D
+Q246: A DevOps engineer is setting up an Amazon Elastic Container Service (Amazon ECS) blue/green deployme...	Answer: B
+Q247: A company uses an organization in AWS Organizations to manage its AWS accounts. The company's DevOps...	Answer: A
+Q248: A company has deployed an application in a single AWS Region. The application backend uses Amazon Dy...	Answer: A
+Q249: A company has configured Amazon RDS storage autoscaling for its RDS DB instances. A DevOps team need...	Answer: A
+Q250: A company uses containers for its applications. The company learns that some container images are mi...	Answer: C
+Q251: A DevOps engineer needs to implement a solution to install antivirus software on all the Amazon EC2 ...	Answer: A
+Q252: A company needs to increase the security of the container images that run in its production environm...	Answer: B, D
+Q253: A company's DevOps team manages a set of AWS accounts that are in an organization in AWS Organizatio...	Answer: D
+Q254: A company gives its employees limited rights to AWS. DevOps engineers have the ability to assume an ...	Answer: D
+Q255: A company needs a strategy for failover and disaster recovery of its data and application. The appli...	Answer: B, D
+Q256: A developer is using the AWS Serverless Application Model (AWS SAM) to create a prototype for an AWS...	Answer: C, E
+Q257: A company runs its container workloads in AWS App Runner. A DevOps engineer manages the company's co...	Answer: A
+Q258: A company wants to use AWS Systems Manager documents to bootstrap physical laptops for developers. T...	Answer: C
+Q259: A company's development team uses AWS CloudFormation to deploy its application resources. The team m...	Answer: A, D, F
+Q260: A company is developing a web application's infrastructure using AWS CloudFormation. The database en...	Answer: A
+Q261: A company has an organization in AWS Organizations. A DevOps engineer needs to maintain multiple AWS...	Answer: D
+Q262: A company has an organization in AWS Organizations for its multi-account environment. A DevOps engin...	Answer: B, C, D
+Q263: A company deploys an application to Amazon EC2 instances. The application runs Amazon Linux 2 and us...	Answer: B
+Q264: A company has set up AWS CodeArtifact repositories with public upstream repositories. The company's ...	Answer: C, D
+Q265: A company is running a custom-built application that processes records. All the components run on Am...	Answer: D
+Q266: A company is migrating its on-premises Windows applications and Linux applications to AWS. The compa...	Answer: D
+Q267: A company's application uses a fleet of Amazon EC2 On-Demand Instances to analyze and process data. ...	Answer: B, D
+Q268: A company recently migrated its application to an Amazon Elastic Kubernetes Service (Amazon EKS) clu...	Answer: A, C, E
+Q269: A company's video streaming platform usage has increased from 10,000 users each day to 50,000 users ...	Answer: B
+Q270: A company uses AWS Organizations to manage hundreds of AWS accounts. The company has a team that is ...	Answer: A, D, F
+Q271: A company uses an organization in AWS Organizations that has all features enabled. The company uses ...	Answer: A, D
+Q272: A company runs an application that uses an Amazon S3 bucket to store images. A DevOps engineer needs...	Answer: A, B, C
+Q273: A company uses the AWS Cloud Development Kit (AWS CDK) to define its application. The company uses a...	Answer: A, D
+Q274: A company has an application that runs on Amazon EC2 instances behind an Application Load Balancer (...	Answer: A
+Q275: A company sends its AWS Network Firewall flow logs to an Amazon S3 bucket. The company then analyzes...	Answer: D
+Q276: A DevOps engineer needs to implement integration tests into an existing AWS CodePipeline CI/CD workf...	Answer: A, D, E
+Q277: A company runs applications on Windows and Linux Amazon EC2 instances. The instances run across mult...	Answer: B, D, E
+Q278: A company uses an organization in AWS Organizations that a security team and a DevOps team manage. B...	Answer: D
+Q279: An Amazon EC2 Auto Scaling group manages EC2 instances that were created from an AMI. The AMI has th...	Answer: B
+Q280: A company uses AWS Organizations to manage its AWS accounts. The organization root has a child OU th...	Answer: B
+Q281: A company manages AWS accounts in AWS Organizations. The company needs a solution to send Amazon Clo...	Answer: D
+Q282: A DevOps engineer manages a Java-based application that runs in an Amazon Elastic Container Service ...	Answer: A, D
+Q283: A company has an application that runs in a single AWS Region. The application runs on an Amazon Ela...	Answer: C
+Q284: A company is building a serverless application that uses AWS Lambda functions to process data.A Begi...	Answer: B
+Q285: A company operates a globally deployed product out of multiple AWS Regions. The company's DevOps tea...	Answer: C
+Q286: A DevOps engineer uses AWS CodeBuild to frequently produce software packages. The CodeBuild project ...	Answer: A
+Q287: A large company recently acquired a small company. The large company invited the small company to jo...	Answer: A
+Q288: A DevOps team manages infrastructure for an application. The application uses long-running processes...	Answer: B
+Q289: A large company runs critical workloads in multiple AWS accounts. The AWS accounts are managed under...	Answer: C
+Q290: A DevOps team is deploying microservices for an application on an Amazon Elastic Kubernetes Service ...	Answer: D
+Q292: A security team wants to use AWS CloudTrail to monitor all actions and API calls in multiple account...	Answer: A
+Q293: A DevOps engineer needs to configure a blue/green deployment for an existing three-tier application....	Answer: A
+Q294: A company has an application that runs on Amazon EC2 instances in an Auto Scaling group. The applica...	Answer: C
+Q295: A company has a single AWS account that runs hundreds of Amazon EC2 instances in a single AWS Region...	Answer: B
+Q296: A company uses AWS Organizations to manage hundreds of AWS accounts. The company has a team that is ...	Answer: B, D, F
+Q297: A company uses an Amazon Aurora PostgreSQL global database that has two secondary AWS Regions. A Dev...	Answer: C
+Q298: A company has a web application that is hosted on an Amazon Elastic Kubernetes Service (Amazon EKS) ...	Answer: A, C, F
+Q299: A company stores its Python-based application code in AWS CodeCommit. The company uses AWS CodePipel...	Answer: A
+Q300: A DevOps engineer deploys an application to a fleet of Amazon Linux EC2 instances. The DevOps engine...	Answer: C
+Q301: A company uses AWS Systems Manager to manage a fleet of Amazon Linux EC2 instances that have SSM Age...	Answer: A
+Q302: A company configured an Amazon S3 event source for an AWS Lambda function. The company needs the Lam...	Answer: B
+Q303: A company recently configured AWS Control Tower in its organization in AWS Organizations. The compan...	Answer: C, D
+Q304: A company's web application uses an Application Load Balancer (ALB) to direct traffic to Amazon EC2 ...	Answer: A
+Q305: A company has several AWS accounts. An Amazon Connect instance runs in each account. The company use...	Answer: C
+Q306: A company has deployed an Amazon Elastic Kubernetes Service (Amazon EKS) cluster with Amazon EC2 nod...	Answer: A, C, F
+Q307: A company discovers that its production environment and disaster recovery (DR) environment are deplo...	Answer: D
+Q308: During a security audit, a company discovered that some security groups allow SSH traffic from 0.0.0...	Answer: C
+Q309: A company's DevOps engineer must install a software package on 30 on-premises VMs and 15 Amazon EC2 ...	Answer: B
+Q310: A company has an AWS CodePipeline pipeline in the eu-west-1 Region. The pipeline stores the build ar...	Answer: C, E
+Q311: A company uses an AWS Cloud Development Kit (AWS CDK) application for its infrastructure. The AWS CD...	Answer: B
+Q312: A company uses Amazon Elastic Container Registry (Amazon ECR) private registries to store container ...	Answer: A
+Q313: A security team sets up a workflow that invokes an AWS Step Functions workflow when Amazon EventBrid...	Answer: A, B, E
+Q314: A company's DevOps engineer uses AWS Systems Manager to perform maintenance tasks. The company has a...	Answer: A
+Q315: A DevOps engineer manages an AWS CodePipeline pipeline that builds and deploys a web application on ...	Answer: B
+Q316: A company has an application that uploads access logs to an Amazon CloudWatch Logs log group. The fi...	Answer: B
+Q317: A DevOps engineer provisioned an Amazon Elastic Kubernetes Service (Amazon EKS) cluster with managed...	Answer: B
+Q318: A company runs a fleet of Amazon EC2 instances in a VPC. The company's employees remotely access the...	Answer: C, D, E
+Q319: A company is using Amazon Elastic Kubernetes Service (Amazon EKS) to run its applications. The EKS c...	Answer: B
+Q320: A company has multiple AWS accounts in an organization in AWS Organizations that has all features en...	Answer: C
+Q321: A company has an organization in AWS Organizations with many Oils that contain many AWS accounts. Th...	Answer: A
+Q322: A company is running an internal application in an Amazon Elastic Container Service (Amazon ECS) clu...	Answer: C, E, F
+Q323: A company has a continuous integration pipeline where the company creates container images by using ...	Answer: A, B
+Q324: A DevOps administrator is configuring a repository to store a company's container images. The admini...	Answer: A
+Q325: A company uses Amazon Redshift as its data warehouse solution. The company wants to create a dashboa...	Answer: C, D
+Q326: A company uses an organization in AWS Organizations to manage its 500 AWS accounts. The organization...	Answer: A
+Q327: A DevOps engineer uses a pipeline in AWS CodePipeline. The pipeline has a build action and a deploy ...	Answer: B, D
+Q328: A company used a lift and shift strategy to migrate a workload to AWS. The company has an Auto Scali...	Answer: D
+Q329: A company is using AWS Organizations and wants to implement a governance strategy with the following...	Answer: D
+Q330: A company detects unusual login attempts in many of its AWS accounts. A DevOps engineer must impleme...	Answer: A
+Q331: A company has deployed a new REST API by using Amazon API Gateway. The company uses the API to acces...	Answer: A
+Q332: A company runs a website by using an Amazon Elastic Container Service (Amazon ECS) service that is c...	Answer: B
+Q333: A company that uses electronic patient health records runs a fleet of Amazon EC2 instances with an A...	Answer: A
+Q334: A company use an organization in AWS Organizations to manage multiple AWS accounts. The company has ...	Answer: A, E, F
+Q335: A company runs an application in an Auto Scaling group of Amazon EC2 instances behind an Application...	Answer: B
+Q336: A company uses an organization in AWS Organizations to manage 10 AWS accounts. All features are enab...	Answer: B
+Q337: A company runs an application that stores artifacts in an Amazon S3 bucket. The application has a la...	Answer: A, D
+Q338: A DevOps team supports an application that runs in an Amazon Elastic Container Service (Amazon ECS) ...	Answer: A, D
+Q339: A security team must record the configuration of AWS resources, detect issues, and send notification...	Answer: C
+Q340: A company has proprietary data available by using an Amazon CloudFront distribution. The company nee...	Answer: D
+Q341: A company runs several applications in the same AWS account. The applications send logs to Amazon Cl...	Answer: A
+Q342: A company uses an HPC platform to run analysis jobs for data. The company uses AWS CodeBuild to crea...	Answer: D
+Q343: A company uses an AWS CodeArtifact repository to store Python packages that the company developed in...	Answer: D
+Q344: A company has a file-reading application that saves files to a database that runs on Amazon EC2 inst...	Answer: A
+Q345: A company uses an organization in AWS Organizations that has all features enabled to manage its AWS ...	Answer: D
+Q346: A DevOps team supports an application that runs on a large number of Amazon EC2 instances in an Auto...	Answer: A, D
+Q347: A company is using AWS CloudFormation to perform deployments of its application environment. A deplo...	Answer: A
+Q348: A DevOps engineer deployed multiple AWS accounts by using AWS Control Tower to support different bus...	Answer: C
+Q349: A company runs a web application on Amazon Elastic Kubernetes Service (Amazon EKS). The company uses...	Answer: A
+Q350: A video platform company is migrating its video catalog to AWS. The company will host MP4 videos fil...	Answer: B
+Q351: A company uses an organization in AWS Organizations to manage multiple AWS accounts in a hierarchica...	Answer: C, E
+Q352: A company has deployed a landing zone that has a well-defined AWS Organizations structure and an SCP...	Answer: C
+Q353: A DevOps team manages a company's AWS account. The company wants to ensure that specific AWS resourc...	Answer: A
+Q354: A company hosts an application in its AWS account. The application uses an Amazon S3 bucket to store...	Answer: B
+Q355: A DevOps administrator is responsible for managing the security of a company's Amazon CloudWatch Log...	Answer: A
+Q356: A company uses an organization in AWS Organizations to manage many AWS accounts. The company has ena...	Answer: D
+Q357: A company uses an Amazon Aurora PostgreSQL DB cluster and loads transactional data into the database...	Answer: D
+Q358: A DevOps engineer is implementing governance controls for a company that requires its infrastructure...	Answer: A, B
+Q359: A company runs applications on Amazon EC2 instances that are in an Amazon EC2 Auto Scaling group. Th...	Answer: D
+Q360: A DevOps engineer needs to troubleshoot a pipeline that uses a GitHub code repository. The pipeline ...	Answer: D
+Q361: A company's DevOps team uses Node Package Manager (NPM) open source libraries to build applications....	Answer: A
+Q362: A company has a search application that has a web interface. The company uses Amazon CloudFront, App...	Answer: A
+Q363: A DevOps engineer uses AWS WAF to manage web ACLs across an AWS account. The DevOps engineer must en...	Answer: A

@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AWS Certification Study Hub - Home</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; }
+        .container { max-width: 1400px; margin: 0 auto; padding: 40px 20px; }
+        .header { text-align: center; color: white; margin-bottom: 60px; }
+        .header h1 { font-size: 4em; margin-bottom: 20px; text-shadow: 2px 2px 4px rgba(0,0,0,0.3); }
+        .header p { font-size: 1.3em; opacity: 0.9; }
+        .stats-overview { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 50px; }
+        .stat-card { background: rgba(255,255,255,0.1); padding: 30px; border-radius: 15px; text-align: center; color: white; backdrop-filter: blur(10px); }
+        .stat-number { font-size: 3em; font-weight: bold; margin-bottom: 10px; }
+        .stat-label { font-size: 1.1em; opacity: 0.9; }
+        .certifications-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 30px; margin-top: 40px; }
+        .cert-card { background: white; border-radius: 20px; padding: 40px; box-shadow: 0 15px 35px rgba(0,0,0,0.1); transition: transform 0.3s, box-shadow 0.3s; }
+        .cert-card:hover { transform: translateY(-10px); box-shadow: 0 25px 50px rgba(0,0,0,0.2); }
+        .cert-icon { font-size: 5em; text-align: center; margin-bottom: 20px; }
+        .cert-title { font-size: 2em; font-weight: bold; margin-bottom: 15px; text-align: center; }
+        .cert-description { color: #666; margin-bottom: 25px; line-height: 1.6; }
+        .cert-stats { background: #f8f9fa; padding: 20px; border-radius: 10px; margin-bottom: 25px; }
+        .cert-buttons { display: flex; gap: 15px; flex-wrap: wrap; justify-content: center; }
+        .btn { padding: 15px 25px; border: none; border-radius: 25px; cursor: pointer; text-decoration: none; display: inline-block; text-align: center; font-weight: bold; transition: all 0.3s; }
+        .btn-primary { background: #2196f3; color: white; }
+        .btn-success { background: #4caf50; color: white; }
+        .btn-warning { background: #ff9800; color: white; }
+        .btn:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
+        .devops { border-left: 5px solid #ff6b35; }
+        .sap { border-left: 5px solid #4caf50; }
+        .network { border-left: 5px solid #2196f3; }
+        .footer { text-align: center; margin-top: 60px; color: white; }
+        .footer p { opacity: 0.8; margin-bottom: 20px; }
+        .quick-links { display: flex; justify-content: center; gap: 20px; flex-wrap: wrap; }
+        .quick-link { background: rgba(255,255,255,0.2); padding: 10px 20px; border-radius: 20px; color: white; text-decoration: none; transition: all 0.3s; }
+        .quick-link:hover { background: rgba(255,255,255,0.3); transform: translateY(-2px); }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚀 AWS Certification Hub</h1>
+            <p>Your Complete AWS Certification Preparation Platform</p>
+        </div>
+        
+        <div class="stats-overview">
+            <div class="stat-card">
+                <div class="stat-number">3</div>
+                <div class="stat-label">Certifications</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">914+</div>
+                <div class="stat-label">Total Questions</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">75+</div>
+                <div class="stat-label">Study Days</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">100%</div>
+                <div class="stat-label">Ready to Use</div>
+            </div>
+        </div>
+        
+        <div class="certifications-grid">
+            <!-- DevOps Professional -->
+            <div class="cert-card devops">
+                <div class="cert-icon">⚙️</div>
+                <div class="cert-title">AWS DevOps Professional</div>
+                <div class="cert-description">
+                    Master CI/CD pipelines, infrastructure as code, monitoring, and automation. Complete with 360+ practice questions and 20-day structured study plan.
+                </div>
+                <div class="cert-stats">
+                    <strong>📊 Questions:</strong> 360+<br>
+                    <strong>📅 Study Plan:</strong> 20 days<br>
+                    <strong>⏱️ Exam Duration:</strong> 180 minutes<br>
+                    <strong>🎯 Difficulty:</strong> Professional
+                </div>
+                <div class="cert-buttons">
+                    <a href="AWS DevOps Profestional/final_repo/master_launcher.html" class="btn btn-primary">Start Studying</a>
+                    <a href="AWS DevOps Profestional/final_repo/apps/exam_mode.html" class="btn btn-warning">Practice Exam</a>
+                </div>
+            </div>
+            
+            <!-- SAP-C02 -->
+            <div class="cert-card sap">
+                <div class="cert-icon">🏗️</div>
+                <div class="cert-title">Solutions Architect Professional</div>
+                <div class="cert-description">
+                    Design complex AWS architectures with 529 comprehensive questions. Features advanced scenarios, multiple choice support, and 30-day study plan.
+                </div>
+                <div class="cert-stats">
+                    <strong>📊 Questions:</strong> 529<br>
+                    <strong>📅 Study Plan:</strong> 30 days<br>
+                    <strong>⏱️ Exam Duration:</strong> 180 minutes<br>
+                    <strong>🎯 Difficulty:</strong> Professional
+                </div>
+                <div class="cert-buttons">
+                    <a href="AWS Solution Architect Profestional/final_repo/master_launcher.html" class="btn btn-primary">30-Day Plan</a>
+                    <a href="AWS Solution Architect Profestional/final_repo/main_study_app.html" class="btn btn-success">All Questions</a>
+                    <a href="AWS Solution Architect Profestional/final_repo/exam_mode.html" class="btn btn-warning">Practice Exam</a>
+                </div>
+            </div>
+            
+            <!-- Network Specialty -->
+            <div class="cert-card network">
+                <div class="cert-icon">🌐</div>
+                <div class="cert-title">AWS Network Specialty</div>
+                <div class="cert-description">
+                    Deep dive into AWS networking with VPC, Direct Connect, Transit Gateway, and security. Curated questions covering advanced networking concepts.
+                </div>
+                <div class="cert-stats">
+                    <strong>📊 Questions:</strong> 25<br>
+                    <strong>📅 Study Plan:</strong> Flexible<br>
+                    <strong>⏱️ Exam Duration:</strong> 170 minutes<br>
+                    <strong>🎯 Difficulty:</strong> Specialty
+                </div>
+                <div class="cert-buttons">
+                    <a href="AWS Network Specity/final_repo/master_launcher.html" class="btn btn-primary">Start Studying</a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>🎓 <strong>Study Smart:</strong> Use daily study plans, practice with exam modes, and review explanations thoroughly</p>
+            <div class="quick-links">
+                <a href="master_study_launcher.html" class="quick-link">📱 Master Hub</a>
+                <a href="SAP_PROJECT_SUMMARY.md" class="quick-link">📋 Project Summary</a>
+                <a href="#" class="quick-link" onclick="alert('Contact: AWS Study Hub Team')">📧 Support</a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

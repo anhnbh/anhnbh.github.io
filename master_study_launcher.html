@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AWS Certification Study Hub</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 40px 20px; }
+        .header { text-align: center; color: white; margin-bottom: 50px; }
+        .header h1 { font-size: 3em; margin-bottom: 10px; text-shadow: 2px 2px 4px rgba(0,0,0,0.3); }
+        .apps-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 30px; margin-top: 40px; }
+        .app-card { background: white; border-radius: 20px; padding: 30px; box-shadow: 0 15px 35px rgba(0,0,0,0.1); transition: transform 0.3s, box-shadow 0.3s; }
+        .app-card:hover { transform: translateY(-10px); box-shadow: 0 25px 50px rgba(0,0,0,0.2); }
+        .app-icon { font-size: 4em; text-align: center; margin-bottom: 20px; }
+        .app-title { font-size: 1.8em; font-weight: bold; margin-bottom: 15px; text-align: center; }
+        .app-description { color: #666; margin-bottom: 20px; line-height: 1.6; }
+        .app-stats { background: #f8f9fa; padding: 15px; border-radius: 10px; margin-bottom: 20px; }
+        .app-buttons { display: flex; gap: 10px; flex-wrap: wrap; }
+        .btn { padding: 12px 20px; border: none; border-radius: 25px; cursor: pointer; text-decoration: none; display: inline-block; text-align: center; font-weight: bold; transition: all 0.3s; }
+        .btn-primary { background: #2196f3; color: white; }
+        .btn-success { background: #4caf50; color: white; }
+        .btn-warning { background: #ff9800; color: white; }
+        .btn:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
+        .devops { border-left: 5px solid #ff6b35; }
+        .sap { border-left: 5px solid #4caf50; }
+        .network { border-left: 5px solid #2196f3; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚀 AWS Certification Study Hub</h1>
+            <p>Your complete AWS certification preparation platform</p>
+        </div>
+        
+        <div class="apps-grid">
+            <!-- DevOps Professional -->
+            <div class="app-card devops">
+                <div class="app-icon">⚙️</div>
+                <div class="app-title">AWS DevOps Professional</div>
+                <div class="app-description">
+                    Complete study system with 360+ questions covering CI/CD, monitoring, security, and automation.
+                </div>
+                <div class="app-stats">
+                    <strong>📊 Study Plan:</strong> 20 days (18 questions/day)<br>
+                    <strong>📝 Total Questions:</strong> 360+<br>
+                    <strong>⏱️ Exam:</strong> 180 minutes<br>
+                    <strong>✅ Status:</strong> Ready to use
+                </div>
+                <div class="app-buttons">
+                    <a href="AWS DevOps Profestional/final_repo/master_launcher.html" class="btn btn-primary">Start Studying</a>
+                    <a href="AWS DevOps Profestional/final_repo/apps/exam_mode.html" class="btn btn-warning">Practice Exam</a>
+                </div>
+            </div>
+            
+            <!-- SAP-C02 -->
+            <div class="app-card sap">
+                <div class="app-icon">🏗️</div>
+                <div class="app-title">Solutions Architect Professional</div>
+                <div class="app-description">
+                    Comprehensive SAP-C02 preparation with 529 questions covering advanced AWS architectures and solutions.
+                </div>
+                <div class="app-stats">
+                    <strong>📊 Study Plan:</strong> 30 days (18 questions/day)<br>
+                    <strong>📝 Total Questions:</strong> 529<br>
+                    <strong>⏱️ Exam:</strong> 180 minutes<br>
+                    <strong>✅ Status:</strong> Ready to use
+                </div>
+                <div class="app-buttons">
+                    <a href="AWS Solution Architect Profestional/final_repo/daily_study_launcher.html" class="btn btn-primary">30-Day Study Plan</a>
+                    <a href="AWS Solution Architect Profestional/final_repo/main_study_app.html" class="btn btn-success">All Questions</a>
+                    <a href="AWS Solution Architect Profestional/final_repo/exam_mode.html" class="btn btn-warning">Practice Exam</a>
+                </div>
+            </div>
+            
+            <!-- Network Specialty -->
+            <div class="app-card network">
+                <div class="app-icon">🌐</div>
+                <div class="app-title">AWS Network Specialty</div>
+                <div class="app-description">
+                    Advanced networking concepts with 25 curated questions covering VPC, Direct Connect, and network security.
+                </div>
+                <div class="app-stats">
+                    <strong>📊 Study Plan:</strong> Flexible<br>
+                    <strong>📝 Total Questions:</strong> 25<br>
+                    <strong>⏱️ Exam:</strong> 170 minutes<br>
+                    <strong>✅ Status:</strong> Ready to use
+                </div>
+                <div class="app-buttons">
+                    <a href="AWS Network Specity/network_specialty_app.html" class="btn btn-primary">Start Studying</a>
+                </div>
+            </div>
+        </div>
+        
+        <div style="text-align: center; margin-top: 50px; color: white;">
+            <p>💡 <strong>Study Tips:</strong> Start with daily study plans, use practice exams to test knowledge, and review explanations carefully.</p>
+            <div style="margin-top: 30px;">
+                <a href="index.html" style="display: inline-block; padding: 15px 30px; background: #17a2b8; color: white; text-decoration: none; border-radius: 25px; font-weight: bold;">🏡 Home Page</a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
