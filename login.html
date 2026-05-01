@@ -1,0 +1,33 @@
+﻿<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Login</title>
+  <link rel="stylesheet" href="/assets/css/login.css">
+  <script src="/assets/js/config.js"></script>
+  <script src="/assets/js/auth.js"></script>
+  <script src="/assets/js/login.js"></script>
+</head>
+<body>
+  <main class="auth-card">
+    <h1>Đăng nhập</h1>
+    <p>Nhập tài khoản admin để truy cập tài liệu.</p>
+
+    <form id="login-form" autocomplete="off">
+      <div class="auth-field">
+        <label for="username">Username</label>
+        <input id="username" name="username" type="text" required>
+      </div>
+
+      <div class="auth-field">
+        <label for="password">Password</label>
+        <input id="password" name="password" type="password" required>
+      </div>
+
+      <button class="auth-submit" type="submit">Login</button>
+      <p id="auth-error" class="auth-error"></p>
+    </form>
+  </main>
+</body>
+</html>
