@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AWS DevOps Professional - Study Notes (DOP-C02)</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f0f2f5; color: #232f3e; }
+        .topbar { background: #232f3e; color: white; padding: 15px 20px; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 8px rgba(0,0,0,0.2); }
+        .topbar-inner { max-width: 1300px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
+        .topbar h1 { font-size: 1.4em; }
+        .topbar a { color: white; text-decoration: none; padding: 8px 16px; background: #ff9900; border-radius: 6px; font-size: 14px; font-weight: bold; }
+        .topbar a:hover { background: #e68900; }
+        .topbar .links { display: flex; gap: 8px; flex-wrap: wrap; }
+        .topbar .links a.sec { background: #3b4a5e; }
+        .topbar .links a.sec:hover { background: #4a5d75; }
+        .layout { max-width: 1300px; margin: 0 auto; display: grid; grid-template-columns: 280px 1fr; gap: 25px; padding: 25px 20px; }
+        .sidebar { position: sticky; top: 80px; align-self: start; background: white; border-radius: 10px; padding: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.08); max-height: calc(100vh - 100px); overflow-y: auto; }
+        .sidebar h3 { font-size: 0.85em; text-transform: uppercase; color: #ff9900; margin-bottom: 12px; letter-spacing: 0.5px; }
+        .sidebar ul { list-style: none; }
+        .sidebar li { margin: 2px 0; }
+        .sidebar a { color: #4a5d75; text-decoration: none; font-size: 13.5px; display: block; padding: 5px 8px; border-radius: 5px; line-height: 1.3; }
+        .sidebar a:hover { background: #fff3cd; color: #232f3e; }
+        .content { background: white; border-radius: 10px; padding: 40px; box-shadow: 0 2px 10px rgba(0,0,0,0.08); min-width: 0; }
+        .content h2 { font-size: 1.7em; color: #232f3e; border-bottom: 3px solid #ff9900; padding-bottom: 8px; margin: 45px 0 18px; scroll-margin-top: 80px; }
+        .content h2:first-child { margin-top: 0; }
+        .content h3 { font-size: 1.25em; color: #6a1b9a; margin: 22px 0 10px; }
+        .content h4 { font-size: 1.05em; color: #232f3e; margin: 16px 0 8px; }
+        .content p { line-height: 1.65; margin-bottom: 12px; color: #333; }
+        .content ul, .content ol { margin: 10px 0 14px 24px; line-height: 1.7; }
+        .content li { margin-bottom: 6px; color: #333; }
+        .content code { background: #f0f2f5; padding: 2px 6px; border-radius: 3px; font-family: 'Courier New', monospace; font-size: 0.9em; color: #c0392b; }
+        .content pre { background: #232f3e; color: #e0e0e0; padding: 16px; border-radius: 8px; overflow-x: auto; margin: 14px 0; font-size: 13.5px; }
+        .content pre code { background: transparent; color: inherit; padding: 0; }
+        .content strong { color: #232f3e; }
+        .content table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 14px; display: block; overflow-x: auto; }
+        .content th { background: #232f3e; color: white; padding: 10px 12px; text-align: left; font-weight: 600; }
+        .content td { padding: 10px 12px; border-bottom: 1px solid #e0e0e0; vertical-align: top; line-height: 1.5; }
+        .content tr:nth-child(even) { background: #f8f9fa; }
+        .content a { color: #1976d2; }
+        .content img { max-width: 100%; height: auto; }
+        @media (max-width: 900px) {
+            .layout { grid-template-columns: 1fr; }
+            .sidebar { position: static; max-height: none; }
+            .content { padding: 25px; }
+        }
+    </style>
+  <script src="/assets/js/auth.js"></script>
+  <script src="/assets/js/login.js"></script>
+</head>
+<body>
+    <div class="topbar">
+        <div class="topbar-inner">
+            <h1>📖 DOP-C02 Study Notes</h1>
+            <div class="links">
+                <a href="index.html" class="sec">🏠 Hub</a>
+                <a href="../../master_study_launcher.html" class="sec">🏡 Study Hub</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="layout">
+        <nav class="sidebar">
+            <h3>📑 Contents</h3>
+            <ul>
+                <li><a href="#exam-details">Exam Details</a></li>
+                <li><a href="#domain-weights">Domain Weights</a></li>
+                <li><a href="#high-impact-study-areas">High-Impact Study Areas</a></li>
+                <li><a href="#common-exam-scenarios">Common Exam Scenarios</a></li>
+                <li><a href="#-high-impact-integration-patterns">🔥 High-Impact Integration Patterns</a></li>
+                <li><a href="#-critical-cli-commands">⚡ Critical CLI Commands</a></li>
+                <li><a href="#-exam-recognition-patterns">🎯 Exam Recognition Patterns</a></li>
+                <li><a href="#-performance-cost-optimization">📊 Performance &amp; Cost Optimization</a></li>
+                <li><a href="#-security-best-practices">🚨 Security Best Practices</a></li>
+                <li><a href="#-final-exam-checklist">🎯 Final Exam Checklist</a></li>
+            </ul>
+        </nav>
+
+        <main class="content">
+<h1>DOP-C02 Exam Overview</h1>
+<h2 id="exam-details">Exam Details</h2>
+<ul>
+<li><strong>Duration</strong>: 180 minutes (3 hours)</li>
+<li><strong>Questions</strong>: 65 (multiple choice + multiple response)</li>
+<li><strong>Passing Score</strong>: 750/1000 (~75%)</li>
+<li><strong>Cost</strong>: $300 USD</li>
+<li><strong>Validity</strong>: 3 years</li>
+</ul>
+<h2 id="domain-weights">Domain Weights</h2>
+<table>
+<thead>
+<tr>
+<th>Domain</th>
+<th>Weight</th>
+<th>Study Priority</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1. SDLC Automation</td>
+<td>22%</td>
+<td>High</td>
+</tr>
+<tr>
+<td>2. Infrastructure as Code</td>
+<td>20%</td>
+<td>High</td>
+</tr>
+<tr>
+<td>3. Resilient Cloud Solutions</td>
+<td>20%</td>
+<td>High</td>
+</tr>
+<tr>
+<td>4. Monitoring and Logging</td>
+<td>15%</td>
+<td>Medium</td>
+</tr>
+<tr>
+<td>5. Incident and Event Response</td>
+<td>18%</td>
+<td>Medium</td>
+</tr>
+<tr>
+<td>6. Security and Compliance</td>
+<td>15%</td>
+<td>Medium</td>
+</tr>
+</tbody>
+</table>
+<h2 id="high-impact-study-areas">High-Impact Study Areas</h2>
+<ul>
+<li><strong>Must-Know Services</strong> (appear in multiple domains): CloudFormation, Lambda, IAM, CloudWatch, Auto Scaling</li>
+<li><strong>Critical Integration Patterns</strong>: Cross-account deployments, Event-driven architectures, CI/CD pipelines, Multi-region resilience, Security automation</li>
+</ul>
+<h2 id="common-exam-scenarios">Common Exam Scenarios</h2>
+<ol>
+<li>Design CI/CD pipeline with cross-account deployment</li>
+<li>Implement blue/green deployment strategy</li>
+<li>Create event-driven incident response system</li>
+<li>Design multi-region disaster recovery architecture</li>
+<li>Implement automated compliance monitoring</li>
+<li>Configure auto scaling with custom metrics</li>
+<li>Set up centralized logging and monitoring</li>
+<li>Design secure secrets management solution</li>
+</ol>
+<h3><strong>Domain 1: SDLC Automation (22%)</strong></h3>
+<h4><strong>CI/CD Core Services</strong></h4>
+<ul>
+<li><strong>CodePipeline</strong> - Orchestrates CI/CD workflows, supports cross-account deployments</li>
+<li><strong>CodeBuild</strong> - Managed build service, uses buildspec.yml, supports Docker</li>
+<li><strong>CodeDeploy</strong> - Deployment service, supports blue/green, rolling, canary strategies</li>
+<li><strong>CodeCommit</strong> - Git repositories (deprecated for new customers July 2024)</li>
+<li><strong>CodeStar/CodeCatalyst</strong> - Development environments and project templates</li>
+</ul>
+<h4><strong>Integration &amp; Automation</strong></h4>
+<ul>
+<li><strong>EventBridge</strong> - Event routing, custom events, cross-account event sharing</li>
+<li><strong>Step Functions</strong> - Workflow orchestration, state machines, error handling</li>
+<li><strong>Lambda</strong> - Serverless compute, event-driven processing, 15-minute max runtime</li>
+<li><strong>API Gateway</strong> - REST/HTTP APIs, WebSocket, request/response transformation</li>
+<li><strong>X-Ray</strong> - Distributed tracing, performance analysis, service maps</li>
+</ul>
+<h4><strong>Testing &amp; Quality</strong></h4>
+<ul>
+<li><strong>Automated Testing</strong> - Unit, integration, security, performance testing</li>
+<li><strong>Artifacts Management</strong> - S3 storage, versioning, lifecycle policies</li>
+<li><strong>Security Integration</strong> - SAST/DAST scanning, vulnerability assessments</li>
+</ul>
+<h3><strong>Domain 2: Infrastructure as Code (20%)</strong></h3>
+<h4><strong>IaC Services</strong></h4>
+<ul>
+<li><strong>CloudFormation</strong> - Native IaC, YAML/JSON, intrinsic functions, drift detection</li>
+<li><strong>CDK</strong> - Code-based IaC, synthesizes to CloudFormation, multiple languages</li>
+<li><strong>SAM</strong> - Serverless application model, extends CloudFormation</li>
+<li><strong>Terraform</strong> - Third-party IaC, state management, workspaces</li>
+</ul>
+<h4><strong>Configuration Management</strong></h4>
+<ul>
+<li><strong>Systems Manager</strong> - Parameter Store, Session Manager, Run Command, Patch Manager</li>
+<li><strong>OpsWorks</strong> - Chef/Puppet managed instances, application lifecycle</li>
+<li><strong>Config</strong> - Configuration compliance, rules, remediation actions</li>
+<li><strong>Service Catalog</strong> - Standardized product portfolios, governance</li>
+</ul>
+<h4><strong>Governance</strong></h4>
+<ul>
+<li><strong>Organizations</strong> - Multi-account management, SCPs, consolidated billing</li>
+<li><strong>Control Tower</strong> - Landing zones, guardrails, account factory</li>
+</ul>
+<h3><strong>Domain 3: Resilient Cloud Solutions (20%)</strong></h3>
+<h4><strong>High Availability</strong></h4>
+<ul>
+<li><strong>Auto Scaling</strong> - EC2, ECS, Application Auto Scaling, predictive scaling</li>
+<li><strong>Elastic Load Balancing</strong> - ALB (Layer 7), NLB (Layer 4), GWLB (Layer 3)</li>
+<li><strong>Route 53</strong> - DNS, health checks, failover routing, geolocation</li>
+<li><strong>Multi-AZ Deployments</strong> - RDS, ElastiCache, EFS cross-AZ replication</li>
+</ul>
+<h4><strong>Disaster Recovery</strong></h4>
+<ul>
+<li><strong>S3 Cross-Region Replication</strong> - Automatic replication, versioning, lifecycle</li>
+<li><strong>RDS Multi-AZ</strong> - Synchronous replication, automatic failover</li>
+<li><strong>Aurora Global Database</strong> - Cross-region read replicas, fast recovery</li>
+<li><strong>EKS</strong> - Kubernetes orchestration, multi-AZ clusters, managed node groups</li>
+</ul>
+<h3><strong>Domain 4: Monitoring and Logging (15%)</strong></h3>
+<h4><strong>Monitoring Services</strong></h4>
+<ul>
+<li><strong>CloudWatch</strong> - Metrics, alarms, dashboards, custom metrics, anomaly detection</li>
+<li><strong>CloudWatch Logs</strong> - Log aggregation, insights, metric filters, retention</li>
+<li><strong>X-Ray</strong> - Application tracing, service maps, performance bottlenecks</li>
+<li><strong>CloudTrail</strong> - API logging, governance, compliance, data events</li>
+</ul>
+<h4><strong>Security Monitoring</strong></h4>
+<ul>
+<li><strong>Config</strong> - Resource compliance, configuration history, rules</li>
+<li><strong>GuardDuty</strong> - Threat detection, ML-based analysis, findings</li>
+<li><strong>Inspector</strong> - Vulnerability assessments, network reachability</li>
+<li><strong>Security Hub</strong> - Centralized security findings, compliance standards</li>
+</ul>
+<h4><strong>Systems Management</strong></h4>
+<ul>
+<li><strong>Systems Manager</strong> - Operational insights, automation, patch management</li>
+<li><strong>Personal Health Dashboard</strong> - Service health, maintenance notifications</li>
+</ul>
+<h3><strong>Domain 5: Incident and Event Response (18%)</strong></h3>
+<h4><strong>Event Processing</strong></h4>
+<ul>
+<li><strong>EventBridge</strong> - Event routing, custom events, third-party integrations</li>
+<li><strong>SNS</strong> - Pub/sub messaging, mobile push, email, SMS notifications</li>
+<li><strong>SQS</strong> - Message queuing, FIFO, dead letter queues, visibility timeout</li>
+<li><strong>Lambda</strong> - Event-driven processing, automatic scaling, multiple triggers</li>
+</ul>
+<h4><strong>Workflow Orchestration</strong></h4>
+<ul>
+<li><strong>Step Functions</strong> - State machines, parallel processing, error handling</li>
+<li><strong>CloudWatch Alarms</strong> - Threshold monitoring, composite alarms, actions</li>
+<li><strong>Auto Scaling</strong> - Dynamic scaling based on metrics, scheduled scaling</li>
+</ul>
+<h3><strong>Domain 6: Security and Compliance (15%)</strong></h3>
+<h4><strong>Identity &amp; Access</strong></h4>
+<ul>
+<li><strong>IAM</strong> - Users, roles, policies, conditions, cross-account access</li>
+<li><strong>Organizations</strong> - SCPs, account management, consolidated billing</li>
+<li><strong>Control Tower</strong> - Governance, guardrails, compliance monitoring</li>
+</ul>
+<h4><strong>Encryption &amp; Secrets</strong></h4>
+<ul>
+<li><strong>KMS</strong> - Key management, envelope encryption, cross-account access</li>
+<li><strong>Secrets Manager</strong> - Secret rotation, database credentials, API keys</li>
+<li><strong>Certificate Manager</strong> - SSL/TLS certificates, automatic renewal</li>
+</ul>
+<h4><strong>Security Services</strong></h4>
+<ul>
+<li><strong>WAF</strong> - Web application firewall, rate limiting, geo-blocking</li>
+<li><strong>Shield</strong> - DDoS protection, Standard (free), Advanced (paid)</li>
+<li><strong>GuardDuty</strong> - Threat detection, behavioral analysis, findings</li>
+</ul>
+<h2 id="-stronghigh-impact-integration-patternsstrong">🔥 <strong>High-Impact Integration Patterns</strong></h2>
+<h3><strong>Cross-Account Patterns</strong></h3>
+<pre class="codehilite"><code>Source Account → Assume Role → Target Account
+S3 Bucket Policy + KMS Key Policy + IAM Role
+</code></pre>
+
+<h3><strong>CI/CD Pipeline Pattern</strong></h3>
+<pre class="codehilite"><code>CodeCommit → CodeBuild → CodeDeploy → CloudWatch
+EventBridge → Lambda → SNS → Step Functions
+</code></pre>
+
+<h3><strong>Event-Driven Architecture</strong></h3>
+<pre class="codehilite"><code>API Gateway → Lambda → EventBridge → [SNS/SQS/Lambda]
+CloudWatch Alarm → EventBridge → Lambda → Auto Scaling
+</code></pre>
+
+<h3><strong>Multi-Region Resilience</strong></h3>
+<pre class="codehilite"><code>Route 53 → CloudFront → ALB (Multi-AZ) → Auto Scaling
+RDS Multi-AZ → Cross-Region Read Replicas
+S3 → Cross-Region Replication
+</code></pre>
+
+<h2 id="-strongcritical-cli-commandsstrong">⚡ <strong>Critical CLI Commands</strong></h2>
+<h3><strong>CodePipeline</strong></h3>
+<pre class="codehilite"><code class="language-bash">aws codepipeline start-pipeline-execution --name MyPipeline
+aws codepipeline get-pipeline-state --name MyPipeline
+aws codepipeline stop-pipeline-execution --pipeline-name MyPipeline
+</code></pre>
+
+<h3><strong>CodeBuild</strong></h3>
+<pre class="codehilite"><code class="language-bash">aws codebuild start-build --project-name MyProject
+aws codebuild batch-get-builds --ids build-id
+aws codebuild list-projects
+</code></pre>
+
+<h3><strong>CloudFormation</strong></h3>
+<pre class="codehilite"><code class="language-bash">aws cloudformation deploy --template-file template.yaml --stack-name MyStack
+aws cloudformation describe-stacks --stack-name MyStack
+aws cloudformation detect-stack-drift --stack-name MyStack
+</code></pre>
+
+<h3><strong>Auto Scaling</strong></h3>
+<pre class="codehilite"><code class="language-bash">aws autoscaling describe-auto-scaling-groups
+aws autoscaling set-desired-capacity --auto-scaling-group-name MyASG --desired-capacity 3
+aws autoscaling put-scaling-policy --policy-name MyPolicy
+</code></pre>
+
+<h3><strong>Systems Manager</strong></h3>
+<pre class="codehilite"><code class="language-bash">aws ssm get-parameter --name /myapp/database/url --with-decryption
+aws ssm send-command --document-name &quot;AWS-RunShellScript&quot; --targets &quot;Key=tag:Environment,Values=prod&quot;
+aws ssm start-session --target i-1234567890abcdef0
+</code></pre>
+
+<h2 id="-strongexam-recognition-patternsstrong">🎯 <strong>Exam Recognition Patterns</strong></h2>
+<h3><strong>Service Selection Triggers</strong></h3>
+<ul>
+<li><strong>"Cross-account deployment"</strong> → IAM roles + trust policies</li>
+<li><strong>"Zero-downtime deployment"</strong> → Blue/green or canary</li>
+<li><strong>"Automatic scaling"</strong> → Auto Scaling Groups + CloudWatch</li>
+<li><strong>"Event-driven processing"</strong> → EventBridge + Lambda</li>
+<li><strong>"Secure secrets"</strong> → Secrets Manager or Parameter Store (SecureString)</li>
+<li><strong>"Infrastructure as Code"</strong> → CloudFormation, CDK, or Terraform</li>
+<li><strong>"Monitoring and alerting"</strong> → CloudWatch + SNS</li>
+<li><strong>"Compliance monitoring"</strong> → Config + remediation actions</li>
+</ul>
+<h3><strong>Common Exam Traps</strong></h3>
+<ul>
+<li><strong>CloudWatch vs CloudTrail vs Config</strong> - Metrics vs API logs vs compliance</li>
+<li><strong>ALB vs NLB vs GWLB</strong> - Layer 7 vs Layer 4 vs Layer 3</li>
+<li><strong>Multi-AZ vs Read Replicas</strong> - HA vs read scaling</li>
+<li><strong>SNS vs SQS</strong> - Pub/sub vs queuing</li>
+<li><strong>Parameter Store vs Secrets Manager</strong> - Configuration vs secrets with rotation</li>
+</ul>
+<h3><strong>Architecture Decision Trees</strong></h3>
+<ol>
+<li><strong>Need automatic failover?</strong> → Multi-AZ deployment</li>
+<li><strong>Need cross-region disaster recovery?</strong> → Cross-region replication</li>
+<li><strong>Need to process events?</strong> → EventBridge + Lambda</li>
+<li><strong>Need workflow orchestration?</strong> → Step Functions</li>
+<li><strong>Need secure parameter storage?</strong> → Parameter Store (config) vs Secrets Manager (secrets)</li>
+</ol>
+<h2 id="-strongperformance-amp-cost-optimizationstrong">📊 <strong>Performance &amp; Cost Optimization</strong></h2>
+<h3><strong>Auto Scaling Optimization</strong></h3>
+<ul>
+<li><strong>Target Tracking</strong> - Maintain specific metric value</li>
+<li><strong>Step Scaling</strong> - Scale based on alarm breach size</li>
+<li><strong>Predictive Scaling</strong> - ML-based capacity planning</li>
+<li><strong>Scheduled Scaling</strong> - Time-based scaling</li>
+</ul>
+<h3><strong>Lambda Optimization</strong></h3>
+<ul>
+<li><strong>Memory allocation</strong> - Affects CPU and network performance</li>
+<li><strong>Provisioned concurrency</strong> - Eliminates cold starts</li>
+<li><strong>Dead letter queues</strong> - Handle failed invocations</li>
+<li><strong>Reserved concurrency</strong> - Limit concurrent executions</li>
+</ul>
+<h3><strong>Cost Management</strong></h3>
+<ul>
+<li><strong>Reserved Instances</strong> - Long-term capacity reservations</li>
+<li><strong>Spot Instances</strong> - Fault-tolerant workloads</li>
+<li><strong>S3 Intelligent Tiering</strong> - Automatic cost optimization</li>
+<li><strong>CloudWatch Logs retention</strong> - Manage log storage costs</li>
+</ul>
+<h2 id="-strongsecurity-best-practicesstrong">🚨 <strong>Security Best Practices</strong></h2>
+<h3><strong>IAM Principles</strong></h3>
+<ul>
+<li><strong>Least privilege</strong> - Minimum necessary permissions</li>
+<li><strong>Role-based access</strong> - Use roles instead of users for services</li>
+<li><strong>Conditions</strong> - Restrict access based on context</li>
+<li><strong>Regular reviews</strong> - Audit permissions regularly</li>
+</ul>
+<h3><strong>Encryption Standards</strong></h3>
+<ul>
+<li><strong>Data at rest</strong> - S3, EBS, RDS encryption</li>
+<li><strong>Data in transit</strong> - TLS/SSL for all communications</li>
+<li><strong>Key management</strong> - KMS for centralized key management</li>
+<li><strong>Envelope encryption</strong> - Encrypt data keys with master keys</li>
+</ul>
+<h3><strong>Network Security</strong></h3>
+<ul>
+<li><strong>VPC isolation</strong> - Separate environments</li>
+<li><strong>Security groups</strong> - Stateful firewall rules</li>
+<li><strong>NACLs</strong> - Stateless subnet-level rules</li>
+<li><strong>VPC endpoints</strong> - Private service access</li>
+</ul>
+<h2 id="-strongfinal-exam-checkliststrong">🎯 <strong>Final Exam Checklist</strong></h2>
+<h3><strong>Must Know Cold</strong></h3>
+<ul>
+<li>[ ] Cross-account IAM role assumption process</li>
+<li>[ ] Blue/green vs rolling vs canary deployment differences</li>
+<li>[ ] Multi-AZ vs Read Replica use cases</li>
+<li>[ ] EventBridge event routing and filtering</li>
+<li>[ ] CloudFormation intrinsic functions (!Ref, !GetAtt, !Sub)</li>
+<li>[ ] Auto Scaling policy types and triggers</li>
+<li>[ ] Lambda error handling and retry behavior</li>
+<li>[ ] Step Functions state types and error handling</li>
+</ul>
+<h3><strong>Service Integration Patterns</strong></h3>
+<ul>
+<li>[ ] CodePipeline + CodeBuild + CodeDeploy workflow</li>
+<li>[ ] EventBridge + Lambda + SNS/SQS integration</li>
+<li>[ ] CloudWatch + Auto Scaling + ELB integration</li>
+<li>[ ] Route 53 + CloudFront + S3 global architecture</li>
+<li>[ ] Systems Manager + EC2 + Auto Scaling management</li>
+</ul>
+<h3><strong>Troubleshooting Scenarios</strong></h3>
+<ul>
+<li>[ ] Pipeline failures and rollback procedures</li>
+<li>[ ] Auto Scaling issues and debugging</li>
+<li>[ ] Cross-account access problems</li>
+<li>[ ] Performance bottlenecks identification</li>
+<li>[ ] Security incident response procedures</li>
+</ul>
+<p><strong>Remember</strong>: Think practically, consider cost implications, and always choose the most AWS-native solution when multiple options exist. Good luck! 🚀</p>
+        </main>
+    </div>
+</body>
+</html>

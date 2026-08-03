@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SAP-C02 - Data-Driven Cheatsheet</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f0f2f5; color: #232f3e; }
+        .topbar { background: #232f3e; color: white; padding: 15px 20px; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 8px rgba(0,0,0,0.2); }
+        .topbar-inner { max-width: 1100px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
+        .topbar h1 { font-size: 1.35em; }
+        .topbar .meta { font-size: 13px; opacity: 0.85; }
+        .topbar a { color: white; text-decoration: none; padding: 8px 16px; background: #ff9900; border-radius: 6px; font-size: 14px; font-weight: bold; }
+        .topbar a.sec { background: #3b4a5e; }
+        .topbar a.sec:hover { background: #4a5d75; }
+        .wrap { max-width: 1100px; margin: 0 auto; padding: 25px 20px; }
+        .section { background: white; border-radius: 10px; padding: 30px; box-shadow: 0 2px 10px rgba(0,0,0,0.08); margin-bottom: 25px; }
+        .section h2 { font-size: 1.5em; color: #232f3e; border-bottom: 3px solid #ff9900; padding-bottom: 8px; margin-bottom: 16px; }
+        .section p.lead { color: #555; margin-bottom: 16px; line-height: 1.6; }
+        .callout { background: #eaf6ff; border-left: 4px solid #2196f3; padding: 14px 18px; border-radius: 8px; margin: 14px 0; line-height: 1.6; font-size: 14px; }
+        .callout.tip { background: #e8f5e9; border-left-color: #4caf50; }
+        .callout.warn { background: #fff8e1; border-left-color: #ff9900; }
+        table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 14px; }
+        th { background: #232f3e; color: white; padding: 10px 12px; text-align: left; }
+        td { padding: 10px 12px; border-bottom: 1px solid #e0e0e0; vertical-align: top; line-height: 1.5; }
+        tr:nth-child(even) { background: #f8f9fa; }
+        .card-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; margin: 16px 0; }
+        .info-card { background: #f8f9fa; border: 1px solid #e0e0e0; border-radius: 8px; padding: 14px; border-top: 4px solid #9c27b0; }
+        .info-card h4 { margin: 0 0 6px; color: #6a1b9a; font-size: 1em; }
+        .info-card p { font-size: 13px; margin: 0; color: #333; line-height: 1.4; }
+        .focus-list { columns: 2; column-gap: 30px; font-size: 14px; line-height: 1.9; list-style: none; }
+        .focus-list li::before { content: '▸ '; color: #ff9900; font-weight: bold; }
+        @media (max-width: 700px) { .focus-list { columns: 1; } }
+    </style>
+  <script src="/assets/js/auth.js"></script>
+  <script src="/assets/js/login.js"></script>
+</head>
+<body>
+    <div class="topbar">
+        <div class="topbar-inner">
+            <div>
+                <h1>📊 SAP-C02 Cheatsheet <span class="meta">— data-driven from 529 questions</span></h1>
+                <div class="meta">AWS Solutions Architect Professional · Extracted from your question bank</div>
+            </div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                <a href="study_notes.html" class="sec">📖 Full Notes</a>
+                <a href="../../master_study_launcher.html" class="sec">🏡 Hub</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="wrap">
+
+        <div class="section">
+            <h2>🎯 How to use this cheatsheet</h2>
+            <p class="lead">This page is <strong>generated from your actual question bank</strong> (529 real questions). It shows what AWS <em>actually tests</em> — not generic advice.</p>
+            <div class="callout">
+                <strong>Strategy:</strong> Memorize the <strong>top 15 services</strong> cold (left table). When you see a scenario trigger (right table), the bolded service is the most likely correct answer. These patterns come directly from analyzing which services appear in the <em>correct answers</em> for each scenario type.
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>🔥 Most-tested services (by frequency in questions)</h2>
+            <p class="lead">These services appear most often across all 529 questions. The top 10 account for the majority of exam content — know them inside-out.</p>
+            <table><tr><th>Service</th><th>Mentions</th><th>Frequency</th></tr><tr><td><strong>S3</strong></td><td>936</td><td><div style="background:#ff9900;height:14px;width:100%;border-radius:3px;display:inline-block;"></div></td></tr><tr><td><strong>EC2</strong></td><td>823</td><td><div style="background:#ff9900;height:14px;width:88%;border-radius:3px;display:inline-block;"></div></td></tr><tr><td><strong>Lambda</strong></td><td>629</td><td><div style="background:#ff9900;height:14px;width:67%;border-radius:3px;display:inline-block;"></div></td></tr><tr><td><strong>ALB</strong></td><td>408</td><td><div style="background:#ff9900;height:14px;width:44%;border-radius:3px;display:inline-block;"></div></td></tr><tr><td><strong>Auto Scaling</strong></td><td>320</td><td><div style="background:#ff9900;height:14px;width:34%;border-radius:3px;display:inline-block;"></div></td></tr><tr><td><strong>IAM</strong></td><td>318</td><td><div style="background:#ff9900;height:14px;width:34%;border-radius:3px;display:inline-block;"></div></td></tr><tr><td><strong>Aurora</strong></td><td>197</td><td><div style="background:#ff9900;height:14px;width:21%;border-radius:3px;display:inline-block;"></div></td></tr><tr><td><strong>RDS</strong></td><td>194</td><td><div style="background:#ff9900;height:14px;width:21%;border-radius:3px;display:inline-block;"></div></td></tr><tr><td><strong>DynamoDB</strong></td><td>194</td><td><div style="background:#ff9900;height:14px;width:21%;border-radius:3px;display:inline-block;"></div></td></tr><tr><td><strong>CloudFront</strong></td><td>159</td><td><div style="background:#ff9900;height:14px;width:17%;border-radius:3px;display:inline-block;"></div></td></tr><tr><td><strong>API Gateway</strong></td><td>159</td><td><div style="background:#ff9900;height:14px;width:17%;border-radius:3px;display:inline-block;"></div></td></tr><tr><td><strong>Route 53</strong></td><td>158</td><td><div style="background:#ff9900;height:14px;width:17%;border-radius:3px;display:inline-block;"></div></td></tr><tr><td><strong>CloudFormation</strong></td><td>145</td><td><div style="background:#ff9900;height:14px;width:15%;border-radius:3px;display:inline-block;"></div></td></tr><tr><td><strong>NLB</strong></td><td>141</td><td><div style="background:#ff9900;height:14px;width:15%;border-radius:3px;display:inline-block;"></div></td></tr><tr><td><strong>ECS</strong></td><td>134</td><td><div style="background:#ff9900;height:14px;width:14%;border-radius:3px;display:inline-block;"></div></td></tr><tr><td><strong>CloudWatch</strong></td><td>123</td><td><div style="background:#ff9900;height:14px;width:13%;border-radius:3px;display:inline-block;"></div></td></tr><tr><td><strong>AWS Organizations</strong></td><td>113</td><td><div style="background:#ff9900;height:14px;width:12%;border-radius:3px;display:inline-block;"></div></td></tr><tr><td><strong>VPC endpoint</strong></td><td>111</td><td><div style="background:#ff9900;height:14px;width:12%;border-radius:3px;display:inline-block;"></div></td></tr><tr><td><strong>Transit Gateway</strong></td><td>110</td><td><div style="background:#ff9900;height:14px;width:12%;border-radius:3px;display:inline-block;"></div></td></tr><tr><td><strong>Service Control Policies</strong></td><td>109</td><td><div style="background:#ff9900;height:14px;width:12%;border-radius:3px;display:inline-block;"></div></td></tr><tr><td><strong>EBS</strong></td><td>108</td><td><div style="background:#ff9900;height:14px;width:12%;border-radius:3px;display:inline-block;"></div></td></tr><tr><td><strong>Direct Connect</strong></td><td>103</td><td><div style="background:#ff9900;height:14px;width:11%;border-radius:3px;display:inline-block;"></div></td></tr><tr><td><strong>EFS</strong></td><td>99</td><td><div style="background:#ff9900;height:14px;width:11%;border-radius:3px;display:inline-block;"></div></td></tr><tr><td><strong>EventBridge</strong></td><td>86</td><td><div style="background:#ff9900;height:14px;width:9%;border-radius:3px;display:inline-block;"></div></td></tr><tr><td><strong>Systems Manager</strong></td><td>77</td><td><div style="background:#ff9900;height:14px;width:8%;border-radius:3px;display:inline-block;"></div></td></tr><tr><td><strong>SQS</strong></td><td>77</td><td><div style="background:#ff9900;height:14px;width:8%;border-radius:3px;display:inline-block;"></div></td></tr><tr><td><strong>AWS DMS</strong></td><td>76</td><td><div style="background:#ff9900;height:14px;width:8%;border-radius:3px;display:inline-block;"></div></td></tr><tr><td><strong>KMS</strong></td><td>74</td><td><div style="background:#ff9900;height:14px;width:8%;border-radius:3px;display:inline-block;"></div></td></tr><tr><td><strong>EKS</strong></td><td>71</td><td><div style="background:#ff9900;height:14px;width:8%;border-radius:3px;display:inline-block;"></div></td></tr><tr><td><strong>SNS</strong></td><td>68</td><td><div style="background:#ff9900;height:14px;width:7%;border-radius:3px;display:inline-block;"></div></td></tr></table>
+        </div>
+
+        <div class="section">
+            <h2>🧠 High-yield focus list</h2>
+            <p class="lead">If you only study these services, you cover most of the exam:</p>
+            <ul class="focus-list"><li><strong>S3</strong></li><li><strong>EC2</strong></li><li><strong>Lambda</strong></li><li><strong>ALB</strong></li><li><strong>Auto Scaling</strong></li><li><strong>IAM</strong></li><li><strong>Aurora</strong></li><li><strong>RDS</strong></li><li><strong>DynamoDB</strong></li><li><strong>CloudFront</strong></li><li><strong>API Gateway</strong></li><li><strong>Route 53</strong></li><li><strong>CloudFormation</strong></li><li><strong>NLB</strong></li><li><strong>ECS</strong></li><li><strong>CloudWatch</strong></li><li><strong>AWS Organizations</strong></li><li><strong>VPC endpoint</strong></li></ul>
+        </div>
+
+        <div class="section">
+            <h2>🔗 Scenario triggers → likely correct services</h2>
+            <p class="lead">When the question mentions the trigger keyword (left), the correct answer very often uses these services (right). Data mined from your question bank's <strong>correct answers</strong>.</p>
+            <table><tr><th>Scenario trigger (in question)</th><th>Services that appear in correct answers</th></tr><tr><td><strong>Migration</strong><br><span style="color:#888;font-size:12px;">145 questions</span></td><td><strong>s3</strong>, <strong>Direct Connect</strong>, <strong>Aurora</strong>, <strong>Lambda</strong>, <strong>Auto Scaling</strong></td></tr><tr><td><strong>Event-driven / automation</strong><br><span style="color:#888;font-size:12px;">99 questions</span></td><td><strong>Lambda</strong>, <strong>s3</strong>, <strong>Aurora</strong>, <strong>Auto Scaling</strong>, <strong>CloudFront</strong></td></tr><tr><td><strong>Multi-account governance</strong><br><span style="color:#888;font-size:12px;">76 questions</span></td><td><strong>SCP</strong>, <strong>IAM role</strong>, <strong>Transit Gateway</strong>, <strong>s3</strong>, <strong>AWS Resource Access Manager</strong></td></tr><tr><td><strong>Scaling / traffic spikes</strong><br><span style="color:#888;font-size:12px;">65 questions</span></td><td><strong>Auto Scaling</strong>, <strong>s3</strong>, <strong>Lambda</strong>, <strong>ALB</strong>, <strong>Aurora</strong></td></tr><tr><td><strong>Cost optimization</strong><br><span style="color:#888;font-size:12px;">57 questions</span></td><td><strong>s3</strong>, <strong>Lambda</strong>, <strong>Auto Scaling</strong>, <strong>DynamoDB</strong>, <strong>ECS</strong></td></tr><tr><td><strong>Logging / audit / tracking</strong><br><span style="color:#888;font-size:12px;">52 questions</span></td><td><strong>s3</strong>, <strong>IAM role</strong>, <strong>Lambda</strong>, <strong>CloudTrail</strong>, <strong>Auto Scaling</strong></td></tr><tr><td><strong>Multi-region / Disaster Recovery</strong><br><span style="color:#888;font-size:12px;">49 questions</span></td><td><strong>s3</strong>, <strong>Route 53</strong>, <strong>read replica</strong>, <strong>Lambda</strong>, <strong>ALB</strong></td></tr><tr><td><strong>Encryption</strong><br><span style="color:#888;font-size:12px;">34 questions</span></td><td><strong>s3</strong>, <strong>KMS</strong>, <strong>IAM role</strong>, <strong>Secrets Manager</strong>, <strong>Lambda</strong></td></tr><tr><td><strong>Least privilege / restrict</strong><br><span style="color:#888;font-size:12px;">28 questions</span></td><td><strong>s3</strong>, <strong>IAM role</strong>, <strong>SCP</strong>, <strong>AWS Config</strong>, <strong>ALB</strong></td></tr><tr><td><strong>Storage tiering</strong><br><span style="color:#888;font-size:12px;">23 questions</span></td><td><strong>s3</strong>, <strong>Auto Scaling</strong>, <strong>Lambda</strong>, <strong>Aurora</strong>, <strong>Route 53</strong></td></tr><tr><td><strong>Secrets / credentials</strong><br><span style="color:#888;font-size:12px;">20 questions</span></td><td><strong>Secrets Manager</strong>, <strong>s3</strong>, <strong>Lambda</strong>, <strong>IAM role</strong>, <strong>KMS</strong></td></tr><tr><td><strong>Cross-account access</strong><br><span style="color:#888;font-size:12px;">11 questions</span></td><td><strong>IAM role</strong>, <strong>Transit Gateway</strong>, <strong>CloudFormation</strong>, <strong>StackSets</strong>, <strong>Auto Scaling</strong></td></tr><tr><td><strong>Patching / vulnerability</strong><br><span style="color:#888;font-size:12px;">8 questions</span></td><td><strong>Auto Scaling</strong>, <strong>Systems Manager</strong>, <strong>CodeDeploy</strong>, <strong>Lambda</strong>, <strong>ALB</strong></td></tr><tr><td><strong>Blue/green / zero downtime</strong><br><span style="color:#888;font-size:12px;">7 questions</span></td><td><strong>Aurora</strong>, <strong>blue/green</strong>, <strong>ECS</strong>, <strong>AWS DMS</strong>, <strong>CodeDeploy</strong></td></tr><tr><td><strong>Canary / gradual rollout</strong><br><span style="color:#888;font-size:12px;">1 questions</span></td><td><strong>Lambda</strong></td></tr><tr><td><strong>Idempotency / retries</strong><br><span style="color:#888;font-size:12px;">1 questions</span></td><td><strong>s3</strong>, <strong>Lambda</strong>, <strong>CloudFront</strong>, <strong>Step Functions</strong></td></tr></table>
+        </div>
+
+        <div class="section">
+            <h2>⚡ Quick-recall cards (top scenarios)</h2>
+            <p class="lead">Memorize these trigger→answer mappings. Drilled until reflexive.</p>
+            <div class="card-grid"><div class="info-card"><h4>Migration</h4><p>s3 · Direct Connect · Aurora</p><span style="color:#999;font-size:11px;">145 Q</span></div><div class="info-card"><h4>Event-driven / automation</h4><p>Lambda · s3 · Aurora</p><span style="color:#999;font-size:11px;">99 Q</span></div><div class="info-card"><h4>Multi-account governance</h4><p>SCP · IAM role · Transit Gateway</p><span style="color:#999;font-size:11px;">76 Q</span></div><div class="info-card"><h4>Scaling / traffic spikes</h4><p>Auto Scaling · s3 · Lambda</p><span style="color:#999;font-size:11px;">65 Q</span></div><div class="info-card"><h4>Cost optimization</h4><p>s3 · Lambda · Auto Scaling</p><span style="color:#999;font-size:11px;">57 Q</span></div><div class="info-card"><h4>Logging / audit / tracking</h4><p>s3 · IAM role · Lambda</p><span style="color:#999;font-size:11px;">52 Q</span></div><div class="info-card"><h4>Multi-region / Disaster Recovery</h4><p>s3 · Route 53 · read replica</p><span style="color:#999;font-size:11px;">49 Q</span></div><div class="info-card"><h4>Encryption</h4><p>s3 · KMS · IAM role</p><span style="color:#999;font-size:11px;">34 Q</span></div><div class="info-card"><h4>Least privilege / restrict</h4><p>s3 · IAM role · SCP</p><span style="color:#999;font-size:11px;">28 Q</span></div><div class="info-card"><h4>Storage tiering</h4><p>s3 · Auto Scaling · Lambda</p><span style="color:#999;font-size:11px;">23 Q</span></div><div class="info-card"><h4>Secrets / credentials</h4><p>Secrets Manager · s3 · Lambda</p><span style="color:#999;font-size:11px;">20 Q</span></div><div class="info-card"><h4>Cross-account access</h4><p>IAM role · Transit Gateway · CloudFormation</p><span style="color:#999;font-size:11px;">11 Q</span></div></div>
+        </div>
+
+        <div class="section">
+            <h2>📌 Study priority recommendation</h2>
+            <div class="callout tip">
+                <strong>Week 1:</strong> Master the top 10 services in the frequency table. Do 100 questions focusing only on those.<br>
+                <strong>Week 2:</strong> Learn the trigger→answer patterns above. They repeat constantly.<br>
+                <strong>Week 3:</strong> Practice exam mode + review wrong answers against this cheatsheet.<br>
+                <strong>Last 24h:</strong> Re-read only the trigger cards + focus list. Sleep well.
+            </div>
+        </div>
+
+    </div>
+</body>
+</html>

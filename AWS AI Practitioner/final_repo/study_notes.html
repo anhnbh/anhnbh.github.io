@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AWS AI Practitioner - Study Notes (AIF-C01)</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f0f2f5; color: #232f3e; }
+        .topbar { background: #232f3e; color: white; padding: 15px 20px; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 8px rgba(0,0,0,0.2); }
+        .topbar-inner { max-width: 1300px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
+        .topbar h1 { font-size: 1.4em; }
+        .topbar a { color: white; text-decoration: none; padding: 8px 16px; background: #ff9900; border-radius: 6px; font-size: 14px; font-weight: bold; }
+        .topbar a:hover { background: #e68900; }
+        .topbar .links { display: flex; gap: 8px; flex-wrap: wrap; }
+        .topbar .links a.sec { background: #3b4a5e; }
+        .topbar .links a.sec:hover { background: #4a5d75; }
+        .layout { max-width: 1300px; margin: 0 auto; display: grid; grid-template-columns: 260px 1fr; gap: 25px; padding: 25px 20px; }
+        .sidebar { position: sticky; top: 80px; align-self: start; background: white; border-radius: 10px; padding: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.08); max-height: calc(100vh - 100px); overflow-y: auto; }
+        .sidebar h3 { font-size: 0.85em; text-transform: uppercase; color: #ff9900; margin-bottom: 12px; letter-spacing: 0.5px; }
+        .sidebar ul { list-style: none; }
+        .sidebar li { margin: 2px 0; }
+        .sidebar a { color: #4a5d75; text-decoration: none; font-size: 13.5px; display: block; padding: 5px 8px; border-radius: 5px; line-height: 1.3; }
+        .sidebar a:hover { background: #fff3cd; color: #232f3e; }
+        .content { background: white; border-radius: 10px; padding: 40px; box-shadow: 0 2px 10px rgba(0,0,0,0.08); min-width: 0; }
+        .content section { margin-bottom: 45px; scroll-margin-top: 80px; }
+        .content h2 { font-size: 1.7em; color: #232f3e; border-bottom: 3px solid #ff9900; padding-bottom: 8px; margin-bottom: 18px; }
+        .content h3 { font-size: 1.25em; color: #6a1b9a; margin: 22px 0 10px; }
+        .content h4 { font-size: 1.05em; color: #232f3e; margin: 16px 0 8px; }
+        .content p { line-height: 1.65; margin-bottom: 12px; color: #333; }
+        .content ul, .content ol { margin: 10px 0 14px 24px; line-height: 1.7; }
+        .content li { margin-bottom: 6px; color: #333; }
+        .content li strong { color: #232f3e; }
+        .content code { background: #f0f2f5; padding: 2px 6px; border-radius: 3px; font-family: 'Courier New', monospace; font-size: 0.9em; color: #c0392b; }
+        .content strong { color: #232f3e; }
+        .callout { background: #eaf6ff; border-left: 4px solid #2196f3; padding: 14px 18px; border-radius: 8px; margin: 14px 0; line-height: 1.6; }
+        .callout.warn { background: #fff8e1; border-left-color: #ff9900; }
+        .callout.tip { background: #e8f5e9; border-left-color: #4caf50; }
+        .card-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; margin: 16px 0; }
+        .info-card { background: #f8f9fa; border: 1px solid #e0e0e0; border-radius: 8px; padding: 16px; border-top: 4px solid #9c27b0; }
+        .info-card h4 { margin-top: 0; color: #6a1b9a; }
+        .info-card p { font-size: 14px; margin-bottom: 0; }
+        table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 14px; }
+        th { background: #232f3e; color: white; padding: 10px 12px; text-align: left; font-weight: 600; }
+        td { padding: 10px 12px; border-bottom: 1px solid #e0e0e0; vertical-align: top; line-height: 1.5; }
+        tr:nth-child(even) { background: #f8f9fa; }
+        tr:hover { background: #fff3cd; }
+        .tag { display: inline-block; background: #9c27b0; color: white; padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: bold; margin-left: 6px; }
+        .pipeline-step { display: flex; gap: 12px; align-items: flex-start; margin: 10px 0; }
+        .step-num { background: #ff9900; color: white; width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; flex-shrink: 0; }
+        .step-content { flex: 1; }
+        .step-content strong { color: #232f3e; display: block; margin-bottom: 4px; }
+        @media (max-width: 900px) {
+            .layout { grid-template-columns: 1fr; }
+            .sidebar { position: static; max-height: none; }
+            .content { padding: 25px; }
+        }
+    </style>
+  <script src="/assets/js/auth.js"></script>
+  <script src="/assets/js/login.js"></script>
+</head>
+<body>
+    <div class="topbar">
+        <div class="topbar-inner">
+            <h1>📖 AIF-C01 Study Notes</h1>
+            <div class="links">
+                <a href="study_app.html" class="sec">📚 Study Mode</a>
+                <a href="exam_mode.html" class="sec">📝 Exam Mode</a>
+                <a href="index.html" class="sec">🏠 Hub</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="layout">
+        <nav class="sidebar">
+            <h3>📑 Contents</h3>
+            <ul>
+                <li><a href="#overview">Overview & Definitions</a></li>
+                <li><a href="#concepts">Core Concepts</a></li>
+                <li><a href="#ml-pipeline">ML Pipeline (8 Steps)</a></li>
+                <li><a href="#mlops">MLOps & Automation</a></li>
+                <li><a href="#governance">Governance & Explainability</a></li>
+                <li><a href="#cost">Cost Optimization</a></li>
+                <li><a href="#security">Security</a></li>
+                <li><a href="#services-managed">Managed AI Services</a></li>
+                <li><a href="#sagemaker">Amazon SageMaker</a></li>
+                <li><a href="#bedrock">Amazon Bedrock</a></li>
+                <li><a href="#glue">AWS Glue</a></li>
+                <li><a href="#tables">Quick Reference Tables</a></li>
+                <li><a href="#cheatsheet">One-Line Cheat Sheet</a></li>
+            </ul>
+        </nav>
+
+        <main class="content">
+
+            <section id="overview">
+                <h2>🧭 Overview &amp; Key Definitions</h2>
+                <div class="callout tip">
+                    <strong>Exam reality:</strong> Foundational level, comparable to AWS Cloud Practitioner but focused on AI/ML/GenAI. High-level &amp; conceptual. Realistically <strong>one focused weekend</strong> of study if you have basic AWS familiarity.
+                </div>
+                <h3>General AI</h3>
+                <p>Systems that can perform <em>any</em> intellectual task a human can — the long-term goal. Examples: <strong>Expert Systems</strong>, <strong>Rules Engines</strong> (e.g., MYCIN) which use predefined logic/rules.</p>
+                <h3>Machine Learning (ML)</h3>
+                <p>Subset of AI. Systems that learn from data to make predictions <em>without explicit programming</em>. Examples: <strong>Linear Regression</strong>, <strong>Decision Trees</strong>, <strong>Support Vector Machines</strong>.</p>
+                <h3>Deep Learning</h3>
+                <p>Subset of ML using <strong>multi-layered neural networks</strong> ("deep") for complex patterns. Examples: <strong>CNNs</strong> for images, <strong>RNNs</strong> for sequential/time-series data.</p>
+                <h3>Generative AI</h3>
+                <p>Subset of deep learning that <strong>creates new content</strong> (text, images, music) based on <strong>foundation models</strong> — large pre-trained models adaptable to many tasks. Examples: ChatGPT, DALL·E.</p>
+                <h3>Large Language Models (LLMs)</h3>
+                <p>Type of Generative AI focused on <strong>understanding and generating human-like text</strong>. Trained on vast text data. Examples: GPT-4, BERT, T5, Claude.</p>
+            </section>
+
+            <section id="concepts">
+                <h2>💡 Core GenAI Concepts</h2>
+                <div class="card-grid">
+                    <div class="info-card">
+                        <h4>In-Context Learning</h4>
+                        <p>Enhancing models by adding data/examples directly to the prompt.</p>
+                    </div>
+                    <div class="info-card">
+                        <h4>Few-Shot / One-Shot / Zero-Shot</h4>
+                        <p>Few = several examples in prompt. One = exactly one example. Zero = no examples, model performs blind.</p>
+                    </div>
+                    <div class="info-card">
+                        <h4>Chain-of-Thought</h4>
+                        <p>Prompt encourages the model to break reasoning into steps ("Let's think step by step").</p>
+                    </div>
+                    <div class="info-card">
+                        <h4>Prompt Template / Tuning</h4>
+                        <p>Pre-defined format to standardize prompts. Tuning = adjusting prompts to improve output.</p>
+                    </div>
+                    <div class="info-card">
+                        <h4>Tokens</h4>
+                        <p>Basic text units (words/subwords/characters) processed by language models — both input &amp; output.</p>
+                    </div>
+                    <div class="info-card">
+                        <h4>Context-Window</h4>
+                        <p>Max tokens an LLM can process at once (input + output). Exceeding it truncates earlier text.</p>
+                    </div>
+                    <div class="info-card">
+                        <h4>Embeddings</h4>
+                        <p>Numerical vector representations capturing <strong>semantic meaning</strong>. Stored in vector DBs for semantic search.</p>
+                    </div>
+                    <div class="info-card">
+                        <h4>Latent Space</h4>
+                        <p>Encoded knowledge/patterns in an LLM storing relationships between data.</p>
+                    </div>
+                    <div class="info-card">
+                        <h4>Multi-Modal Models</h4>
+                        <p>Work across multiple data types (text, images, audio) in a shared space.</p>
+                    </div>
+                </div>
+
+                <h3>🚨 Hallucinations &amp; Mitigations</h3>
+                <p>When a model generates incorrect/nonsensical info that sounds plausible but isn't grounded in facts.</p>
+                <ul>
+                    <li><strong>RAG</strong> — retrieve relevant external data during generation to ground responses.</li>
+                    <li><strong>Fine-Tuning</strong> — train on more accurate/relevant data.</li>
+                    <li><strong>Human-in-the-Loop (HITL)</strong> — human review in low-confidence areas.</li>
+                </ul>
+
+                <h3>🔍 Search Methods</h3>
+                <ul>
+                    <li><strong>Keyword Search</strong> — matches exact terms.</li>
+                    <li><strong>Semantic Search</strong> — uses embeddings to understand meaning behind queries.</li>
+                </ul>
+
+                <h3>🗄️ Vector Databases on AWS</h3>
+                <table>
+                    <tr><th>Service</th><th>Vector Capability</th></tr>
+                    <tr><td><strong>Amazon OpenSearch Service</strong></td><td>k-NN search; log analytics, monitoring, search</td></tr>
+                    <tr><td><strong>Aurora PostgreSQL / RDS PostgreSQL</strong></td><td><code>pgvector</code> extension for embeddings &amp; similarity search</td></tr>
+                    <tr><td><strong>Amazon Neptune ML</strong></td><td>Graph Neural Networks (GNNs) on graph data</td></tr>
+                    <tr><td><strong>Amazon MemoryDB</strong></td><td>Millisecond vector queries, tens of thousands of QPS</td></tr>
+                    <tr><td><strong>Amazon DocumentDB</strong></td><td>MongoDB-compatible, vector search with millisecond response</td></tr>
+                </table>
+            </section>
+
+            <section id="ml-pipeline">
+                <h2>⚙️ The ML Pipeline (8 Steps)</h2>
+
+                <div class="pipeline-step">
+                    <div class="step-num">1</div>
+                    <div class="step-content"><strong>Identify Business Goal</strong>Define success metrics &amp; align stakeholders.</div>
+                </div>
+                <div class="pipeline-step">
+                    <div class="step-num">2</div>
+                    <div class="step-content"><strong>Frame ML Problem</strong>Define inputs/outputs/metrics; cost-benefit analysis. Model options: <em>AI/ML Hosted Service</em> (Comprehend, Forecast — no training), <em>Pre-trained</em> (Bedrock, JumpStart — fine-tune), <em>Fully Custom</em>.</div>
+                </div>
+                <div class="pipeline-step">
+                    <div class="step-num">3</div>
+                    <div class="step-content"><strong>Collect Data</strong>Store in <strong>Amazon S3</strong>. Tools: <strong>AWS Glue</strong> (ETL), <strong>SageMaker Ground Truth</strong> (human labeling), <strong>AWS Data Exchange</strong> (third-party datasets).</div>
+                </div>
+                <div class="pipeline-step">
+                    <div class="step-num">4</div>
+                    <div class="step-content"><strong>Pre-Process Data</strong>EDA, clean data, anonymize PII. Split: <strong>80% train / 10% validation / 10% test</strong>. Tools: <strong>AWS Glue</strong>, <strong>Glue DataBrew</strong> (visual, "recipes"), <strong>Macie</strong> (PII detection), <strong>SageMaker Canvas</strong> (no-code).</div>
+                </div>
+                <div class="pipeline-step">
+                    <div class="step-num">5</div>
+                    <div class="step-content"><strong>Engineer Features</strong>Selection, creation, transformation (normalization, one-hot encoding). Use <strong>SageMaker Autopilot</strong> (auto feature gen/rank), <strong>PCA</strong> (dimensionality reduction). Store in <strong>SageMaker Feature Store</strong>.</div>
+                </div>
+                <div class="pipeline-step">
+                    <div class="step-num">6</div>
+                    <div class="step-content"><strong>Train, Tune, Evaluate</strong>Tune hyperparameters; evaluate with metrics. (Details below.)</div>
+                </div>
+                <div class="pipeline-step">
+                    <div class="step-num">7</div>
+                    <div class="step-content"><strong>Deploy</strong>Real-time / Batch / Asynchronous / Serverless inference.</div>
+                </div>
+                <div class="pipeline-step">
+                    <div class="step-num">8</div>
+                    <div class="step-content"><strong>Monitor</strong>Detect data drift &amp; concept drift with <strong>SageMaker Model Monitor</strong>.</div>
+                </div>
+
+                <h3>Step 6 Deep Dive — Parameters</h3>
+                <h4>Inference Parameters (Amazon Bedrock)</h4>
+                <table>
+                    <tr><th>Parameter</th><th>Effect</th></tr>
+                    <tr><td><strong>Temperature</strong></td><td>Higher = more creative/diverse. Lower = deterministic. <em>Use for consistent randomness control.</em></td></tr>
+                    <tr><td><strong>Top K</strong></td><td>Limits to top K probable tokens. Smaller K = safer. <span class="tag">Not very useful</span> — use Temperature or Top-P instead.</td></tr>
+                    <tr><td><strong>Top P</strong></td><td>Cumulative probability token selection. Higher (closer to 1) = less random. <em>Use for adaptive diversity.</em></td></tr>
+                    <tr><td><strong>Response length</strong></td><td>Max output length (verbose vs. concise).</td></tr>
+                    <tr><td><strong>Penalties</strong></td><td>Penalize repeated tokens/sequences for variety.</td></tr>
+                    <tr><td><strong>Stop sequences</strong></td><td>Specific sequences where generation stops.</td></tr>
+                </table>
+                <div class="callout warn"><strong>Temperature vs Top-P:</strong> Temperature scales probabilities across all tokens. Top-P narrows to a probability threshold. Use <strong>Top-P</strong> for adaptive diversity staying close to likely outcomes; use <strong>Temperature</strong> for consistent randomness control.</div>
+
+                <h4>Training Parameters (Hyperparameters)</h4>
+                <ul>
+                    <li><strong>Epoch</strong> — iterations through entire dataset. More = better learning, but risk of <em>overfitting</em>.</li>
+                    <li><strong>Batch Size</strong> — samples before updating params. Smaller = faster convergence but noisier; larger = stable but more compute.</li>
+                    <li><strong>Learning Rate</strong> — how fast the model learns. High = fast but may skip optimum; low = precise but slow, risk of local minima.</li>
+                </ul>
+
+                <h4>Error Metrics</h4>
+                <table>
+                    <tr><th>Metric</th><th>Measures</th><th>Rule of Thumb</th></tr>
+                    <tr><td><strong>MSE</strong></td><td>Avg squared error; weights larger errors</td><td>Lower better. Regression (house prices).</td></tr>
+                    <tr><td><strong>RMSE</strong></td><td>Sqrt of MSE; same unit as predicted</td><td>Lower better. More interpretable.</td></tr>
+                    <tr><td><strong>Perplexity</strong></td><td>How well model predicts next token</td><td>Lower better. Language models.</td></tr>
+                    <tr><td><strong>Precision</strong></td><td>True positives ÷ total predicted positives</td><td>Higher when false positives costly (spam).</td></tr>
+                    <tr><td><strong>Recall (TPR)</strong></td><td>True positives ÷ actual positives</td><td>Higher when false negatives costly (medical).</td></tr>
+                    <tr><td><strong>FPR</strong></td><td>False positives ÷ total negatives</td><td>Lower better (fraud, alarms).</td></tr>
+                    <tr><td><strong>Specificity (TNR)</strong></td><td>True negatives ÷ actual negatives</td><td>Higher better for identifying negatives.</td></tr>
+                    <tr><td><strong>Accuracy</strong></td><td>Correct ÷ total predictions</td><td>Higher better. Balanced classification.</td></tr>
+                    <tr><td><strong>F1 Score</strong></td><td>Harmonic mean of precision &amp; recall</td><td>Higher better. Balance FP &amp; FN.</td></tr>
+                    <tr><td><strong>ROC Curve / AUC</strong></td><td>TPR vs FPR across thresholds</td><td>Higher AUC better. Binary classification.</td></tr>
+                </table>
+
+                <h4>Training Issues</h4>
+                <ul>
+                    <li><strong>Overfitting</strong> — too much training on same data, model overly specific. <em>Fix: more diverse data.</em></li>
+                    <li><strong>Underfitting</strong> — model doesn't learn enough patterns. <em>Fix: more epochs / more data.</em></li>
+                    <li><strong>Bias &amp; Fairness</strong> — lack of diversity → biased predictions. <em>Fix: diverse representative data + fairness constraints.</em></li>
+                </ul>
+
+                <h4>Customization Methods</h4>
+                <table>
+                    <tr><th>Method</th><th>Data</th><th>Use Case</th></tr>
+                    <tr><td><strong>Fine-Tuning</strong></td><td>Labeled</td><td>Adjust weights for specific task. Risk: <em>catastrophic forgetting</em> if single-task only.</td></tr>
+                    <tr><td><strong>Domain adaptation fine-tuning</strong></td><td>Small domain-specific</td><td>Tailor to legal/medical/etc.</td></tr>
+                    <tr><td><strong>Instruction-based fine-tuning</strong></td><td>Labeled task examples</td><td>Summarization, classification.</td></tr>
+                    <tr><td><strong>Continued-Pretraining</strong></td><td>Unlabeled</td><td>Expand overall knowledge without narrowing scope.</td></tr>
+                    <tr><td><strong>Transfer Learning</strong></td><td>—</td><td>Apply general-features model to new problem; faster training.</td></tr>
+                </table>
+            </section>
+
+            <section id="mlops">
+                <h2>🔄 MLOps &amp; Automation</h2>
+                <p>Apply DevOps principles to manage ML models across their lifecycle: automation, version control, monitoring.</p>
+                <ul>
+                    <li><strong>SageMaker Pipelines</strong> — automate ML workflow end-to-end.</li>
+                    <li><strong>AWS CodePipeline</strong> — automate build/test/deploy.</li>
+                    <li><strong>SageMaker Model Registry</strong> — manage &amp; track model versions/metadata.</li>
+                    <li><strong>Amazon S3</strong> — store trained model artifacts/weights (SageMaker &amp; Bedrock).</li>
+                </ul>
+            </section>
+
+            <section id="governance">
+                <h2>⚖️ Model Governance &amp; Explainability</h2>
+                <p>Transparency, accountability, regulatory compliance, and interpretable behavior.</p>
+                <ul>
+                    <li><strong>SageMaker Clarify</strong> — detect bias, explain predictions, increase transparency.</li>
+                    <li><strong>SageMaker Model Cards</strong> — documentation (performance, intended use).</li>
+                    <li><strong>ML Governance (SageMaker)</strong> — control &amp; visibility; track bias.</li>
+                    <li><strong>SageMaker ML Lineage Tracking</strong> — capture workflow, model lineage for reproducibility.</li>
+                    <li><strong>Glue DataBrew</strong> — data governance with visual quality rules.</li>
+                    <li><strong>AWS Audit Manager</strong> — automate auditing, compliance.</li>
+                    <li><strong>AWS Artifact</strong> — compliance reports &amp; agreements.</li>
+                    <li><strong>AWS AI Service Cards</strong> — transparency docs (use cases, limitations, responsible AI practices).</li>
+                </ul>
+            </section>
+
+            <section id="cost">
+                <h2>💰 Cost &amp; Performance Optimization</h2>
+                <ul>
+                    <li><strong>AWS Trusted Advisor</strong> — cost/performance/security recommendations.</li>
+                    <li><strong>SageMaker Managed Spot Training</strong> — use spare EC2 capacity to cut training cost.</li>
+                    <li><strong>SageMaker Profiler</strong> — identify inefficient resource use during training.</li>
+                    <li><strong>Amazon Inspector</strong> — automated security assessments.</li>
+                </ul>
+            </section>
+
+            <section id="security">
+                <h2>🔐 Security</h2>
+                <ul>
+                    <li><strong>Least Privilege</strong> — IAM roles/policies grant only required permissions.</li>
+                    <li><strong>PrivateLink &amp; VPC Endpoints</strong> — lock down SageMaker; prevent internet exposure.</li>
+                    <li><strong>Encryption at Rest &amp; in Transit</strong> — SageMaker encrypts via <strong>KMS</strong> by default.</li>
+                    <li><strong>S3 Block Public Access</strong> — prevent model data exposure.</li>
+                    <li><strong>AWS IAM Identity Center</strong> — centralize identity; integrate with Active Directory.</li>
+                    <li><strong>AWS Config</strong> — monitor/record config changes for compliance.</li>
+                    <li><strong>AWS CloudTrail</strong> — log API calls, track user activity.</li>
+                    <li><strong>SageMaker Role Manager</strong> — simplify permissions management.</li>
+                </ul>
+            </section>
+
+            <section id="services-managed">
+                <h2>🤖 AWS Managed AI Services</h2>
+                <h3>Computer Vision</h3>
+                <p><strong>AWS Rekognition</strong> — facial comparison/analysis, object/text detection, content moderation (screening violent/inappropriate material).</p>
+                <h3>Text &amp; Document Analysis</h3>
+                <ul>
+                    <li><strong>AWS Textract (OCR)</strong> — scanned images → text; digital content management.</li>
+                    <li><strong>Amazon Comprehend (NLP)</strong> — key phrases, entities, sentiment, <strong>PII detection</strong>.</li>
+                    <li><strong>AWS Intelligent Document Processing (IDP)</strong> — combines Textract + Comprehend + A2I for invoices, contracts, PDFs.</li>
+                </ul>
+                <h3>Language AI</h3>
+                <ul>
+                    <li><strong>Amazon Lex</strong> — conversational interfaces (voice/text) for <strong>chatbots</strong>.</li>
+                    <li><strong>Amazon Transcribe</strong> — speech-to-text; audio <strong>captioning</strong>.</li>
+                    <li><strong>Amazon Polly</strong> — text-to-speech; lifelike voice.</li>
+                </ul>
+                <h3>Customer Experience</h3>
+                <ul>
+                    <li><strong>Amazon Kendra</strong> — intelligent document search.</li>
+                    <li><strong>Amazon Personalize</strong> — personalized product recommendations ("you may also like").</li>
+                    <li><strong>Amazon Translate</strong> — language translation.</li>
+                </ul>
+                <h3>Business Metrics</h3>
+                <ul>
+                    <li><strong>Amazon Forecast</strong> — time-series forecasting (inventory levels).</li>
+                    <li><strong>Amazon Fraud Detection</strong> — fraud in transactions &amp; new account creation.</li>
+                </ul>
+                <h3>Amazon Q Family</h3>
+                <div class="card-grid">
+                    <div class="info-card"><h4>Q Business</h4><p>GenAI assistant over enterprise data (S3, SharePoint, Salesforce).</p></div>
+                    <div class="info-card"><h4>Q Developer</h4><p>Code generation, security scanning for devs.</p></div>
+                    <div class="info-card"><h4>Q in QuickSight</h4><p>Natural language BI queries.</p></div>
+                    <div class="info-card"><h4>Q in Connect</h4><p>Customer service automation in Amazon Connect.</p></div>
+                    <div class="info-card"><h4>Q in Supply Chain</h4><p>Supply chain insights, inventory, demand forecasting.</p></div>
+                </div>
+            </section>
+
+            <section id="sagemaker">
+                <h2>🛠️ Amazon SageMaker</h2>
+                <p>End-to-end ML service — build, train, deploy at scale. More control than Rekognition/Comprehend. Use JumpStart for pre-trained models.</p>
+                <h3>Features</h3>
+                <table>
+                    <tr><th>Feature</th><th>Purpose</th></tr>
+                    <tr><td><strong>Studio</strong></td><td>IDE for ML — Jupyter notebooks, debugging, experiment mgmt.</td></tr>
+                    <tr><td><strong>Feature Store</strong></td><td>Central repository to store/retrieve/share features.</td></tr>
+                    <tr><td><strong>Model Registry</strong></td><td>Manage model versions &amp; metadata.</td></tr>
+                    <tr><td><strong>Pipelines</strong></td><td>Workflow orchestration — repeatable build/train/deploy.</td></tr>
+                    <tr><td><strong>Model Monitor</strong></td><td>Detect data drift; results → CloudWatch; auto-remediation.</td></tr>
+                    <tr><td><strong>Ground Truth</strong></td><td><strong>Human labeling</strong> for training data.</td></tr>
+                    <tr><td><strong>Canvas</strong></td><td>No-code visual model building.</td></tr>
+                    <tr><td><strong>JumpStart</strong></td><td>Pre-trained models hub, one-click deploy.</td></tr>
+                    <tr><td><strong>Clarify</strong></td><td><strong>Bias detection</strong> &amp; explainability.</td></tr>
+                    <tr><td><strong>Role Manager</strong></td><td>Manage SageMaker permissions.</td></tr>
+                    <tr><td><strong>Model Cards</strong></td><td>Transparent documentation for trained models.</td></tr>
+                    <tr><td><strong>ML Lineage Tracking</strong></td><td>Track lineage for governance/reproducibility.</td></tr>
+                    <tr><td><strong>Data Wrangler</strong></td><td>Data prep — clean, transform, visualize.</td></tr>
+                    <tr><td><strong>Experiments (MLflow)</strong></td><td>Track/compare iterative ML experiments.</td></tr>
+                    <tr><td><strong>Autopilot</strong></td><td>Auto build/train/tune with full visibility.</td></tr>
+                    <tr><td><strong>Augmented AI (A2I)</strong></td><td><strong>Human review</strong> for low-confidence predictions.</td></tr>
+                    <tr><td><strong>Managed Spot Training</strong></td><td>Cut training cost via spare EC2 capacity.</td></tr>
+                    <tr><td><strong>Profiler</strong></td><td>Identify resource inefficiencies in training.</td></tr>
+                </table>
+                <h3>Deployment — Instance Types</h3>
+                <table>
+                    <tr><th>Type</th><th>Optimized For</th></tr>
+                    <tr><td><strong>Inf1</strong></td><td>Cost-effective DL inference (AWS Inferentia chips).</td></tr>
+                    <tr><td><strong>P4</strong></td><td>Large-scale, high-performance inference (NVIDIA A100).</td></tr>
+                    <tr><td><strong>G5</strong></td><td>GPU workloads, graphics &amp; ML (NVIDIA).</td></tr>
+                    <tr><td><strong>Graviton2 (C6g, M6g)</strong></td><td>Energy-efficient ARM; general-purpose ML inference.</td></tr>
+                </table>
+            </section>
+
+            <section id="bedrock">
+                <h2>🪨 Amazon Bedrock</h2>
+                <p>Fully managed, <strong>serverless</strong> service — access foundation models from AI21 Labs, Anthropic, Cohere, Meta, Mistral AI, Stability AI, and Amazon via a <strong>single API</strong>. Built for security, privacy, responsible AI.</p>
+                <h3>Pricing</h3>
+                <ul>
+                    <li><strong>Pay-as-you-go</strong> — charged per input/output <strong>tokens</strong>.</li>
+                    <li><strong>Fine-tuned/custom models</strong> — additional <strong>Provisioned Throughput</strong> charges for reserved capacity.</li>
+                </ul>
+                <h3>Features</h3>
+                <table>
+                    <tr><th>Feature</th><th>Detail</th></tr>
+                    <tr><td><strong>Model Choice</strong></td><td>FMs from 7 leading AI companies + <strong>Amazon Titan</strong> (exclusive, AWS-built).</td></tr>
+                    <tr><td><strong>Customization</strong></td><td>Fine-tune &amp; RAG privately with your data.</td></tr>
+                    <tr><td><strong>Foundation Model Evaluation</strong></td><td>Evaluate/compare on accuracy, robustness, toxicity. Integrates SageMaker Clarify &amp; fmeval.</td></tr>
+                    <tr><td><strong>Knowledge Bases</strong></td><td>Managed <strong>RAG</strong> — data ingestion, retrieval, prompt augmentation.</td></tr>
+                    <tr><td><strong>Agents</strong></td><td>Plan &amp; execute multistep tasks with company systems/data.</td></tr>
+                    <tr><td><strong>Serverless</strong></td><td>No infrastructure management.</td></tr>
+                    <tr><td><strong>Guardrails</strong></td><td>Restrict inappropriate content &amp; risky advice (financial, etc.).</td></tr>
+                    <tr><td><strong>PartyRock</strong></td><td>No-code AI app-building playground powered by Bedrock.</td></tr>
+                </table>
+            </section>
+
+            <section id="glue">
+                <h2>🧱 AWS Glue</h2>
+                <p>Fully managed, cloud-optimized <strong>ETL</strong> service for data prep &amp; analytics.</p>
+                <ul>
+                    <li><strong>Glue ETL Service</strong> — built-in transformations (drop duplicates, fill missing). Workflow: Kinesis Data Streams → Glue ETL → CSV to Parquet → S3 Data Lake.</li>
+                    <li><strong>Glue Data Catalog</strong> — centralized metadata repository (schemas, not data); built-in classifiers.</li>
+                    <li><strong>Glue DataBrew</strong> — visual data prep; data quality rules saved as "recipes".</li>
+                    <li><strong>Glue Data Quality</strong> — detect anomalies; recommend quality rules.</li>
+                </ul>
+            </section>
+
+            <section id="tables">
+                <h2>📊 Quick Reference Tables</h2>
+
+                <h3>Traditional ML vs Deep Learning</h3>
+                <table>
+                    <tr><th>Category</th><th>Traditional ML</th><th>Deep Learning</th></tr>
+                    <tr><td><strong>Task Complexity</strong></td><td>Well-defined tasks</td><td>Complex tasks</td></tr>
+                    <tr><td><strong>Data Type</strong></td><td>Structured / Labeled</td><td>Unstructured (images, video, text)</td></tr>
+                    <tr><td><strong>Methodology</strong></td><td>Statistics &amp; mathematics</td><td>Neural networks</td></tr>
+                    <tr><td><strong>Feature Handling</strong></td><td>Manual selection</td><td>Auto-learned by model</td></tr>
+                    <tr><td><strong>Cost</strong></td><td>Less costly</td><td>Higher (compute demands)</td></tr>
+                </table>
+
+                <h3>Types of Machine Learning</h3>
+                <table>
+                    <tr><th>Type</th><th>Description</th><th>Challenge</th><th>AWS Tool</th><th>Use Cases</th></tr>
+                    <tr><td><strong>Supervised</strong></td><td>Pre-labeled data</td><td>Labeling is hard</td><td>Ground Truth</td><td>Image classification, spam detection</td></tr>
+                    <tr><td><strong>Unsupervised</strong></td><td>Unlabeled, find patterns</td><td>Interpreting patterns</td><td>—</td><td>Clustering, anomaly detection, LLM pre-training</td></tr>
+                    <tr><td><strong>Reinforcement</strong></td><td>Trial &amp; error, maximize rewards</td><td>Needs agent environment</td><td>DeepRacer</td><td>Gaming, robotics, real-time decisions</td></tr>
+                </table>
+
+                <h3>SageMaker Inference Methods</h3>
+                <table>
+                    <tr><th>Type</th><th>Deployed To</th><th>Characteristics</th></tr>
+                    <tr><td><strong>Batch</strong></td><td>EC2</td><td>Cost-effective for infrequent, large jobs</td></tr>
+                    <tr><td><strong>Asynchronous</strong></td><td>EC2</td><td>Non-time-sensitive; large payloads</td></tr>
+                    <tr><td><strong>Serverless</strong></td><td>Lambda</td><td>Intermittent traffic; auto-scaling</td></tr>
+                    <tr><td><strong>Real-Time</strong></td><td>EC2</td><td>Live predictions; sustained traffic; low latency</td></tr>
+                </table>
+
+                <h3>Generative AI Performance Metrics</h3>
+                <table>
+                    <tr><th>Metric</th><th>Best For</th></tr>
+                    <tr><td><strong>ROUGE</strong></td><td>Text overlap — <strong>summaries</strong></td></tr>
+                    <tr><td><strong>BLEU</strong></td><td>N-gram comparison — <strong>translation</strong></td></tr>
+                    <tr><td><strong>GLUE</strong></td><td>Multiple NLU tasks</td></tr>
+                    <tr><td><strong>HELM</strong></td><td>Broad, task-specific evaluation</td></tr>
+                    <tr><td><strong>MMLU</strong></td><td>Knowledge across domains</td></tr>
+                    <tr><td><strong>BIG-bench</strong></td><td>Creative/difficult AI tasks</td></tr>
+                    <tr><td><strong>Perplexity</strong></td><td>Next-token prediction quality</td></tr>
+                </table>
+
+                <h3>Generative AI Model Types</h3>
+                <table>
+                    <tr><th>Model</th><th>Examples</th><th>Good For</th></tr>
+                    <tr><td><strong>GANs</strong></td><td>StyleGAN, CycleGAN</td><td>Image generation, face synthesis, video</td></tr>
+                    <tr><td><strong>VAEs</strong></td><td>Beta-VAE</td><td>Image denoising, anomaly detection</td></tr>
+                    <tr><td><strong>Transformers</strong></td><td>GPT-4, BERT, T5</td><td>Text generation, translation</td></tr>
+                    <tr><td><strong>RNNs</strong></td><td>LSTMs, GRUs</td><td>Sequential data, time series</td></tr>
+                    <tr><td><strong>Diffusion</strong></td><td>Stable Diffusion, DALL·E 2</td><td>Image / text-to-image</td></tr>
+                    <tr><td><strong>Flow-Based</strong></td><td>Glow, RealNVP</td><td>High-quality image gen, density estimation</td></tr>
+                </table>
+
+                <h3>Types of Training Data</h3>
+                <table>
+                    <tr><th>Type</th><th>AWS Source</th><th>Example</th></tr>
+                    <tr><td><strong>Structured</strong></td><td>RDS → S3</td><td>Customer info in relational tables</td></tr>
+                    <tr><td><strong>Semi-Structured</strong></td><td>DynamoDB / DocumentDB → S3</td><td>JSON user activity logs</td></tr>
+                    <tr><td><strong>Unstructured</strong></td><td>S3 directly</td><td>Images, videos, PDFs</td></tr>
+                    <tr><td><strong>Time-Series</strong></td><td>Time-stamped in S3</td><td>IoT data, stock market</td></tr>
+                </table>
+            </section>
+
+            <section id="cheatsheet">
+                <h2>⚡ One-Line Cheat Sheet</h2>
+                <div class="callout tip">
+                    <p><strong>Rekognition</strong> = vision · <strong>Textract</strong> = OCR · <strong>Comprehend</strong> = NLP/sentiment/PII · <strong>Lex</strong> = chatbots · <strong>Transcribe</strong> = speech→text · <strong>Polly</strong> = text→speech · <strong>Kendra</strong> = search · <strong>Personalize</strong> = recommendations · <strong>Translate</strong> = translation · <strong>Forecast</strong> = time-series · <strong>Fraud Detection</strong> = fraud · <strong>Macie</strong> = PII in S3 · <strong>Q Business</strong> = enterprise GenAI assistant · <strong>Q Developer</strong> = code assistant</p>
+                    <p style="margin-top:10px;"><strong>Bedrock</strong> = serverless FMs · <strong>Bedrock Knowledge Bases</strong> = managed RAG · <strong>Bedrock Agents</strong> = multistep tasks · <strong>Bedrock Guardrails</strong> = block harmful/PII · <strong>Provisioned Throughput</strong> = guaranteed capacity</p>
+                    <p style="margin-top:10px;"><strong>Ground Truth</strong> = human labeling (training) · <strong>A2I</strong> = human review (inference) · <strong>Clarify</strong> = bias detection · <strong>Model Cards</strong> = documentation · <strong>Model Monitor</strong> = drift detection · <strong>JumpStart</strong> = pre-trained hub · <strong>Canvas</strong> = no-code · <strong>Feature Store</strong> = features repo</p>
+                    <p style="margin-top:10px;"><strong>Fine-tuning</strong> = labeled data · <strong>Continued-Pretraining</strong> = unlabeled data · <strong>Data Drift</strong> = input changes · <strong>Concept Drift</strong> = input↔output relationship changes</p>
+                </div>
+            </section>
+
+        </main>
+    </div>
+</body>
+</html>

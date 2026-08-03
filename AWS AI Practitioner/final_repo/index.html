@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AWS AI Practitioner (AIF-C01) - Study Hub</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg, #9c27b0 0%, #6a1b9a 100%); min-height: 100vh; }
+        .container { max-width: 1100px; margin: 0 auto; padding: 40px 20px; }
+        .header { text-align: center; color: white; margin-bottom: 50px; }
+        .header h1 { font-size: 2.8em; margin-bottom: 10px; text-shadow: 2px 2px 4px rgba(0,0,0,0.3); }
+        .header p { font-size: 1.2em; opacity: 0.9; }
+        .apps-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 25px; }
+        .app-card { background: white; border-radius: 16px; padding: 30px; box-shadow: 0 12px 30px rgba(0,0,0,0.15); transition: transform 0.3s, box-shadow 0.3s; text-decoration: none; color: inherit; display: block; }
+        .app-card:hover { transform: translateY(-8px); box-shadow: 0 20px 40px rgba(0,0,0,0.25); }
+        .app-icon { font-size: 3.5em; text-align: center; margin-bottom: 15px; }
+        .app-title { font-size: 1.5em; font-weight: bold; margin-bottom: 12px; text-align: center; color: #232f3e; }
+        .app-description { color: #555; margin-bottom: 18px; line-height: 1.5; font-size: 15px; }
+        .app-stats { background: #f8f9fa; padding: 12px 15px; border-radius: 8px; font-size: 14px; color: #444; line-height: 1.7; }
+        .back-link { text-align: center; margin-top: 40px; }
+        .back-link a { display: inline-block; padding: 12px 28px; background: rgba(255,255,255,0.2); color: white; text-decoration: none; border-radius: 25px; font-weight: bold; }
+        .back-link a:hover { background: rgba(255,255,255,0.3); }
+    </style>
+  <script src="/assets/js/auth.js"></script>
+  <script src="/assets/js/login.js"></script>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🤖 AWS Certified AI Practitioner</h1>
+            <p>AIF-C01 · Foundational GenAI &amp; ML Certification</p>
+        </div>
+
+        <div class="apps-grid">
+            <a href="study_app.html" class="app-card">
+                <div class="app-icon">📚</div>
+                <div class="app-title">Study Mode</div>
+                <div class="app-description">
+                    Review all questions with instant feedback and detailed explanations. Filter by domain, track accuracy, progress saved in browser.
+                </div>
+                <div class="app-stats">
+                    <strong>📝 Questions:</strong> 50<br>
+                    <strong>🎯 Features:</strong> Domain filter · instant feedback · explanations<br>
+                    <strong>💾 Progress:</strong> Saved locally
+                </div>
+            </a>
+
+            <a href="exam_mode.html" class="app-card">
+                <div class="app-icon">📝</div>
+                <div class="app-title">Practice Exam</div>
+                <div class="app-description">
+                    Timed exam simulation. Randomized question order, flag for review, scaled scoring, and full answer review at the end.
+                </div>
+                <div class="app-stats">
+                    <strong>📝 Questions:</strong> 50 (randomized)<br>
+                    <strong>⏱️ Time:</strong> 90 minutes<br>
+                    <strong>✅ Pass:</strong> 700/1000
+                </div>
+            </a>
+
+            <a href="study_notes.html" class="app-card">
+                <div class="app-icon">📖</div>
+                <div class="app-title">Study Notes</div>
+                <div class="app-description">
+                    Full AIF-C01 study guide with sidebar navigation. ML pipeline, all AWS services, GenAI concepts, inference parameters, metrics, and cheat sheets.
+                </div>
+                <div class="app-stats">
+                    <strong>📑 Sections:</strong> 13 (Overview, Pipeline, Services, Cheat Sheet)<br>
+                    <strong>🎯 Covers:</strong> All 5 exam domains<br>
+                    <strong>💡 Includes:</strong> Tables, callouts, one-line cheatsheet
+                </div>
+            </a>
+        </div>
+
+        <div class="back-link">
+            <a href="../../master_study_launcher.html">🏡 Back to AWS Study Hub</a>
+        </div>
+    </div>
+</body>
+</html>
