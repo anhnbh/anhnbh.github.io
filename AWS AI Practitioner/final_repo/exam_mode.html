@@ -70,7 +70,7 @@
                 <div class="timer" id="examTimer">90:00</div>
             </div>
             <div class="progress-info">
-                <span>Question <span id="currentQ">1</span> of <span id="totalQ">50</span></span>
+                <span>Question <span id="currentQ">1</span> of <span id="totalQ">—</span></span>
                 <div class="progress-bar">
                     <div class="progress" id="progressBar"></div>
                 </div>
@@ -81,7 +81,7 @@
         <div class="exam-warning">
             <strong>⚠️ Exam Instructions:</strong>
             <ul style="margin-left: 20px; margin-top: 10px;">
-                <li>50 questions, 90 minutes (scaled from real exam: 65 questions, 90 min)</li>
+                <li>65 questions drawn from 409-question bank, 90 minutes (real exam format)</li>
                 <li>Passing score: 700/1000 points (70%)</li>
                 <li>Single response and multiple response questions</li>
                 <li>You can flag questions for review</li>
@@ -189,8 +189,9 @@
 
         // ===== Exam initialization =====
         function initializeExam() {
-            // Shuffle questions for variety, take all
-            examQuestions = [...allQuestions].sort(() => Math.random() - 0.5);
+            // Sample 65 questions (real AIF-C01 exam format) from the full bank
+            const shuffled = [...allQuestions].sort(() => Math.random() - 0.5);
+            examQuestions = shuffled.slice(0, Math.min(65, shuffled.length));
             currentQuestionIndex = 0;
             userAnswers = new Array(examQuestions.length).fill(null);
             flaggedQuestions.clear();

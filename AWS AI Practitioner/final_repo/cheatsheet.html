@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AIF-C01 - Data-Driven Cheatsheet</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f0f2f5; color: #232f3e; }
+        .topbar { background: #232f3e; color: white; padding: 15px 20px; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 8px rgba(0,0,0,0.2); }
+        .topbar-inner { max-width: 1100px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
+        .topbar h1 { font-size: 1.35em; }
+        .topbar .meta { font-size: 13px; opacity: 0.85; }
+        .topbar a { color: white; text-decoration: none; padding: 8px 16px; background: #ff9900; border-radius: 6px; font-size: 14px; font-weight: bold; }
+        .topbar a.sec { background: #3b4a5e; }
+        .topbar a.sec:hover { background: #4a5d75; }
+        .wrap { max-width: 1100px; margin: 0 auto; padding: 25px 20px; }
+        .section { background: white; border-radius: 10px; padding: 30px; box-shadow: 0 2px 10px rgba(0,0,0,0.08); margin-bottom: 25px; }
+        .section h2 { font-size: 1.5em; color: #232f3e; border-bottom: 3px solid #9c27b0; padding-bottom: 8px; margin-bottom: 16px; }
+        .section p.lead { color: #555; margin-bottom: 16px; line-height: 1.6; }
+        .callout { background: #eaf6ff; border-left: 4px solid #2196f3; padding: 14px 18px; border-radius: 8px; margin: 14px 0; line-height: 1.6; font-size: 14px; }
+        .callout.tip { background: #e8f5e9; border-left-color: #4caf50; }
+        table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 14px; }
+        th { background: #232f3e; color: white; padding: 10px 12px; text-align: left; }
+        td { padding: 10px 12px; border-bottom: 1px solid #e0e0e0; vertical-align: top; line-height: 1.5; }
+        tr:nth-child(even) { background: #f8f9fa; }
+        .card-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; margin: 16px 0; }
+        .info-card { background: #f8f9fa; border: 1px solid #e0e0e0; border-radius: 8px; padding: 14px; border-top: 4px solid #9c27b0; }
+        .info-card h4 { margin: 0 0 6px; color: #6a1b9a; font-size: 1em; }
+        .info-card p { font-size: 13px; margin: 0; color: #333; line-height: 1.4; }
+        .focus-list { columns: 2; column-gap: 30px; font-size: 14px; line-height: 1.9; list-style: none; }
+        .focus-list li::before { content: '▸ '; color: #9c27b0; font-weight: bold; }
+        @media (max-width: 700px) { .focus-list { columns: 1; } }
+    </style>
+  <script src="/assets/js/auth.js"></script>
+  <script src="/assets/js/login.js"></script>
+</head>
+<body>
+    <div class="topbar">
+        <div class="topbar-inner">
+            <div>
+                <h1>📊 AIF-C01 Cheatsheet <span class="meta">— data-driven from 409 questions</span></h1>
+                <div class="meta">AWS Certified AI Practitioner · Extracted from question bank</div>
+            </div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                <a href="study_notes.html" class="sec">📖 Full Notes</a>
+                <a href="study_app.html" class="sec">📚 Study</a>
+                <a href="exam_mode.html" class="sec">📝 Exam</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="wrap">
+
+        <div class="section">
+            <h2>🎯 How to use this cheatsheet</h2>
+            <p class="lead">Generated from <strong>409 real AIF-C01 questions</strong> (sourced from <a href="https://github.com/nastaso/cloudcertprep">cloudcertprep</a>, MIT license). Shows what AWS <em>actually tests</em>.</p>
+            <div class="callout">
+                <strong>Strategy:</strong> Memorize the <strong>top 12 services</strong> cold. When you see a scenario trigger, the bolded service is the most likely correct answer. Patterns mined from <strong>correct answers</strong> in the bank.
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>🔥 Most-tested services &amp; concepts</h2>
+            <p class="lead">These appear most often across all 409 questions. Top 10 = majority of exam content.</p>
+            <table><tr><th>Service / Concept</th><th>Mentions</th><th>Frequency</th></tr><tr><td><strong>Amazon Bedrock</strong></td><td>148</td><td><div style="background:#9c27b0;height:14px;width:100%;border-radius:3px;display:inline-block;"></div></td></tr><tr><td><strong>Amazon SageMaker</strong></td><td>120</td><td><div style="background:#9c27b0;height:14px;width:81%;border-radius:3px;display:inline-block;"></div></td></tr><tr><td><strong>Foundation model</strong></td><td>109</td><td><div style="background:#9c27b0;height:14px;width:74%;border-radius:3px;display:inline-block;"></div></td></tr><tr><td><strong>LLM</strong></td><td>99</td><td><div style="background:#9c27b0;height:14px;width:67%;border-radius:3px;display:inline-block;"></div></td></tr><tr><td><strong>Fine-tuning</strong></td><td>46</td><td><div style="background:#9c27b0;height:14px;width:31%;border-radius:3px;display:inline-block;"></div></td></tr><tr><td><strong>RAG</strong></td><td>34</td><td><div style="background:#9c27b0;height:14px;width:23%;border-radius:3px;display:inline-block;"></div></td></tr><tr><td><strong>Amazon Comprehend</strong></td><td>32</td><td><div style="background:#9c27b0;height:14px;width:22%;border-radius:3px;display:inline-block;"></div></td></tr><tr><td><strong>Amazon Q</strong></td><td>21</td><td><div style="background:#9c27b0;height:14px;width:14%;border-radius:3px;display:inline-block;"></div></td></tr><tr><td><strong>Amazon Rekognition</strong></td><td>20</td><td><div style="background:#9c27b0;height:14px;width:14%;border-radius:3px;display:inline-block;"></div></td></tr><tr><td><strong>Amazon Polly</strong></td><td>19</td><td><div style="background:#9c27b0;height:14px;width:13%;border-radius:3px;display:inline-block;"></div></td></tr><tr><td><strong>Amazon Personalize</strong></td><td>19</td><td><div style="background:#9c27b0;height:14px;width:13%;border-radius:3px;display:inline-block;"></div></td></tr><tr><td><strong>Amazon Forecast</strong></td><td>18</td><td><div style="background:#9c27b0;height:14px;width:12%;border-radius:3px;display:inline-block;"></div></td></tr><tr><td><strong>Amazon Transcribe</strong></td><td>17</td><td><div style="background:#9c27b0;height:14px;width:11%;border-radius:3px;display:inline-block;"></div></td></tr><tr><td><strong>Bedrock Guardrails</strong></td><td>17</td><td><div style="background:#9c27b0;height:14px;width:11%;border-radius:3px;display:inline-block;"></div></td></tr><tr><td><strong>Embeddings</strong></td><td>17</td><td><div style="background:#9c27b0;height:14px;width:11%;border-radius:3px;display:inline-block;"></div></td></tr><tr><td><strong>Bedrock Knowledge Bases</strong></td><td>16</td><td><div style="background:#9c27b0;height:14px;width:11%;border-radius:3px;display:inline-block;"></div></td></tr><tr><td><strong>Prompt engineering</strong></td><td>14</td><td><div style="background:#9c27b0;height:14px;width:9%;border-radius:3px;display:inline-block;"></div></td></tr><tr><td><strong>SageMaker JumpStart</strong></td><td>12</td><td><div style="background:#9c27b0;height:14px;width:8%;border-radius:3px;display:inline-block;"></div></td></tr><tr><td><strong>SageMaker Clarify</strong></td><td>12</td><td><div style="background:#9c27b0;height:14px;width:8%;border-radius:3px;display:inline-block;"></div></td></tr><tr><td><strong>SageMaker Model Monitor</strong></td><td>12</td><td><div style="background:#9c27b0;height:14px;width:8%;border-radius:3px;display:inline-block;"></div></td></tr><tr><td><strong>Amazon Textract</strong></td><td>12</td><td><div style="background:#9c27b0;height:14px;width:8%;border-radius:3px;display:inline-block;"></div></td></tr><tr><td><strong>Amazon Translate</strong></td><td>11</td><td><div style="background:#9c27b0;height:14px;width:7%;border-radius:3px;display:inline-block;"></div></td></tr><tr><td><strong>SageMaker Model Cards</strong></td><td>10</td><td><div style="background:#9c27b0;height:14px;width:7%;border-radius:3px;display:inline-block;"></div></td></tr><tr><td><strong>Amazon Inspector</strong></td><td>10</td><td><div style="background:#9c27b0;height:14px;width:7%;border-radius:3px;display:inline-block;"></div></td></tr><tr><td><strong>Amazon Macie</strong></td><td>9</td><td><div style="background:#9c27b0;height:14px;width:6%;border-radius:3px;display:inline-block;"></div></td></tr></table>
+        </div>
+
+        <div class="section">
+            <h2>🧠 High-yield focus list</h2>
+            <p class="lead">Master these and you cover most of the exam:</p>
+            <ul class="focus-list"><li><strong>Amazon Bedrock</strong></li><li><strong>Amazon SageMaker</strong></li><li><strong>Foundation model</strong></li><li><strong>LLM</strong></li><li><strong>Fine-tuning</strong></li><li><strong>RAG</strong></li><li><strong>Amazon Comprehend</strong></li><li><strong>Amazon Q</strong></li><li><strong>Amazon Rekognition</strong></li><li><strong>Amazon Polly</strong></li><li><strong>Amazon Personalize</strong></li><li><strong>Amazon Forecast</strong></li><li><strong>Amazon Transcribe</strong></li><li><strong>Bedrock Guardrails</strong></li><li><strong>Embeddings</strong></li><li><strong>Bedrock Knowledge Bases</strong></li></ul>
+        </div>
+
+        <div class="section">
+            <h2>🔗 Scenario triggers → likely correct services</h2>
+            <p class="lead">When the question mentions the trigger (left), the correct answer very often uses these services (right).</p>
+            <table><tr><th>Scenario trigger (in question)</th><th>Services in correct answers</th></tr><tr><td><strong>Customizing a model</strong><br><span style="color:#888;font-size:12px;">49 questions</span></td><td><strong>SageMaker</strong>, <strong>Amazon Bedrock</strong>, <strong>fine-tuning</strong>, <strong>SageMaker Model Cards</strong>, <strong>Provisioned Throughput</strong></td></tr><tr><td><strong>Edge / deployment</strong><br><span style="color:#888;font-size:12px;">44 questions</span></td><td><strong>SageMaker</strong>, <strong>Amazon Bedrock</strong>, <strong>RAG</strong>, <strong>SageMaker Canvas</strong>, <strong>SageMaker Model Monitor</strong></td></tr><tr><td><strong>Compliance / governance</strong><br><span style="color:#888;font-size:12px;">32 questions</span></td><td><strong>SageMaker</strong>, <strong>SageMaker Model Cards</strong>, <strong>Amazon Bedrock</strong>, <strong>SageMaker Clarify</strong>, <strong>Bedrock Guardrails</strong></td></tr><tr><td><strong>Summarization / text gen</strong><br><span style="color:#888;font-size:12px;">31 questions</span></td><td><strong>Amazon Bedrock</strong>, <strong>RAG</strong>, <strong>Bedrock Guardrails</strong>, <strong>fine-tuning</strong>, <strong>Amazon Comprehend</strong></td></tr><tr><td><strong>Image / vision task</strong><br><span style="color:#888;font-size:12px;">30 questions</span></td><td><strong>SageMaker</strong>, <strong>SageMaker Ground Truth</strong>, <strong>Amazon Bedrock</strong>, <strong>Amazon Transcribe</strong>, <strong>OpenSearch</strong></td></tr><tr><td><strong>Recommendation / search</strong><br><span style="color:#888;font-size:12px;">30 questions</span></td><td><strong>SageMaker</strong>, <strong>SageMaker Model Cards</strong>, <strong>OpenSearch</strong>, <strong>Amazon Bedrock</strong>, <strong>Amazon Kendra</strong></td></tr><tr><td><strong>Model selection / evaluation</strong><br><span style="color:#888;font-size:12px;">29 questions</span></td><td><strong>SageMaker</strong>, <strong>Amazon Bedrock</strong>, <strong>SageMaker Clarify</strong>, <strong>SageMaker Model Monitor</strong></td></tr><tr><td><strong>Cost optimization</strong><br><span style="color:#888;font-size:12px;">21 questions</span></td><td><strong>Amazon Bedrock</strong>, <strong>RAG</strong>, <strong>Bedrock Knowledge Bases</strong>, <strong>Provisioned Throughput</strong>, <strong>PrivateLink</strong></td></tr><tr><td><strong>Responsible AI / ethics</strong><br><span style="color:#888;font-size:12px;">19 questions</span></td><td><strong>SageMaker</strong>, <strong>Amazon Bedrock</strong>, <strong>SageMaker Clarify</strong>, <strong>SageMaker Model Cards</strong>, <strong>Bedrock Guardrails</strong></td></tr><tr><td><strong>Bias / fairness</strong><br><span style="color:#888;font-size:12px;">14 questions</span></td><td><strong>SageMaker</strong>, <strong>SageMaker Clarify</strong>, <strong>SageMaker Model Monitor</strong>, <strong>temperature</strong></td></tr><tr><td><strong>RAG / knowledge base</strong><br><span style="color:#888;font-size:12px;">13 questions</span></td><td><strong>Amazon Bedrock</strong>, <strong>RAG</strong>, <strong>Bedrock Guardrails</strong>, <strong>OpenSearch</strong>, <strong>temperature</strong></td></tr><tr><td><strong>Security / privacy</strong><br><span style="color:#888;font-size:12px;">13 questions</span></td><td><strong>Amazon Bedrock</strong>, <strong>Bedrock Guardrails</strong>, <strong>Amazon Rekognition</strong>, <strong>KMS</strong>, <strong>CloudTrail</strong></td></tr><tr><td><strong>Inference parameters</strong><br><span style="color:#888;font-size:12px;">8 questions</span></td><td><strong>Amazon Q</strong></td></tr><tr><td><strong>Speech / audio</strong><br><span style="color:#888;font-size:12px;">6 questions</span></td><td><strong>Amazon Transcribe</strong>, <strong>Amazon Polly</strong>, <strong>Amazon Lex</strong>, <strong>Amazon Translate</strong>, <strong>AWS HealthScribe</strong></td></tr><tr><td><strong>No-code / low-code</strong><br><span style="color:#888;font-size:12px;">2 questions</span></td><td>—</td></tr><tr><td><strong>Multi-modal</strong><br><span style="color:#888;font-size:12px;">2 questions</span></td><td>—</td></tr></table>
+        </div>
+
+        <div class="section">
+            <h2>⚡ Quick-recall cards</h2>
+            <p class="lead">Drill these trigger→answer mappings until reflexive.</p>
+            <div class="card-grid"><div class="info-card"><h4>Customizing a model</h4><p>SageMaker · Amazon Bedrock · fine-tuning</p><span style="color:#999;font-size:11px;">49 Q</span></div><div class="info-card"><h4>Edge / deployment</h4><p>SageMaker · Amazon Bedrock · RAG</p><span style="color:#999;font-size:11px;">44 Q</span></div><div class="info-card"><h4>Compliance / governance</h4><p>SageMaker · SageMaker Model Cards · Amazon Bedrock</p><span style="color:#999;font-size:11px;">32 Q</span></div><div class="info-card"><h4>Summarization / text gen</h4><p>Amazon Bedrock · RAG · Bedrock Guardrails</p><span style="color:#999;font-size:11px;">31 Q</span></div><div class="info-card"><h4>Image / vision task</h4><p>SageMaker · SageMaker Ground Truth · Amazon Bedrock</p><span style="color:#999;font-size:11px;">30 Q</span></div><div class="info-card"><h4>Recommendation / search</h4><p>SageMaker · SageMaker Model Cards · OpenSearch</p><span style="color:#999;font-size:11px;">30 Q</span></div><div class="info-card"><h4>Model selection / evaluation</h4><p>SageMaker · Amazon Bedrock · SageMaker Clarify</p><span style="color:#999;font-size:11px;">29 Q</span></div><div class="info-card"><h4>Cost optimization</h4><p>Amazon Bedrock · RAG · Bedrock Knowledge Bases</p><span style="color:#999;font-size:11px;">21 Q</span></div><div class="info-card"><h4>Responsible AI / ethics</h4><p>SageMaker · Amazon Bedrock · SageMaker Clarify</p><span style="color:#999;font-size:11px;">19 Q</span></div><div class="info-card"><h4>Bias / fairness</h4><p>SageMaker · SageMaker Clarify · SageMaker Model Monitor</p><span style="color:#999;font-size:11px;">14 Q</span></div><div class="info-card"><h4>RAG / knowledge base</h4><p>Amazon Bedrock · RAG · Bedrock Guardrails</p><span style="color:#999;font-size:11px;">13 Q</span></div><div class="info-card"><h4>Security / privacy</h4><p>Amazon Bedrock · Bedrock Guardrails · Amazon Rekognition</p><span style="color:#999;font-size:11px;">13 Q</span></div></div>
+        </div>
+
+        <div class="section">
+            <h2>📌 Study priority</h2>
+            <div class="callout tip">
+                <strong>Days 1-2:</strong> Master top 10 services in the frequency table. Do 80 questions focusing only on those.<br>
+                <strong>Days 3-4:</strong> Learn the trigger→answer patterns. Use Study Mode with domain filter on your weakest domain.<br>
+                <strong>Days 5-6:</strong> Full exam mode (65 Q, 90 min). Review wrong answers against this cheatsheet.<br>
+                <strong>Last 24h:</strong> Re-read trigger cards + focus list. Sleep well.
+            </div>
+            <p style="margin-top:14px;font-size:12px;color:#888;">Question data source: <a href="https://github.com/nastaso/cloudcertprep">cloudcertprep</a> by Alex Santonastaso (MIT License). 409 multiple-choice questions.</p>
+        </div>
+
+    </div>
+</body>
+</html>
