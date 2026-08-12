@@ -9,7 +9,7 @@
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; }
         .container { max-width: 900px; margin: 0 auto; padding: 20px; }
         .header { text-align: center; color: white; margin-bottom: 30px; }
-        .header h1 { font-size: 2.5em; margin-bottom: 10px; text-shadow: 2px 2px 4px rgba(0,0,0,0.3); }
+        .header h1 { font-size: clamp(1.6em, 6vw, 2.5em); margin-bottom: 10px; text-shadow: 2px 2px 4px rgba(0,0,0,0.3); }
         .stats { background: rgba(255,255,255,0.1); padding: 20px; border-radius: 15px; margin-bottom: 30px; backdrop-filter: blur(10px); }
         .question-card { background: white; border-radius: 15px; padding: 30px; margin-bottom: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
         .question-text { font-size: 1.1em; line-height: 1.6; margin-bottom: 20px; color: #333; }
@@ -27,6 +27,17 @@
         .explanation { background: #f0f7ff; padding: 20px; border-radius: 10px; margin-top: 20px; border-left: 4px solid #2196f3; }
         .progress { background: rgba(255,255,255,0.2); height: 10px; border-radius: 5px; margin: 20px 0; overflow: hidden; }
         .progress-bar { background: #4caf50; height: 100%; transition: width 0.3s; }
+        @media (max-width: 600px) {
+            .container { padding: 12px; }
+            .header { margin-bottom: 20px; }
+            .stats { padding: 14px; margin-bottom: 20px; }
+            .stats > div:first-child { flex-wrap: wrap; gap: 8px; font-size: 13px; justify-content: space-between; }
+            .question-card { padding: 18px 14px; }
+            .question-text { font-size: 1em; }
+            .option { padding: 12px; }
+            .controls .btn { display: block; width: 100%; margin: 8px 0; }
+            .explanation { padding: 14px; }
+        }
     </style>
   <script src="/assets/js/auth.js"></script>
   <script src="/assets/js/login.js"></script>

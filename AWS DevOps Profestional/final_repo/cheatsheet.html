@@ -21,17 +21,25 @@
         .callout { background: #eaf6ff; border-left: 4px solid #2196f3; padding: 14px 18px; border-radius: 8px; margin: 14px 0; line-height: 1.6; font-size: 14px; }
         .callout.tip { background: #e8f5e9; border-left-color: #4caf50; }
         .callout.warn { background: #fff8e1; border-left-color: #ff9900; }
-        table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 14px; }
-        th { background: #232f3e; color: white; padding: 10px 12px; text-align: left; }
+        table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 14px; display: block; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+        th { background: #232f3e; color: white; padding: 10px 12px; text-align: left; white-space: nowrap; }
         td { padding: 10px 12px; border-bottom: 1px solid #e0e0e0; vertical-align: top; line-height: 1.5; }
         tr:nth-child(even) { background: #f8f9fa; }
-        .card-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; margin: 16px 0; }
+        .card-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(220px, 100%), 1fr)); gap: 14px; margin: 16px 0; }
         .info-card { background: #f8f9fa; border: 1px solid #e0e0e0; border-radius: 8px; padding: 14px; border-top: 4px solid #9c27b0; }
         .info-card h4 { margin: 0 0 6px; color: #6a1b9a; font-size: 1em; }
         .info-card p { font-size: 13px; margin: 0; color: #333; line-height: 1.4; }
         .focus-list { columns: 2; column-gap: 30px; font-size: 14px; line-height: 1.9; list-style: none; }
         .focus-list li::before { content: '▸ '; color: #ff9900; font-weight: bold; }
-        @media (max-width: 700px) { .focus-list { columns: 1; } }
+        @media (max-width: 700px) {
+            .focus-list { columns: 1; }
+            .wrap { padding: 16px 12px; }
+            .section { padding: 18px 14px; }
+            .section h2 { font-size: 1.25em; }
+            .topbar-inner { flex-direction: column; align-items: flex-start; gap: 8px; }
+            .topbar h1 { font-size: 1.15em; }
+            .card-grid { grid-template-columns: 1fr; }
+        }
     </style>
   <script src="/assets/js/auth.js"></script>
   <script src="/assets/js/login.js"></script>

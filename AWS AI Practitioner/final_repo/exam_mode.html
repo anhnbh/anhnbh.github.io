@@ -55,6 +55,28 @@
         .review-explanation { background: #f8f9fa; padding: 15px; border-radius: 8px; margin-top: 15px; font-size: 15px; line-height: 1.6; }
         .review-correct-text { color: #28a745; font-weight: bold; }
         .review-wrong-text { color: #dc3545; font-weight: bold; }
+        @media (max-width: 600px) {
+            .container { padding: 12px; }
+            .exam-header { padding: 14px; }
+            .timer { font-size: 18px; }
+            .progress-info { flex-wrap: wrap; gap: 8px; }
+            .progress-bar { margin: 0; }
+            .question-card { padding: 18px 14px; }
+            .question-text { font-size: 16px; }
+            .option { padding: 14px 12px; }
+            .option-checkbox { right: 12px; }
+            .controls { flex-direction: column; gap: 10px; }
+            .controls > .btn, .navigation { width: 100%; }
+            .navigation { justify-content: space-between; }
+            .navigation .btn { flex: 1; padding: 12px 8px; font-size: 14px; }
+            .question-nav { grid-template-columns: repeat(auto-fill, minmax(42px, 1fr)); gap: 6px; }
+            .nav-btn { padding: 8px 4px; font-size: 12px; }
+            .summary-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+            .summary-card { padding: 14px 8px; }
+            .summary-number { font-size: 22px; }
+            .exam-summary { padding: 18px 14px; }
+            .review-item { padding: 16px 12px; }
+        }
     </style>
   <script src="/assets/js/auth.js"></script>
   <script src="/assets/js/login.js"></script>

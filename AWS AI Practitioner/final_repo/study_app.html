@@ -45,6 +45,24 @@
         .progress-info { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; color: #ccc; font-size: 14px; }
         .progress-bar { background: #555; height: 6px; border-radius: 3px; flex: 1; margin: 0 15px; }
         .progress-fill { background: #ff9900; height: 100%; border-radius: 3px; transition: width 0.3s; }
+        @media (max-width: 600px) {
+            .container { padding: 12px; }
+            .header { padding: 16px 14px; }
+            .header h2 { font-size: 1.15em; }
+            .filter-bar { gap: 8px; }
+            .filter-bar select, .filter-bar button { padding: 8px 10px; font-size: 13px; flex: 1 1 auto; min-width: 0; }
+            .filter-bar label { display: none; }
+            .stats-bar { gap: 8px; font-size: 12px; }
+            .stats-bar span { padding: 3px 8px; }
+            .question-card { padding: 18px 14px; }
+            .question-text { font-size: 16px; }
+            .option { padding: 14px 12px; }
+            .option-checkbox, .badge { right: 12px; }
+            .controls { flex-direction: column-reverse; gap: 10px; }
+            .controls .btn { width: 100%; }
+            .progress-info { flex-wrap: wrap; gap: 6px; font-size: 12px; }
+            .progress-bar { margin: 0; flex-basis: 100%; order: 1; }
+        }
     </style>
   <script src="/assets/js/auth.js"></script>
   <script src="/assets/js/login.js"></script>
