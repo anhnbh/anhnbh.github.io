@@ -2,172 +2,200 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>AWS AI Practitioner - Practice Exam (AIF-C01)</title>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f0f2f5; }
-        .container { max-width: 1000px; margin: 0 auto; padding: 20px; }
-        .exam-header { background: #232f3e; color: white; padding: 20px; border-radius: 10px; margin-bottom: 20px; position: sticky; top: 0; z-index: 100; }
-        .timer { font-size: 24px; font-weight: bold; color: #ff9900; }
-        .progress-info { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; }
-        .progress-bar { background: #ddd; height: 8px; border-radius: 4px; flex: 1; margin: 0 20px; }
-        .progress { background: #ff9900; height: 100%; border-radius: 4px; transition: width 0.3s; }
-        .exam-warning { background: #fff3cd; border: 1px solid #ffeaa7; padding: 15px; border-radius: 8px; margin-bottom: 20px; }
-        .question-card { background: white; padding: 30px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 20px; }
-        .question-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-        .question-number { background: #232f3e; color: white; padding: 8px 16px; border-radius: 20px; font-weight: bold; }
-        .question-type { background: #e3f2fd; color: #1976d2; padding: 6px 12px; border-radius: 15px; font-size: 14px; }
-        .question-domain { color: #6c757d; font-size: 13px; margin-bottom: 12px; font-style: italic; }
-        .question-text { font-size: 18px; line-height: 1.6; margin-bottom: 25px; }
-        .options { margin: 20px 0; }
-        .option { background: #f8f9fa; border: 2px solid #e9ecef; padding: 18px; margin: 12px 0; border-radius: 8px; cursor: pointer; transition: all 0.3s; position: relative; }
-        .option:hover { border-color: #ff9900; background: #fff8e1; }
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        :root { --topbar-h: 52px; --bottombar-h: 60px; }
+        html, body { height: 100%; overscroll-behavior: none; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #f0f2f5; color: #232f3e;
+            display: flex; flex-direction: column; height: 100dvh; overflow: hidden;
+        }
+
+        /* === Fixed Top Bar (compact) === */
+        .app-topbar {
+            background: #232f3e; color: white;
+            display: flex; align-items: center; gap: 10px;
+            padding: 0 12px; height: var(--topbar-h); flex-shrink: 0;
+            position: relative; z-index: 200;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+        }
+        .topbar-back { color: rgba(255,255,255,0.8); text-decoration: none; font-size: 1.1em; flex-shrink: 0; padding: 4px; }
+        .topbar-timer { font-size: 1.2em; font-weight: bold; color: #ff9900; font-variant-numeric: tabular-nums; min-width: 62px; flex-shrink: 0; }
+        .topbar-timer.time-warning { color: #ff5252; animation: pulse 1s infinite; }
+        .topbar-progress { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+        .topbar-progress-text { font-size: 0.72em; opacity: 0.8; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .topbar-progress .progress-bar { background: rgba(255,255,255,0.2); height: 4px; border-radius: 2px; overflow: hidden; }
+        .topbar-progress .progress { background: #ff9900; height: 100%; border-radius: 2px; transition: width 0.3s; width: 0%; }
+        .topbar-btn {
+            background: rgba(255,255,255,0.12); border: none; color: white;
+            width: 38px; height: 38px; border-radius: 8px; font-size: 1.05em;
+            cursor: pointer; display: flex; align-items: center; justify-content: center;
+            transition: background 0.15s; flex-shrink: 0;
+        }
+        .topbar-btn:active { background: rgba(255,255,255,0.3); }
+        .topbar-btn.flagged { background: #dc3545; }
+
+        /* === Scrollable Content === */
+        .app-main {
+            flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch;
+            padding: 12px; max-width: 800px; width: 100%; align-self: center;
+        }
+
+        /* === Exam Warning (collapsible) === */
+        .exam-warning { background: #fff3cd; border: 1px solid #ffeaa7; border-radius: 10px; margin-bottom: 12px; overflow: hidden; }
+        .exam-warning summary { padding: 10px 14px; cursor: pointer; font-weight: 600; font-size: 0.85em; list-style: none; }
+        .exam-warning summary::-webkit-details-marker { display: none; }
+        .exam-warning summary::before { content: '▶ '; font-size: 0.75em; }
+        .exam-warning[open] summary::before { content: '▼ '; }
+        .exam-warning[open] summary { border-bottom: 1px solid #ffeaa7; }
+        .exam-warning ul { padding: 8px 14px 12px 30px; font-size: 0.82em; line-height: 1.7; color: #856404; }
+
+        /* === Question Card === */
+        .question-card { background: white; padding: 20px 16px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.06); }
+        .question-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; gap: 8px; }
+        .question-number { background: #232f3e; color: white; padding: 5px 12px; border-radius: 14px; font-weight: bold; font-size: 0.8em; }
+        .question-type { background: #e3f2fd; color: #1976d2; padding: 5px 10px; border-radius: 12px; font-size: 0.72em; font-weight: 600; white-space: nowrap; }
+        .question-type.multiple { background: #fff3cd; color: #856404; }
+        .question-domain { color: #6c757d; font-size: 0.78em; margin-bottom: 10px; font-style: italic; }
+        .question-text { font-size: 1.02em; line-height: 1.6; margin-bottom: 18px; }
+        .options { margin: 14px 0; }
+        .option {
+            background: #f8f9fa; border: 2px solid #e9ecef; padding: 14px 12px;
+            margin: 8px 0; border-radius: 10px; cursor: pointer; transition: all 0.15s;
+            display: flex; align-items: center; gap: 10px; min-height: 50px;
+        }
+        .option:active { border-color: #ff9900; background: #fff8e1; }
         .option.selected { border-color: #ff9900; background: #fff3cd; }
-        .option-checkbox { position: absolute; right: 18px; top: 50%; transform: translateY(-50%); width: 18px; height: 18px; }
-        .controls { display: flex; gap: 15px; justify-content: space-between; margin-top: 30px; flex-wrap: wrap; }
-        .btn { padding: 12px 24px; border: none; border-radius: 6px; cursor: pointer; font-size: 16px; transition: all 0.3s; }
+        .option-letter { font-weight: bold; color: #232f3e; flex-shrink: 0; font-size: 0.95em; width: 24px; }
+        .option-text { flex: 1; line-height: 1.4; }
+        .option-checkbox { width: 22px; height: 22px; flex-shrink: 0; accent-color: #ff9900; cursor: pointer; }
+
+        /* === Fixed Bottom Bar === */
+        .app-bottombar {
+            background: #232f3e; display: flex; align-items: center; gap: 8px;
+            padding: 8px 12px; padding-bottom: max(8px, env(safe-area-inset-bottom));
+            height: var(--bottombar-h); flex-shrink: 0; position: relative; z-index: 200;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.2);
+        }
+        .app-bottombar .btn { flex: 1; height: 42px; font-size: 0.95em; border: none; border-radius: 10px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px; }
         .btn-primary { background: #ff9900; color: white; }
-        .btn-primary:hover { background: #e68900; }
-        .btn-secondary { background: #6c757d; color: white; }
-        .btn-secondary:hover { background: #545b62; }
+        .btn-primary:active { background: #e68900; }
+        .btn-secondary { background: #3b4a5e; color: white; }
+        .btn-secondary:active { background: #4a5d75; }
         .btn-danger { background: #dc3545; color: white; }
-        .btn-danger:hover { background: #c82333; }
-        .btn-warning { background: #ffc107; color: #212529; }
-        .btn-warning:hover { background: #e0a800; }
-        .btn:disabled { background: #ccc; cursor: not-allowed; }
-        .navigation { display: flex; gap: 10px; }
-        .question-nav { display: grid; grid-template-columns: repeat(auto-fill, minmax(50px, 1fr)); gap: 8px; margin: 20px 0; }
-        .nav-btn { padding: 8px; border: 2px solid #ddd; background: white; border-radius: 6px; cursor: pointer; text-align: center; font-size: 14px; }
-        .nav-btn.answered { background: #d4edda; border-color: #28a745; }
-        .nav-btn.flagged { background: #f8d7da; border-color: #dc3545; }
-        .nav-btn.current { background: #fff3cd; border-color: #ffc107; font-weight: bold; }
-        .exam-summary { background: white; padding: 30px; border-radius: 10px; margin-top: 20px; }
-        .summary-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin: 20px 0; }
-        .summary-card { background: #f8f9fa; padding: 20px; border-radius: 8px; text-align: center; }
-        .summary-number { font-size: 28px; font-weight: bold; color: #232f3e; }
-        .hidden { display: none; }
-        .time-warning { animation: pulse 1s infinite; }
-        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.7; } }
-        .final-warning { background: #f8d7da; border: 2px solid #dc3545; padding: 20px; border-radius: 10px; margin: 20px 0; }
-        .review-item { background: white; padding: 25px; border-radius: 10px; margin-bottom: 20px; border-left: 5px solid #dc3545; }
+        .btn-danger:active { background: #c82333; }
+        .btn:disabled { opacity: 0.35; }
+
+        /* === Question Navigator Bottom Sheet === */
+        .nav-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 300; opacity: 0; pointer-events: none; transition: opacity 0.3s; }
+        .nav-overlay.show { opacity: 1; pointer-events: auto; }
+        .nav-panel {
+            position: fixed; bottom: 0; left: 0; right: 0;
+            background: white; border-radius: 16px 16px 0 0; z-index: 301;
+            transform: translateY(100%); transition: transform 0.3s ease-out;
+            max-height: 75vh; display: flex; flex-direction: column;
+            padding-bottom: env(safe-area-inset-bottom);
+        }
+        .nav-panel.show { transform: translateY(0); }
+        .nav-panel-handle { width: 40px; height: 4px; background: #ccc; border-radius: 2px; margin: 10px auto 6px; flex-shrink: 0; }
+        .nav-panel-header { display: flex; justify-content: space-between; align-items: center; padding: 0 20px 10px; border-bottom: 1px solid #eee; flex-shrink: 0; }
+        .nav-panel-header h3 { font-size: 1.05em; }
+        .nav-legend { font-size: 0.78em; display: flex; gap: 10px; color: #666; }
+        .nav-legend span { display: flex; align-items: center; gap: 3px; }
+        .nav-legend .dot { width: 10px; height: 10px; border-radius: 50; display: inline-block; }
+        .nav-legend .dot.answered { background: #28a745; }
+        .nav-legend .dot.flagged { background: #dc3545; }
+        .nav-legend .dot.current { background: #ffc107; }
+        .nav-legend .dot.unanswered { background: #fff; border: 2px solid #ddd; }
+        .question-nav { display: grid; grid-template-columns: repeat(auto-fill, minmax(46px, 1fr)); gap: 8px; padding: 14px 20px; overflow-y: auto; }
+        .nav-btn {
+            aspect-ratio: 1; display: flex; align-items: center; justify-content: center;
+            border: 2px solid #ddd; background: white; border-radius: 10px;
+            cursor: pointer; font-size: 0.88em; font-weight: 600; min-height: 44px;
+        }
+        .nav-btn.answered { background: #d4edda; border-color: #28a745; color: #155724; }
+        .nav-btn.flagged { background: #f8d7da; border-color: #dc3545; color: #721c24; }
+        .nav-btn.current { background: #fff3cd; border-color: #ffc107; box-shadow: 0 0 0 2px rgba(255,193,7,0.3); }
+        .nav-panel-footer { padding: 10px 20px; border-top: 1px solid #eee; flex-shrink: 0; }
+        .nav-panel-footer .btn { width: 100%; height: 46px; font-size: 1em; border: none; border-radius: 10px; font-weight: 600; cursor: pointer; }
+
+        /* === Submit Confirm & Results === */
+        .exam-summary { background: white; padding: 20px 16px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.06); }
+        .final-warning { background: #f8d7da; border: 2px solid #dc3545; padding: 16px; border-radius: 10px; margin-bottom: 16px; }
+        .final-warning h3 { margin-bottom: 6px; }
+        .summary-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin: 14px 0; }
+        .summary-card { background: #f8f9fa; padding: 14px 10px; border-radius: 8px; text-align: center; }
+        .summary-number { font-size: 1.5em; font-weight: bold; color: #232f3e; }
+        .controls { display: flex; flex-direction: column; gap: 10px; margin-top: 16px; }
+        .controls .btn { width: 100%; height: 48px; font-size: 1em; border: none; border-radius: 10px; font-weight: 600; cursor: pointer; }
+        .hidden { display: none !important; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+        .review-item { background: white; padding: 18px 14px; border-radius: 10px; margin-bottom: 12px; border-left: 4px solid #dc3545; }
         .review-item.correct { border-left-color: #28a745; }
-        .review-explanation { background: #f8f9fa; padding: 15px; border-radius: 8px; margin-top: 15px; font-size: 15px; line-height: 1.6; }
+        .review-explanation { background: #f8f9fa; padding: 12px; border-radius: 8px; margin-top: 10px; font-size: 0.88em; line-height: 1.6; }
         .review-correct-text { color: #28a745; font-weight: bold; }
         .review-wrong-text { color: #dc3545; font-weight: bold; }
-        @media (max-width: 600px) {
-            .container { padding: 12px; }
-            .exam-header { padding: 14px; }
-            .timer { font-size: 18px; }
-            .progress-info { flex-wrap: wrap; gap: 8px; }
-            .progress-bar { margin: 0; }
-            .question-card { padding: 18px 14px; }
-            .question-text { font-size: 16px; }
-            .option { padding: 14px 12px; }
-            .option-checkbox { right: 12px; }
-            .controls { flex-direction: column; gap: 10px; }
-            .controls > .btn, .navigation { width: 100%; }
-            .navigation { justify-content: space-between; }
-            .navigation .btn { flex: 1; padding: 12px 8px; font-size: 14px; }
-            .question-nav { grid-template-columns: repeat(auto-fill, minmax(42px, 1fr)); gap: 6px; }
-            .nav-btn { padding: 8px 4px; font-size: 12px; }
-            .summary-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
-            .summary-card { padding: 14px 8px; }
-            .summary-number { font-size: 22px; }
-            .exam-summary { padding: 18px 14px; }
-            .review-item { padding: 16px 12px; }
+
+        /* === Desktop: wider, centered, still app-like === */
+        @media (min-width: 769px) {
+            .app-topbar, .app-bottombar { max-width: 800px; align-self: center; width: 100%; margin: 0 auto; }
+            .app-topbar { border-radius: 0; }
+            .summary-grid { grid-template-columns: repeat(4, 1fr); }
+            .controls { flex-direction: row; }
+            .controls .btn { width: auto; flex: 1; }
         }
     </style>
   <script src="/assets/js/auth.js"></script>
   <script src="/assets/js/login.js"></script>
 </head>
 <body>
-    <div class="container">
-        <div class="exam-header">
-            <div class="progress-info">
-                <div>
-                    <h2>🎓 AWS Certified AI Practitioner</h2>
-                    <p>Practice Exam - AIF-C01</p>
-                </div>
-                <div class="timer" id="examTimer">90:00</div>
-            </div>
-            <div class="progress-info">
-                <span>Question <span id="currentQ">1</span> of <span id="totalQ">—</span></span>
-                <div class="progress-bar">
-                    <div class="progress" id="progressBar"></div>
-                </div>
-                <span>Answered: <span id="answeredCount">0</span> | Flagged: <span id="flaggedCount">0</span></span>
-            </div>
+    <!-- ===== Fixed Top Bar ===== -->
+    <header class="app-topbar">
+        <div class="topbar-timer" id="examTimer">90:00</div>
+        <div class="topbar-progress">
+            <div class="topbar-progress-text">Q<span id="currentQ">1</span>/<span id="totalQ">—</span> · ✅<span id="answeredCount">0</span> · 🚩<span id="flaggedCount">0</span></div>
+            <div class="progress-bar"><div class="progress" id="progressBar"></div></div>
         </div>
+        <button class="topbar-btn" onclick="flagQuestion()" id="flagBtn" title="Flag question">🚩</button>
+        <button class="topbar-btn" onclick="toggleNavPanel()" title="Question navigator">📋</button>
+    </header>
 
-        <div class="exam-warning">
-            <strong>⚠️ Exam Instructions:</strong>
-            <ul style="margin-left: 20px; margin-top: 10px;">
-                <li>65 questions drawn from 409-question bank, 90 minutes (real exam format)</li>
-                <li>Passing score: 700/1000 points (70%)</li>
-                <li>Single response and multiple response questions</li>
-                <li>You can flag questions for review</li>
-                <li>Submit exam when ready or time expires</li>
+    <!-- ===== Scrollable Content ===== -->
+    <main class="app-main" id="appMain">
+        <details class="exam-warning">
+            <summary>⚠️ Exam Instructions</summary>
+            <ul>
+                <li>65 questions from 409-question bank · 90 minutes</li>
+                <li>Passing score: 700/1000 (70%)</li>
+                <li>Tap 📩 in top bar to jump to any question</li>
+                <li>Flag questions with 🚩 for review later</li>
             </ul>
-        </div>
+        </details>
 
         <div id="examMode" class="question-card">
             <div class="question-header">
-                <div class="question-number" id="questionNumber">Question 1</div>
-                <div class="question-type" id="questionType">Single Response</div>
+                <span class="question-number" id="questionNumber">Question 1</span>
+                <span class="question-type" id="questionType">Single Response</span>
             </div>
-
             <div class="question-domain" id="questionDomain"></div>
-
-            <div class="question-text" id="questionText">
-                Loading question...
-            </div>
-
-            <div class="options" id="optionsContainer">
-                <!-- Options will be loaded here -->
-            </div>
-
-            <div class="controls">
-                <div class="navigation">
-                    <button class="btn btn-secondary" onclick="previousQuestion()" id="prevBtn">⬅️ Previous</button>
-                    <button class="btn btn-warning" onclick="flagQuestion()" id="flagBtn">🚩 Flag</button>
-                    <button class="btn btn-secondary" onclick="nextQuestion()" id="nextBtn">Next ➡️</button>
-                </div>
-                <div>
-                    <button class="btn btn-danger" onclick="showSubmitConfirm()">📤 Submit Exam</button>
-                </div>
-            </div>
-        </div>
-
-        <div class="question-nav" id="questionNav">
-            <!-- Navigation buttons will be generated here -->
+            <div class="question-text" id="questionText">Loading question...</div>
+            <div class="options" id="optionsContainer"></div>
         </div>
 
         <div id="submitConfirm" class="exam-summary hidden">
             <div class="final-warning">
-                <h3>⚠️ Submit Exam Confirmation</h3>
-                <p>Are you sure you want to submit your exam? This action cannot be undone.</p>
+                <h3>⚠️ Submit Exam?</h3>
+                <p>This action cannot be undone.</p>
             </div>
-
             <div class="summary-grid">
-                <div class="summary-card">
-                    <div class="summary-number" id="finalAnswered">0</div>
-                    <div>Questions Answered</div>
-                </div>
-                <div class="summary-card">
-                    <div class="summary-number" id="finalUnanswered">50</div>
-                    <div>Questions Unanswered</div>
-                </div>
-                <div class="summary-card">
-                    <div class="summary-number" id="finalFlagged">0</div>
-                    <div>Questions Flagged</div>
-                </div>
-                <div class="summary-card">
-                    <div class="summary-number" id="finalTime">90:00</div>
-                    <div>Time Remaining</div>
-                </div>
+                <div class="summary-card"><div class="summary-number" id="finalAnswered">0</div><div>Answered</div></div>
+                <div class="summary-card"><div class="summary-number" id="finalUnanswered">65</div><div>Unanswered</div></div>
+                <div class="summary-card"><div class="summary-number" id="finalFlagged">0</div><div>Flagged</div></div>
+                <div class="summary-card"><div class="summary-number" id="finalTime">90:00</div><div>Time Left</div></div>
             </div>
-
             <div class="controls">
                 <button class="btn btn-secondary" onclick="hideSubmitConfirm()">↩️ Continue Exam</button>
                 <button class="btn btn-danger" onclick="submitExam()">✅ Submit Final Answer</button>
@@ -177,11 +205,36 @@
         <div id="examResults" class="exam-summary hidden">
             <h2>📊 Exam Results</h2>
             <div id="resultsContent"></div>
-            <div id="reviewSection" style="margin-top: 30px;"></div>
-            <div class="controls" style="margin-top: 20px;">
+            <div id="reviewSection" style="margin-top: 20px;"></div>
+            <div class="controls">
                 <button class="btn btn-primary" onclick="restartExam()">🔄 Retake Exam</button>
-                <button class="btn btn-warning" onclick="exportExamResults()">💾 Export Results</button>
+                <button class="btn btn-secondary" onclick="exportExamResults()">💾 Export Results</button>
             </div>
+        </div>
+    </main>
+
+    <!-- ===== Fixed Bottom Bar ===== -->
+    <footer class="app-bottombar" id="appBottombar">
+        <button class="btn btn-secondary" onclick="previousQuestion()" id="prevBtn">◀ Prev</button>
+        <button class="btn btn-primary" onclick="nextQuestion()" id="nextBtn">Next ▶</button>
+        <button class="btn btn-danger" onclick="showSubmitConfirm()">📤 Submit</button>
+    </footer>
+
+    <!-- ===== Question Navigator Bottom Sheet ===== -->
+    <div class="nav-overlay" id="navOverlay" onclick="closeNavPanel()"></div>
+    <div class="nav-panel" id="navPanel">
+        <div class="nav-panel-handle"></div>
+        <div class="nav-panel-header">
+            <h3>📋 Question Navigator</h3>
+            <div class="nav-legend">
+                <span><span class="dot unanswered"></span>Unanswered</span>
+                <span><span class="dot answered"></span>Answered</span>
+                <span><span class="dot flagged"></span>Flagged</span>
+            </div>
+        </div>
+        <div class="question-nav" id="questionNav"></div>
+        <div class="nav-panel-footer">
+            <button class="btn btn-danger" onclick="closeNavPanel(); showSubmitConfirm();">📤 Submit Exam</button>
         </div>
     </div>
 
@@ -211,7 +264,6 @@
 
         // ===== Exam initialization =====
         function initializeExam() {
-            // Sample 65 questions (real AIF-C01 exam format) from the full bank
             const shuffled = [...allQuestions].sort(() => Math.random() - 0.5);
             examQuestions = shuffled.slice(0, Math.min(65, shuffled.length));
             currentQuestionIndex = 0;
@@ -244,6 +296,7 @@
         function loadQuestion() {
             if (currentQuestionIndex >= examQuestions.length) return;
             const question = examQuestions[currentQuestionIndex];
+            document.getElementById('appMain').scrollTop = 0;
 
             document.getElementById('questionNumber').textContent = `Question ${currentQuestionIndex + 1}`;
             document.getElementById('questionDomain').textContent = question.domain || '';
@@ -251,13 +304,11 @@
 
             const typeElement = document.getElementById('questionType');
             if (question.type === 'multiple') {
-                typeElement.textContent = `Multiple Response (Select ${question.correct.length})`;
-                typeElement.style.background = '#fff3cd';
-                typeElement.style.color = '#856404';
+                typeElement.textContent = `Multiple Response (Pick ${question.correct.length})`;
+                typeElement.classList.add('multiple');
             } else {
                 typeElement.textContent = 'Single Response';
-                typeElement.style.background = '#e3f2fd';
-                typeElement.style.color = '#1976d2';
+                typeElement.classList.remove('multiple');
             }
 
             const container = document.getElementById('optionsContainer');
@@ -266,9 +317,11 @@
             question.options.forEach((option, index) => {
                 const optionDiv = document.createElement('div');
                 optionDiv.className = 'option';
+                const letter = String.fromCharCode(65 + index);
                 optionDiv.innerHTML = `
-                    <strong>${String.fromCharCode(65 + index)}.</strong> ${option}
-                    ${question.type === 'multiple' ? '<input type="checkbox" class="option-checkbox">' : ''}
+                    <span class="option-letter">${letter}.</span>
+                    <span class="option-text">${option}</span>
+                    ${question.type === 'multiple' ? `<input type="checkbox" class="option-checkbox">` : ''}
                 `;
                 const previousAnswer = userAnswers[currentQuestionIndex];
                 if (previousAnswer && previousAnswer.includes(index)) {
@@ -278,13 +331,16 @@
                     }
                 }
                 if (question.type === 'multiple') {
-                    optionDiv.onclick = () => toggleMultipleOption(index);
+                    optionDiv.onclick = (e) => { if (e.target.tagName !== 'INPUT') toggleMultipleOption(index); };
                 } else {
                     optionDiv.onclick = () => selectSingleOption(index);
                 }
                 optionDiv.dataset.index = index;
                 container.appendChild(optionDiv);
             });
+
+            // Update flag button visual state
+            document.getElementById('flagBtn').classList.toggle('flagged', flaggedQuestions.has(currentQuestionIndex));
 
             updateQuestionNavigation();
             updateNavigationButtons();
@@ -335,6 +391,7 @@
         function goToQuestion(index) {
             currentQuestionIndex = index;
             loadQuestion();
+            closeNavPanel();
         }
 
         function flagQuestion() {
@@ -343,9 +400,22 @@
             } else {
                 flaggedQuestions.add(currentQuestionIndex);
             }
+            document.getElementById('flagBtn').classList.toggle('flagged', flaggedQuestions.has(currentQuestionIndex));
             updateQuestionNavigation();
-            updateNavigationButtons();
             updateStats();
+        }
+
+        // ===== Nav Panel (bottom sheet) =====
+        function toggleNavPanel() {
+            const panel = document.getElementById('navPanel');
+            const overlay = document.getElementById('navOverlay');
+            const isOpen = panel.classList.contains('show');
+            panel.classList.toggle('show', !isOpen);
+            overlay.classList.toggle('show', !isOpen);
+        }
+        function closeNavPanel() {
+            document.getElementById('navPanel').classList.remove('show');
+            document.getElementById('navOverlay').classList.remove('show');
         }
 
         function updateQuestionNavigation() {
@@ -399,17 +469,21 @@
             document.getElementById('finalTime').textContent = document.getElementById('examTimer').textContent;
             document.getElementById('examMode').classList.add('hidden');
             document.getElementById('submitConfirm').classList.remove('hidden');
+            document.getElementById('appBottombar').classList.add('hidden');
+            document.getElementById('appMain').scrollTop = 0;
         }
 
         function hideSubmitConfirm() {
             document.getElementById('examMode').classList.remove('hidden');
             document.getElementById('submitConfirm').classList.add('hidden');
+            document.getElementById('appBottombar').classList.remove('hidden');
         }
 
         function submitExam() {
             if (isExamSubmitted) return;
             isExamSubmitted = true;
             clearInterval(examTimer);
+            closeNavPanel();
 
             let correctAnswers = 0;
             const wrongDetails = [];
@@ -443,12 +517,13 @@
 
             document.getElementById('submitConfirm').classList.add('hidden');
             document.getElementById('examResults').classList.remove('hidden');
+            document.getElementById('appBottombar').classList.add('hidden');
 
             const resultsHTML = `
                 <div class="summary-grid">
                     <div class="summary-card">
                         <div class="summary-number" style="color: ${passed ? '#28a745' : '#dc3545'}">${scaledScore}</div>
-                        <div>Score (out of 1000)</div>
+                        <div>Score / 1000</div>
                     </div>
                     <div class="summary-card">
                         <div class="summary-number">${percentage.toFixed(1)}%</div>
@@ -456,29 +531,27 @@
                     </div>
                     <div class="summary-card">
                         <div class="summary-number">${correctAnswers}</div>
-                        <div>Correct Answers</div>
+                        <div>Correct</div>
                     </div>
                     <div class="summary-card">
                         <div class="summary-number">${examQuestions.length - correctAnswers}</div>
                         <div>Wrong / Skipped</div>
                     </div>
                 </div>
-
-                <div style="text-align: center; margin: 30px 0; padding: 20px; border-radius: 10px; background: ${passed ? '#d4edda' : '#f8d7da'};">
+                <div style="text-align: center; margin: 20px 0; padding: 18px; border-radius: 10px; background: ${passed ? '#d4edda' : '#f8d7da'};">
                     <h2 style="color: ${passed ? '#155724' : '#721c24'};">
-                        ${passed ? '🎉 CONGRATULATIONS! YOU PASSED!' : '❌ NOT PASSED - KEEP STUDYING!'}
+                        ${passed ? '🎉 PASSED!' : '❌ NOT PASSED'}
                     </h2>
-                    <p style="margin-top: 10px;">
-                        ${passed ? 'You are ready for the real AIF-C01 exam!' : 'Passing score is 700. Review your weak areas and try again.'}
+                    <p style="margin-top: 8px; font-size: 0.9em;">
+                        ${passed ? 'You are ready for the real AIF-C01 exam!' : 'Passing score is 700. Review below and try again.'}
                     </p>
                 </div>
             `;
             document.getElementById('resultsContent').innerHTML = resultsHTML;
 
-            // Build review of wrong answers
             let reviewHTML = '';
             if (wrongDetails.length > 0) {
-                reviewHTML = '<h3>📝 Review Wrong Answers (' + wrongDetails.length + ')</h3>';
+                reviewHTML = '<h3 style="margin: 20px 0 10px;">📝 Review Wrong Answers (' + wrongDetails.length + ')</h3>';
                 wrongDetails.forEach((item, i) => {
                     const userText = item.userAnswer
                         ? item.userAnswer.map(idx => `${String.fromCharCode(65 + idx)}. ${item.question.options[idx]}`).join('<br>')
@@ -488,23 +561,24 @@
                     reviewHTML += `
                         <div class="review-item">
                             <div class="question-domain">${item.question.domain || ''}</div>
-                            <div class="question-text"><strong>Q${item.index + 1}.</strong> ${item.question.text}</div>
-                            <p><span class="review-wrong-text">Your answer:</span><br>${userText}</p>
-                            <p><span class="review-correct-text">Correct answer:</span><br>${correctText}</p>
+                            <div class="question-text" style="font-size:0.95em;"><strong>Q${item.index + 1}.</strong> ${item.question.text}</div>
+                            <p style="margin: 10px 0 4px;"><span class="review-wrong-text">Your answer:</span><br>${userText}</p>
+                            <p style="margin: 4px 0;"><span class="review-correct-text">Correct answer:</span><br>${correctText}</p>
                             <div class="review-explanation"><strong>💡 Explanation:</strong> ${item.question.explanation}</div>
                         </div>
                     `;
                 });
             } else {
-                reviewHTML = '<h3>🌟 Perfect Score! All answers correct.</h3>';
+                reviewHTML = '<h3 style="margin: 20px 0;">🌟 Perfect Score! All answers correct.</h3>';
             }
             document.getElementById('reviewSection').innerHTML = reviewHTML;
-            document.getElementById('reviewSection').scrollIntoView({ behavior: 'smooth' });
+            document.getElementById('appMain').scrollTop = 0;
         }
 
         function restartExam() {
             document.getElementById('examResults').classList.add('hidden');
             document.getElementById('examMode').classList.remove('hidden');
+            document.getElementById('appBottombar').classList.remove('hidden');
             document.getElementById('examTimer').classList.remove('time-warning');
             initializeExam();
         }
