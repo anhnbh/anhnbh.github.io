@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>AWS Cloud Practitioner - Practice Exam (CLF-C02)</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        :root { --topbar-h: 52px; --bottombar-h: 60px; }
+        html, body { height: 100%; overscroll-behavior: none; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #f0f2f5; color: #232f3e;
+            display: flex; flex-direction: column; height: 100dvh; overflow: hidden;
+        }
+
+        /* === Fixed Top Bar (compact) === */
+        .app-topbar {
+            background: #232f3e; color: white;
+            display: flex; align-items: center; gap: 10px;
+            padding: 0 12px; height: var(--topbar-h); flex-shrink: 0;
+            position: relative; z-index: 200;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+        }
+        .topbar-back { color: rgba(255,255,255,0.8); text-decoration: none; font-size: 1.1em; flex-shrink: 0; padding: 4px; }
+        .topbar-timer { font-size: 1.2em; font-weight: bold; color: #ff9900; font-variant-numeric: tabular-nums; min-width: 62px; flex-shrink: 0; }
+        .topbar-timer.time-warning { color: #ff5252; animation: pulse 1s infinite; }
+        .topbar-progress { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+        .topbar-progress-text { font-size: 0.72em; opacity: 0.8; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .topbar-progress .progress-bar { background: rgba(255,255,255,0.2); height: 4px; border-radius: 2px; overflow: hidden; }
+        .topbar-progress .progress { background: #ff9900; height: 100%; border-radius: 2px; transition: width 0.3s; width: 0%; }
+        .topbar-btn {
+            background: rgba(255,255,255,0.12); border: none; color: white;
+            width: 38px; height: 38px; border-radius: 8px; font-size: 1.05em;
+            cursor: pointer; display: flex; align-items: center; justify-content: center;
+            transition: background 0.15s; flex-shrink: 0;
+        }
+        .topbar-btn:active { background: rgba(255,255,255,0.3); }
+        .topbar-btn.flagged { background: #dc3545; }
+
+        /* === Scrollable Content === */
+        .app-main {
+            flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch;
+            padding: 12px; max-width: 800px; width: 100%; align-self: center;
+        }
+
+        /* === Exam Warning (collapsible) === */
+        .exam-warning { background: #fff3cd; border: 1px solid #ffeaa7; border-radius: 10px; margin-bottom: 12px; overflow: hidden; }
+        .exam-warning summary { padding: 10px 14px; cursor: pointer; font-weight: 600; font-size: 0.85em; list-style: none; }
+        .exam-warning summary::-webkit-details-marker { display: none; }
+        .exam-warning summary::before { content: '▶ '; font-size: 0.75em; }
+        .exam-warning[open] summary::before { content: '▼ '; }
+        .exam-warning[open] summary { border-bottom: 1px solid #ffeaa7; }
+        .exam-warning ul { padding: 8px 14px 12px 30px; font-size: 0.82em; line-height: 1.7; color: #856404; }
+
+        /* === Question Card === */
+        .question-card { background: white; padding: 20px 16px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.06); }
+        .question-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; gap: 8px; }
+        .question-number { background: #232f3e; color: white; padding: 5px 12px; border-radius: 14px; font-weight: bold; font-size: 0.8em; }
+        .question-type { background: #e3f2fd; color: #1976d2; padding: 5px 10px; border-radius: 12px; font-size: 0.72em; font-weight: 600; white-space: nowrap; }
+        .question-type.multiple { background: #fff3cd; color: #856404; }
+        .question-domain { color: #6c757d; font-size: 0.78em; margin-bottom: 10px; font-style: italic; }
+        .question-text { font-size: 1.02em; line-height: 1.6; margin-bottom: 18px; }
+        .options { margin: 14px 0; }
+        .option {
+            background: #f8f9fa; border: 2px solid #e9ecef; padding: 14px 12px;
+            margin: 8px 0; border-radius: 10px; cursor: pointer; transition: all 0.15s;
+            display: flex; align-items: center; gap: 10px; min-height: 50px;
+        }
+        .option:active { border-color: #ff9900; background: #fff8e1; }
+        .option.selected { border-color: #ff9900; background: #fff3cd; }
+        .option-letter { font-weight: bold; color: #232f3e; flex-shrink: 0; font-size: 0.95em; width: 24px; }
+        .option-text { flex: 1; line-height: 1.4; }
+        .option-checkbox { width: 22px; height: 22px; flex-shrink: 0; accent-color: #ff9900; cursor: pointer; }
+
+        /* === Fixed Bottom Bar === */
+        .app-bottombar {
+            background: #232f3e; display: flex; align-items: center; gap: 8px;
+            padding: 8px 12px; padding-bottom: max(8px, env(safe-area-inset-bottom));
+            height: var(--bottombar-h); flex-shrink: 0; position: relative; z-index: 200;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.2);
+        }
+        .app-bottombar .btn { flex: 1; height: 42px; font-size: 0.95em; border: none; border-radius: 10px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px; }
+        .btn-primary { background: #ff9900; color: white; }
+        .btn-primary:active { background: #e68900; }
+        .btn-secondary { background: #3b4a5e; color: white; }
+        .btn-secondary:active { background: #4a5d75; }
+        .btn-danger { background: #dc3545; color: white; }
+        .btn-danger:active { background: #c82333; }
+        .btn:disabled { opacity: 0.35; }
+
+        /* === Question Navigator Bottom Sheet === */
+        .nav-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 300; opacity: 0; pointer-events: none; transition: opacity 0.3s; }
+        .nav-overlay.show { opacity: 1; pointer-events: auto; }
+        .nav-panel {
+            position: fixed; bottom: 0; left: 0; right: 0;
+            background: white; border-radius: 16px 16px 0 0; z-index: 301;
+            transform: translateY(100%); transition: transform 0.3s ease-out;
+            max-height: 75vh; display: flex; flex-direction: column;
+            padding-bottom: env(safe-area-inset-bottom);
+        }
+        .nav-panel.show { transform: translateY(0); }
+        .nav-panel-handle { width: 40px; height: 4px; background: #ccc; border-radius: 2px; margin: 10px auto 6px; flex-shrink: 0; }
+        .nav-panel-header { display: flex; justify-content: space-between; align-items: center; padding: 0 20px 10px; border-bottom: 1px solid #eee; flex-shrink: 0; }
+        .nav-panel-header h3 { font-size: 1.05em; }
+        .nav-legend { font-size: 0.78em; display: flex; gap: 10px; color: #666; }
+        .nav-legend span { display: flex; align-items: center; gap: 3px; }
+        .nav-legend .dot { width: 10px; height: 10px; border-radius: 50; display: inline-block; }
+        .nav-legend .dot.answered { background: #28a745; }
+        .nav-legend .dot.flagged { background: #dc3545; }
+        .nav-legend .dot.current { background: #ffc107; }
+        .nav-legend .dot.unanswered { background: #fff; border: 2px solid #ddd; }
+        .question-nav { display: grid; grid-template-columns: repeat(auto-fill, minmax(46px, 1fr)); gap: 8px; padding: 14px 20px; overflow-y: auto; }
+        .nav-btn {
+            aspect-ratio: 1; display: flex; align-items: center; justify-content: center;
+            border: 2px solid #ddd; background: white; border-radius: 10px;
+            cursor: pointer; font-size: 0.88em; font-weight: 600; min-height: 44px;
+        }
+        .nav-btn.answered { background: #d4edda; border-color: #28a745; color: #155724; }
+        .nav-btn.flagged { background: #f8d7da; border-color: #dc3545; color: #721c24; }
+        .nav-btn.current { background: #fff3cd; border-color: #ffc107; box-shadow: 0 0 0 2px rgba(255,193,7,0.3); }
+        .nav-panel-footer { padding: 10px 20px; border-top: 1px solid #eee; flex-shrink: 0; }
+        .nav-panel-footer .btn { width: 100%; height: 46px; font-size: 1em; border: none; border-radius: 10px; font-weight: 600; cursor: pointer; }
+
+        /* === Submit Confirm & Results === */
+        .exam-summary { background: white; padding: 20px 16px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.06); }
+        .final-warning { background: #f8d7da; border: 2px solid #dc3545; padding: 16px; border-radius: 10px; margin-bottom: 16px; }
+        .final-warning h3 { margin-bottom: 6px; }
+        .summary-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin: 14px 0; }
+        .summary-card { background: #f8f9fa; padding: 14px 10px; border-radius: 8px; text-align: center; }
+        .summary-number { font-size: 1.5em; font-weight: bold; color: #232f3e; }
+        .controls { display: flex; flex-direction: column; gap: 10px; margin-top: 16px; }
+        .controls .btn { width: 100%; height: 48px; font-size: 1em; border: none; border-radius: 10px; font-weight: 600; cursor: pointer; }
+        .hidden { display: none !important; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+        .review-item { background: white; padding: 18px 14px; border-radius: 10px; margin-bottom: 12px; border-left: 4px solid #dc3545; }
+        .review-item.correct { border-left-color: #28a745; }
+        .review-explanation { background: #f8f9fa; padding: 12px; border-radius: 8px; margin-top: 10px; font-size: 0.88em; line-height: 1.6; }
+        .review-correct-text { color: #28a745; font-weight: bold; }
+        .review-wrong-text { color: #dc3545; font-weight: bold; }
+
+        /* === Desktop: wider, centered, still app-like === */
+        @media (min-width: 769px) {
+            .app-topbar, .app-bottombar { max-width: 800px; align-self: center; width: 100%; margin: 0 auto; }
+            .app-topbar { border-radius: 0; }
+            .summary-grid { grid-template-columns: repeat(4, 1fr); }
+            .controls { flex-direction: row; }
+            .controls .btn { width: auto; flex: 1; }
+        }
+    </style>
+  <script src="/assets/js/auth.js"></script>
+  <script src="/assets/js/login.js"></script>
+</head>
+<body>
+    <!-- ===== Fixed Top Bar ===== -->
+    <header class="app-topbar">
+        <div class="topbar-timer" id="examTimer">90:00</div>
+        <div class="topbar-progress">
+            <div class="topbar-progress-text">Q<span id="currentQ">1</span>/<span id="totalQ">—</span> · ✅<span id="answeredCount">0</span> · 🚩<span id="flaggedCount">0</span></div>
+            <div class="progress-bar"><div class="progress" id="progressBar"></div></div>
+        </div>
+        <button class="topbar-btn" onclick="flagQuestion()" id="flagBtn" title="Flag question">🚩</button>
+        <button class="topbar-btn" onclick="toggleNavPanel()" title="Question navigator">📋</button>
+    </header>
+
+    <!-- ===== Scrollable Content ===== -->
+    <main class="app-main" id="appMain">
+        <details class="exam-warning">
+            <summary>⚠️ Exam Instructions</summary>
+            <ul>
+                <li>65 questions from 1050-question bank · 90 minutes</li>
+                <li>Passing score: 700/1000 (70%)</li>
+                <li>Tap 📩 in top bar to jump to any question</li>
+                <li>Flag questions with 🚩 for review later</li>
+            </ul>
+        </details>
+
+        <div id="examMode" class="question-card">
+            <div class="question-header">
+                <span class="question-number" id="questionNumber">Question 1</span>
+                <span class="question-type" id="questionType">Single Response</span>
+            </div>
+            <div class="question-domain" id="questionDomain"></div>
+            <div class="question-text" id="questionText">Loading question...</div>
+            <div class="options" id="optionsContainer"></div>
+        </div>
+
+        <div id="submitConfirm" class="exam-summary hidden">
+            <div class="final-warning">
+                <h3>⚠️ Submit Exam?</h3>
+                <p>This action cannot be undone.</p>
+            </div>
+            <div class="summary-grid">
+                <div class="summary-card"><div class="summary-number" id="finalAnswered">0</div><div>Answered</div></div>
+                <div class="summary-card"><div class="summary-number" id="finalUnanswered">65</div><div>Unanswered</div></div>
+                <div class="summary-card"><div class="summary-number" id="finalFlagged">0</div><div>Flagged</div></div>
+                <div class="summary-card"><div class="summary-number" id="finalTime">90:00</div><div>Time Left</div></div>
+            </div>
+            <div class="controls">
+                <button class="btn btn-secondary" onclick="hideSubmitConfirm()">↩️ Continue Exam</button>
+                <button class="btn btn-danger" onclick="submitExam()">✅ Submit Final Answer</button>
+            </div>
+        </div>
+
+        <div id="examResults" class="exam-summary hidden">
+            <h2>📊 Exam Results</h2>
+            <div id="resultsContent"></div>
+            <div id="reviewSection" style="margin-top: 20px;"></div>
+            <div class="controls">
+                <button class="btn btn-primary" onclick="restartExam()">🔄 Retake Exam</button>
+                <button class="btn btn-secondary" onclick="exportExamResults()">💾 Export Results</button>
+            </div>
+        </div>
+    </main>
+
+    <!-- ===== Fixed Bottom Bar ===== -->
+    <footer class="app-bottombar" id="appBottombar">
+        <button class="btn btn-secondary" onclick="previousQuestion()" id="prevBtn">◀ Prev</button>
+        <button class="btn btn-primary" onclick="nextQuestion()" id="nextBtn">Next ▶</button>
+        <button class="btn btn-danger" onclick="showSubmitConfirm()">📤 Submit</button>
+    </footer>
+
+    <!-- ===== Question Navigator Bottom Sheet ===== -->
+    <div class="nav-overlay" id="navOverlay" onclick="closeNavPanel()"></div>
+    <div class="nav-panel" id="navPanel">
+        <div class="nav-panel-handle"></div>
+        <div class="nav-panel-header">
+            <h3>📋 Question Navigator</h3>
+            <div class="nav-legend">
+                <span><span class="dot unanswered"></span>Unanswered</span>
+                <span><span class="dot answered"></span>Answered</span>
+                <span><span class="dot flagged"></span>Flagged</span>
+            </div>
+        </div>
+        <div class="question-nav" id="questionNav"></div>
+        <div class="nav-panel-footer">
+            <button class="btn btn-danger" onclick="closeNavPanel(); showSubmitConfirm();">📤 Submit Exam</button>
+        </div>
+    </div>
+
+    <script>
+        // ===== State =====
+        let allQuestions = [];
+        let examQuestions = [];
+        let currentQuestionIndex = 0;
+        let userAnswers = [];
+        let flaggedQuestions = new Set();
+        let examStartTime = null;
+        let examTimer = null;
+        let isExamSubmitted = false;
+        const EXAM_DURATION = 90 * 60 * 1000; // 90 minutes
+
+        // ===== Load questions from JSON =====
+        async function loadQuestions() {
+            try {
+                const res = await fetch('data.json');
+                allQuestions = await res.json();
+                initializeExam();
+            } catch (e) {
+                document.getElementById('questionText').textContent =
+                    '❌ Could not load data.json. Make sure the page is served via http:// (not opened as file://). Error: ' + e.message;
+            }
+        }
+
+        // ===== Exam initialization =====
+        function initializeExam() {
+            const shuffled = [...allQuestions].sort(() => Math.random() - 0.5);
+            examQuestions = shuffled.slice(0, Math.min(65, shuffled.length));
+            currentQuestionIndex = 0;
+            userAnswers = new Array(examQuestions.length).fill(null);
+            flaggedQuestions.clear();
+            isExamSubmitted = false;
+            examStartTime = Date.now();
+
+            document.getElementById('totalQ').textContent = examQuestions.length;
+            document.getElementById('finalUnanswered').textContent = examQuestions.length;
+
+            generateQuestionNavigation();
+            loadQuestion();
+            startExamTimer();
+            updateStats();
+        }
+
+        function generateQuestionNavigation() {
+            const nav = document.getElementById('questionNav');
+            nav.innerHTML = '';
+            for (let i = 0; i < examQuestions.length; i++) {
+                const btn = document.createElement('div');
+                btn.className = 'nav-btn';
+                btn.textContent = i + 1;
+                btn.onclick = () => goToQuestion(i);
+                nav.appendChild(btn);
+            }
+        }
+
+        function loadQuestion() {
+            if (currentQuestionIndex >= examQuestions.length) return;
+            const question = examQuestions[currentQuestionIndex];
+            document.getElementById('appMain').scrollTop = 0;
+
+            document.getElementById('questionNumber').textContent = `Question ${currentQuestionIndex + 1}`;
+            document.getElementById('questionDomain').textContent = question.domain || '';
+            document.getElementById('questionText').innerHTML = question.text;
+
+            const typeElement = document.getElementById('questionType');
+            if (question.type === 'multiple') {
+                typeElement.textContent = `Multiple Response (Pick ${question.correct.length})`;
+                typeElement.classList.add('multiple');
+            } else {
+                typeElement.textContent = 'Single Response';
+                typeElement.classList.remove('multiple');
+            }
+
+            const container = document.getElementById('optionsContainer');
+            container.innerHTML = '';
+
+            question.options.forEach((option, index) => {
+                const optionDiv = document.createElement('div');
+                optionDiv.className = 'option';
+                const letter = String.fromCharCode(65 + index);
+                optionDiv.innerHTML = `
+                    <span class="option-letter">${letter}.</span>
+                    <span class="option-text">${option}</span>
+                    ${question.type === 'multiple' ? `<input type="checkbox" class="option-checkbox">` : ''}
+                `;
+                const previousAnswer = userAnswers[currentQuestionIndex];
+                if (previousAnswer && previousAnswer.includes(index)) {
+                    optionDiv.classList.add('selected');
+                    if (question.type === 'multiple') {
+                        optionDiv.querySelector('.option-checkbox').checked = true;
+                    }
+                }
+                if (question.type === 'multiple') {
+                    optionDiv.onclick = (e) => { if (e.target.tagName !== 'INPUT') toggleMultipleOption(index); };
+                } else {
+                    optionDiv.onclick = () => selectSingleOption(index);
+                }
+                optionDiv.dataset.index = index;
+                container.appendChild(optionDiv);
+            });
+
+            // Update flag button visual state
+            document.getElementById('flagBtn').classList.toggle('flagged', flaggedQuestions.has(currentQuestionIndex));
+
+            updateQuestionNavigation();
+            updateNavigationButtons();
+            updateStats();
+        }
+
+        function selectSingleOption(index) {
+            document.querySelectorAll('.option').forEach(opt => opt.classList.remove('selected'));
+            document.querySelector(`[data-index="${index}"]`).classList.add('selected');
+            userAnswers[currentQuestionIndex] = [index];
+            updateStats();
+            updateQuestionNavigation();
+        }
+
+        function toggleMultipleOption(index) {
+            const option = document.querySelector(`[data-index="${index}"]`);
+            const checkbox = option.querySelector('.option-checkbox');
+            if (option.classList.contains('selected')) {
+                option.classList.remove('selected');
+                checkbox.checked = false;
+            } else {
+                option.classList.add('selected');
+                checkbox.checked = true;
+            }
+            const selected = [];
+            document.querySelectorAll('.option.selected').forEach(opt => {
+                selected.push(parseInt(opt.dataset.index));
+            });
+            userAnswers[currentQuestionIndex] = selected.length > 0 ? selected : null;
+            updateStats();
+            updateQuestionNavigation();
+        }
+
+        function nextQuestion() {
+            if (currentQuestionIndex < examQuestions.length - 1) {
+                currentQuestionIndex++;
+                loadQuestion();
+            }
+        }
+
+        function previousQuestion() {
+            if (currentQuestionIndex > 0) {
+                currentQuestionIndex--;
+                loadQuestion();
+            }
+        }
+
+        function goToQuestion(index) {
+            currentQuestionIndex = index;
+            loadQuestion();
+            closeNavPanel();
+        }
+
+        function flagQuestion() {
+            if (flaggedQuestions.has(currentQuestionIndex)) {
+                flaggedQuestions.delete(currentQuestionIndex);
+            } else {
+                flaggedQuestions.add(currentQuestionIndex);
+            }
+            document.getElementById('flagBtn').classList.toggle('flagged', flaggedQuestions.has(currentQuestionIndex));
+            updateQuestionNavigation();
+            updateStats();
+        }
+
+        // ===== Nav Panel (bottom sheet) =====
+        function toggleNavPanel() {
+            const panel = document.getElementById('navPanel');
+            const overlay = document.getElementById('navOverlay');
+            const isOpen = panel.classList.contains('show');
+            panel.classList.toggle('show', !isOpen);
+            overlay.classList.toggle('show', !isOpen);
+        }
+        function closeNavPanel() {
+            document.getElementById('navPanel').classList.remove('show');
+            document.getElementById('navOverlay').classList.remove('show');
+        }
+
+        function updateQuestionNavigation() {
+            const navBtns = document.querySelectorAll('.nav-btn');
+            navBtns.forEach((btn, index) => {
+                btn.className = 'nav-btn';
+                if (index === currentQuestionIndex) btn.classList.add('current');
+                if (userAnswers[index]) btn.classList.add('answered');
+                if (flaggedQuestions.has(index)) btn.classList.add('flagged');
+            });
+        }
+
+        function updateNavigationButtons() {
+            document.getElementById('prevBtn').disabled = currentQuestionIndex === 0;
+            document.getElementById('nextBtn').disabled = currentQuestionIndex === examQuestions.length - 1;
+        }
+
+        function updateStats() {
+            const answered = userAnswers.filter(a => a !== null).length;
+            const progress = (answered / examQuestions.length) * 100;
+            document.getElementById('currentQ').textContent = currentQuestionIndex + 1;
+            document.getElementById('answeredCount').textContent = answered;
+            document.getElementById('flaggedCount').textContent = flaggedQuestions.size;
+            document.getElementById('progressBar').style.width = progress + '%';
+        }
+
+        function startExamTimer() {
+            examTimer = setInterval(() => {
+                const elapsed = Date.now() - examStartTime;
+                const remaining = Math.max(0, EXAM_DURATION - elapsed);
+                const minutes = Math.floor(remaining / 60000);
+                const seconds = Math.floor((remaining % 60000) / 1000);
+                document.getElementById('examTimer').textContent =
+                    `${minutes}:${seconds.toString().padStart(2, '0')}`;
+                if (remaining < 5 * 60 * 1000) {
+                    document.getElementById('examTimer').classList.add('time-warning');
+                }
+                if (remaining === 0) {
+                    clearInterval(examTimer);
+                    alert('⏰ Time expired! Exam will be submitted automatically.');
+                    submitExam();
+                }
+            }, 1000);
+        }
+
+        function showSubmitConfirm() {
+            const answered = userAnswers.filter(a => a !== null).length;
+            document.getElementById('finalAnswered').textContent = answered;
+            document.getElementById('finalUnanswered').textContent = examQuestions.length - answered;
+            document.getElementById('finalFlagged').textContent = flaggedQuestions.size;
+            document.getElementById('finalTime').textContent = document.getElementById('examTimer').textContent;
+            document.getElementById('examMode').classList.add('hidden');
+            document.getElementById('submitConfirm').classList.remove('hidden');
+            document.getElementById('appBottombar').classList.add('hidden');
+            document.getElementById('appMain').scrollTop = 0;
+        }
+
+        function hideSubmitConfirm() {
+            document.getElementById('examMode').classList.remove('hidden');
+            document.getElementById('submitConfirm').classList.add('hidden');
+            document.getElementById('appBottombar').classList.remove('hidden');
+        }
+
+        function submitExam() {
+            if (isExamSubmitted) return;
+            isExamSubmitted = true;
+            clearInterval(examTimer);
+            closeNavPanel();
+
+            let correctAnswers = 0;
+            const wrongDetails = [];
+
+            examQuestions.forEach((question, index) => {
+                const userAnswer = userAnswers[index];
+                const correctAnswer = [...question.correct].sort((a, b) => a - b);
+                let isCorrect = false;
+
+                if (userAnswer) {
+                    const userSorted = [...userAnswer].sort((a, b) => a - b);
+                    if (JSON.stringify(userSorted) === JSON.stringify(correctAnswer)) {
+                        isCorrect = true;
+                        correctAnswers++;
+                    }
+                }
+
+                if (!isCorrect) {
+                    wrongDetails.push({
+                        index: index,
+                        question: question,
+                        userAnswer: userAnswer,
+                        correctAnswer: correctAnswer
+                    });
+                }
+            });
+
+            const percentage = (correctAnswers / examQuestions.length) * 100;
+            const scaledScore = Math.round((correctAnswers / examQuestions.length) * 1000);
+            const passed = scaledScore >= 700;
+
+            document.getElementById('submitConfirm').classList.add('hidden');
+            document.getElementById('examResults').classList.remove('hidden');
+            document.getElementById('appBottombar').classList.add('hidden');
+
+            const resultsHTML = `
+                <div class="summary-grid">
+                    <div class="summary-card">
+                        <div class="summary-number" style="color: ${passed ? '#28a745' : '#dc3545'}">${scaledScore}</div>
+                        <div>Score / 1000</div>
+                    </div>
+                    <div class="summary-card">
+                        <div class="summary-number">${percentage.toFixed(1)}%</div>
+                        <div>Percentage</div>
+                    </div>
+                    <div class="summary-card">
+                        <div class="summary-number">${correctAnswers}</div>
+                        <div>Correct</div>
+                    </div>
+                    <div class="summary-card">
+                        <div class="summary-number">${examQuestions.length - correctAnswers}</div>
+                        <div>Wrong / Skipped</div>
+                    </div>
+                </div>
+                <div style="text-align: center; margin: 20px 0; padding: 18px; border-radius: 10px; background: ${passed ? '#d4edda' : '#f8d7da'};">
+                    <h2 style="color: ${passed ? '#155724' : '#721c24'};">
+                        ${passed ? '🎉 PASSED!' : '❌ NOT PASSED'}
+                    </h2>
+                    <p style="margin-top: 8px; font-size: 0.9em;">
+                        ${passed ? 'You are ready for the real CLF-C02 exam!' : 'Passing score is 700. Review below and try again.'}
+                    </p>
+                </div>
+            `;
+            document.getElementById('resultsContent').innerHTML = resultsHTML;
+
+            let reviewHTML = '';
+            if (wrongDetails.length > 0) {
+                reviewHTML = '<h3 style="margin: 20px 0 10px;">📝 Review Wrong Answers (' + wrongDetails.length + ')</h3>';
+                wrongDetails.forEach((item, i) => {
+                    const userText = item.userAnswer
+                        ? item.userAnswer.map(idx => `${String.fromCharCode(65 + idx)}. ${item.question.options[idx]}`).join('<br>')
+                        : '<em>No answer</em>';
+                    const correctText = item.correctAnswer
+                        .map(idx => `${String.fromCharCode(65 + idx)}. ${item.question.options[idx]}`).join('<br>');
+                    reviewHTML += `
+                        <div class="review-item">
+                            <div class="question-domain">${item.question.domain || ''}</div>
+                            <div class="question-text" style="font-size:0.95em;"><strong>Q${item.index + 1}.</strong> ${item.question.text}</div>
+                            <p style="margin: 10px 0 4px;"><span class="review-wrong-text">Your answer:</span><br>${userText}</p>
+                            <p style="margin: 4px 0;"><span class="review-correct-text">Correct answer:</span><br>${correctText}</p>
+                            <div class="review-explanation"><strong>💡 Explanation:</strong> ${item.question.explanation}</div>
+                        </div>
+                    `;
+                });
+            } else {
+                reviewHTML = '<h3 style="margin: 20px 0;">🌟 Perfect Score! All answers correct.</h3>';
+            }
+            document.getElementById('reviewSection').innerHTML = reviewHTML;
+            document.getElementById('appMain').scrollTop = 0;
+        }
+
+        function restartExam() {
+            document.getElementById('examResults').classList.add('hidden');
+            document.getElementById('examMode').classList.remove('hidden');
+            document.getElementById('appBottombar').classList.remove('hidden');
+            document.getElementById('examTimer').classList.remove('time-warning');
+            initializeExam();
+        }
+
+        function exportExamResults() {
+            let correctCount = 0;
+            examQuestions.forEach((q, i) => {
+                const ua = userAnswers[i];
+                if (ua && JSON.stringify([...ua].sort()) === JSON.stringify([...q.correct].sort())) correctCount++;
+            });
+            const results = {
+                examDate: new Date().toISOString(),
+                examType: "AWS Cloud Practitioner (CLF-C02) Practice Exam",
+                totalQuestions: examQuestions.length,
+                answeredQuestions: userAnswers.filter(a => a !== null).length,
+                correctAnswers: correctCount,
+                scaledScore: Math.round((correctCount / examQuestions.length) * 1000),
+                passed: Math.round((correctCount / examQuestions.length) * 1000) >= 700,
+                timeRemaining: document.getElementById('examTimer').textContent,
+                detailedAnswers: examQuestions.map((q, i) => ({
+                    questionId: q.id,
+                    domain: q.domain,
+                    questionType: q.type,
+                    userAnswer: userAnswers[i],
+                    correctAnswer: q.correct,
+                    flagged: flaggedQuestions.has(i)
+                }))
+            };
+            const blob = new Blob([JSON.stringify(results, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `clf-c02-exam-results-${new Date().toISOString().split('T')[0]}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        // ===== Init =====
+        window.onload = loadQuestions;
+        window.addEventListener('beforeunload', function (e) {
+            if (!isExamSubmitted && userAnswers.some(a => a !== null)) {
+                e.preventDefault();
+                e.returnValue = 'Are you sure you want to leave? Your exam progress will be lost.';
+            }
+        });
+    </script>
+</body>
+</html>

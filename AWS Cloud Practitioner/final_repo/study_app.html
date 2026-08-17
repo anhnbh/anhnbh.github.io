@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>AWS Cloud Practitioner - Study Mode (CLF-C02)</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        :root { --topbar-h: 48px; --bottombar-h: 56px; }
+        html, body { height: 100%; overscroll-behavior: none; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #f0f2f5; color: #232f3e;
+            display: flex; flex-direction: column; height: 100dvh; overflow: hidden;
+        }
+
+        /* === Fixed Top Bar === */
+        .app-topbar {
+            background: #232f3e; color: white;
+            display: flex; align-items: center; gap: 8px;
+            padding: 0 12px; height: var(--topbar-h); flex-shrink: 0;
+            position: relative; z-index: 200;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+        }
+        .topbar-title { font-size: 0.95em; font-weight: 600; flex-shrink: 0; }
+        .topbar-stats { flex: 1; font-size: 0.72em; opacity: 0.85; display: flex; gap: 8px; overflow: hidden; white-space: nowrap; }
+        .topbar-btn {
+            background: rgba(255,255,255,0.12); border: none; color: white;
+            width: 36px; height: 36px; border-radius: 8px; font-size: 1em;
+            cursor: pointer; display: flex; align-items: center; justify-content: center;
+            transition: background 0.15s; flex-shrink: 0; text-decoration: none;
+        }
+        .topbar-btn:active { background: rgba(255,255,255,0.3); }
+
+        /* === Filter Panel (collapsible) === */
+        .filter-panel {
+            background: #2b3a4e; padding: 0 12px; max-height: 0; overflow: hidden;
+            transition: max-height 0.3s ease, padding 0.3s ease; flex-shrink: 0;
+        }
+        .filter-panel.open { max-height: 200px; padding: 10px 12px; }
+        .filter-row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+        .filter-row select {
+            flex: 1; min-width: 0; padding: 8px 10px; border-radius: 8px;
+            border: 1px solid #4a5d75; background: #1a2533; color: white;
+            font-size: 0.85em; cursor: pointer;
+        }
+        .filter-row button {
+            padding: 8px 12px; border-radius: 8px; border: none;
+            background: #ff9900; color: white; font-size: 0.8em; font-weight: 600;
+            cursor: pointer; white-space: nowrap;
+        }
+        .filter-row button.secondary { background: #3b4a5e; }
+
+        /* === Scrollable Content === */
+        .app-main {
+            flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch;
+            padding: 12px; max-width: 800px; width: 100%; align-self: center;
+        }
+
+        /* === Question Card === */
+        .question-card { background: white; padding: 20px 16px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.06); margin-bottom: 12px; }
+        .question-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; gap: 8px; }
+        .question-number { background: #232f3e; color: white; padding: 5px 12px; border-radius: 14px; font-weight: bold; font-size: 0.8em; }
+        .question-type { background: #e3f2fd; color: #1976d2; padding: 5px 10px; border-radius: 12px; font-size: 0.72em; font-weight: 600; white-space: nowrap; }
+        .question-type.multiple { background: #fff3cd; color: #856404; }
+        .question-domain { color: #6c757d; font-size: 0.78em; margin-bottom: 10px; font-style: italic; }
+        .question-text { font-size: 1.02em; line-height: 1.6; margin-bottom: 16px; }
+        .options { margin: 14px 0; }
+        .option {
+            background: #f8f9fa; border: 2px solid #e9ecef; padding: 14px 12px;
+            margin: 8px 0; border-radius: 10px; cursor: pointer; transition: all 0.15s;
+            display: flex; align-items: center; gap: 10px; min-height: 50px; position: relative;
+        }
+        .option:active { border-color: #ff9900; background: #fff8e1; }
+        .option.selected { border-color: #ff9900; background: #fff3cd; }
+        .option.correct { border-color: #28a745; background: #d4edda; }
+        .option.wrong { border-color: #dc3545; background: #f8d7da; }
+        .option-letter { font-weight: bold; color: #232f3e; flex-shrink: 0; font-size: 0.95em; }
+        .option-text { flex: 1; line-height: 1.4; }
+        .option-checkbox { width: 22px; height: 22px; flex-shrink: 0; accent-color: #ff9900; }
+        .badge { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); font-size: 1.1em; }
+        .explanation { background: #eaf6ff; border-left: 4px solid #2196f3; padding: 12px; border-radius: 8px; margin-top: 12px; font-size: 0.88em; line-height: 1.6; display: none; }
+        .explanation.show { display: block; }
+        .result-line { margin-top: 10px; font-weight: bold; font-size: 0.95em; }
+        .result-line.correct { color: #28a745; }
+        .result-line.wrong { color: #dc3545; }
+        .card-controls { display: flex; gap: 8px; margin-top: 14px; }
+        .card-controls .btn { flex: 1; height: 42px; border: none; border-radius: 10px; font-weight: 600; font-size: 0.9em; cursor: pointer; }
+        .btn-primary { background: #ff9900; color: white; }
+        .btn-primary:active { background: #e68900; }
+        .btn-primary:disabled { background: #ccc; }
+        .btn-secondary { background: #6c757d; color: white; }
+        .btn-secondary:active { background: #545b62; }
+
+        /* === Fixed Bottom Bar (sequential mode only) === */
+        .app-bottombar {
+            background: #232f3e; display: flex; align-items: center; gap: 8px;
+            padding: 8px 12px; padding-bottom: max(8px, env(safe-area-inset-bottom));
+            height: var(--bottombar-h); flex-shrink: 0; position: relative; z-index: 200;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.2);
+        }
+        .app-bottombar.hidden { display: none; }
+        .app-bottombar .btn { flex: 1; height: 40px; border: none; border-radius: 10px; font-weight: 600; font-size: 0.9em; cursor: pointer; }
+        .seq-counter { color: white; font-size: 0.85em; font-weight: 600; min-width: 60px; text-align: center; }
+
+        .hidden { display: none !important; }
+
+        @media (min-width: 769px) {
+            .app-topbar, .app-bottombar { max-width: 800px; align-self: center; width: 100%; }
+            .topbar-stats { font-size: 0.8em; }
+        }
+    </style>
+  <script src="/assets/js/auth.js"></script>
+  <script src="/assets/js/login.js"></script>
+</head>
+<body>
+    <!-- ===== Top Bar ===== -->
+    <header class="app-topbar">
+        <span class="topbar-title">📚 Study</span>
+        <div class="topbar-stats">
+            <span id="statsSeen">👁️ 0</span>
+            <span id="statsCorrect">✅ 0</span>
+            <span id="statsWrong">❌ 0</span>
+            <span id="statsAccuracy">🎯 —</span>
+        </div>
+        <button class="topbar-btn" onclick="toggleFilters()" title="Filters">⚙️</button>
+        <a class="topbar-btn" href="exam_mode.html" title="Exam mode">📝</a>
+    </header>
+
+    <!-- ===== Collapsible Filter Panel ===== -->
+    <div class="filter-panel" id="filterPanel">
+        <div class="filter-row">
+            <select id="domainFilter" onchange="applyFilter()">
+                <option value="all">All Domains</option>
+            </select>
+            <select id="modeFilter" onchange="applyFilter()">
+                <option value="sequential">One-by-One</option>
+                <option value="instant">Show All</option>
+            </select>
+            <button class="secondary" onclick="resetProgress()">🔄 Reset</button>
+        </div>
+    </div>
+
+    <!-- ===== Scrollable Content ===== -->
+    <main class="app-main" id="appMain">
+        <div id="questionsList"></div>
+    </main>
+
+    <!-- ===== Bottom Bar (sequential mode) ===== -->
+    <footer class="app-bottombar hidden" id="appBottombar">
+        <button class="btn btn-secondary" onclick="seqPrev()">◀ Prev</button>
+        <span class="seq-counter" id="seqCounter">1 / 1</span>
+        <button class="btn btn-primary" onclick="seqNext()">Next ▶</button>
+    </footer>
+
+    <script>
+        // ===== State =====
+        let allQuestions = [];
+        let filteredQuestions = [];
+        let currentSeqIndex = 0;
+        const seenSet = new Set();
+        const correctSet = new Set();
+        const wrongSet = new Set();
+        const STORAGE_KEY = 'clf_c02_study_progress';
+
+        // ===== Filter panel toggle =====
+        function toggleFilters() {
+            document.getElementById('filterPanel').classList.toggle('open');
+        }
+
+        // ===== Load =====
+        async function loadQuestions() {
+            try {
+                const res = await fetch('data.json');
+                allQuestions = await res.json();
+                loadProgress();
+                populateDomainFilter();
+                applyFilter();
+            } catch (e) {
+                document.getElementById('questionsList').innerHTML =
+                    '<div class="question-card">❌ Could not load data.json. Serve via http://. Error: ' + e.message + '</div>';
+            }
+        }
+
+        function populateDomainFilter() {
+            const domains = [...new Set(allQuestions.map(q => q.domain).filter(Boolean))].sort();
+            const sel = document.getElementById('domainFilter');
+            domains.forEach(d => {
+                const opt = document.createElement('option');
+                opt.value = d;
+                opt.textContent = d;
+                sel.appendChild(opt);
+            });
+        }
+
+        function applyFilter() {
+            const domain = document.getElementById('domainFilter').value;
+            const mode = document.getElementById('modeFilter').value;
+            filteredQuestions = domain === 'all'
+                ? [...allQuestions]
+                : allQuestions.filter(q => q.domain === domain);
+            currentSeqIndex = 0;
+            if (mode === 'sequential') {
+                document.getElementById('appBottombar').classList.remove('hidden');
+                renderSequential();
+            } else {
+                document.getElementById('appBottombar').classList.add('hidden');
+                renderAll();
+            }
+            updateStats();
+        }
+
+        function renderAll() {
+            const list = document.getElementById('questionsList');
+            list.innerHTML = '';
+            filteredQuestions.forEach((q, idx) => {
+                list.appendChild(buildQuestionCard(q, idx, false));
+            });
+        }
+
+        function renderSequential() {
+            const list = document.getElementById('questionsList');
+            list.innerHTML = '';
+            if (filteredQuestions.length === 0) return;
+            const q = filteredQuestions[currentSeqIndex];
+            list.appendChild(buildQuestionCard(q, currentSeqIndex, true));
+            document.getElementById('seqCounter').textContent =
+                `${currentSeqIndex + 1} / ${filteredQuestions.length}`;
+            document.getElementById('appMain').scrollTop = 0;
+        }
+
+        function seqNext() {
+            if (currentSeqIndex < filteredQuestions.length - 1) {
+                currentSeqIndex++;
+                renderSequential();
+            }
+        }
+        function seqPrev() {
+            if (currentSeqIndex > 0) {
+                currentSeqIndex--;
+                renderSequential();
+            }
+        }
+
+        function buildQuestionCard(q, idx, isSeq) {
+            const card = document.createElement('div');
+            card.className = 'question-card';
+            const qid = isSeq ? currentSeqIndex : idx;
+
+            const typeLabel = q.type === 'multiple'
+                ? `<span class="question-type multiple">Multiple (${q.correct.length})</span>`
+                : `<span class="question-type">Single</span>`;
+
+            let optionsHTML = '';
+            q.options.forEach((opt, i) => {
+                const checkbox = q.type === 'multiple'
+                    ? `<input type="checkbox" class="option-checkbox" data-qid="${qid}" data-idx="${i}">`
+                    : '';
+                optionsHTML += `
+                    <div class="option" data-qid="${qid}" data-idx="${i}" onclick="selectOption(this, ${qid}, ${i}, '${q.type}')">
+                        <span class="option-letter">${String.fromCharCode(65 + i)}.</span>
+                        <span class="option-text">${opt}</span>
+                        ${checkbox}
+                        <span class="badge" data-badge-qid="${qid}" data-badge-idx="${i}"></span>
+                    </div>
+                `;
+            });
+
+            card.innerHTML = `
+                <div class="question-header">
+                    <span class="question-number">Q${idx + 1}</span>
+                    ${typeLabel}
+                </div>
+                <div class="question-domain">${q.domain || ''}</div>
+                <div class="question-text">${q.text}</div>
+                <div class="options" id="options-${qid}">${optionsHTML}</div>
+                <div class="result-line" id="result-${qid}"></div>
+                <div class="explanation" id="expl-${qid}">
+                    <strong>💡 Explanation:</strong> ${q.explanation}<br>
+                    <strong>✅ Correct answer:</strong> ${q.correct.map(c => String.fromCharCode(65 + c)).join(', ')}
+                </div>
+                <div class="card-controls">
+                    <button class="btn btn-primary" onclick="checkAnswer(${qid})">✅ Check</button>
+                    <button class="btn btn-secondary" onclick="resetQuestion(${qid})">↩️ Reset</button>
+                </div>
+            `;
+            card.dataset.qData = JSON.stringify(q);
+            card.dataset.qid = qid;
+            return card;
+        }
+
+        const tempSelections = {};
+
+        function selectOption(el, qid, idx, type) {
+            if (!tempSelections[qid]) tempSelections[qid] = [];
+            const container = document.getElementById(`options-${qid}`);
+            const opts = container.querySelectorAll('.option');
+
+            if (type === 'single') {
+                opts.forEach(o => o.classList.remove('selected'));
+                el.classList.add('selected');
+                tempSelections[qid] = [idx];
+            } else {
+                if (el.classList.contains('selected')) {
+                    el.classList.remove('selected');
+                    const cb = el.querySelector('.option-checkbox');
+                    if (cb) cb.checked = false;
+                    tempSelections[qid] = tempSelections[qid].filter(i => i !== idx);
+                } else {
+                    el.classList.add('selected');
+                    const cb = el.querySelector('.option-checkbox');
+                    if (cb) cb.checked = true;
+                    tempSelections[qid].push(idx);
+                }
+            }
+        }
+
+        function checkAnswer(qid) {
+            const card = document.querySelector(`.question-card[data-qid="${qid}"]`);
+            const q = JSON.parse(card.dataset.qData);
+            const userSel = tempSelections[qid] || [];
+
+            if (userSel.length === 0) {
+                alert('Please select at least one option first.');
+                return;
+            }
+
+            const container = document.getElementById(`options-${qid}`);
+            const opts = container.querySelectorAll('.option');
+            const correct = q.correct;
+            const userSorted = [...userSel].sort((a, b) => a - b);
+            const correctSorted = [...correct].sort((a, b) => a - b);
+            const isCorrect = JSON.stringify(userSorted) === JSON.stringify(correctSorted);
+
+            opts.forEach(opt => {
+                const optIdx = parseInt(opt.dataset.idx);
+                opt.style.cursor = 'default';
+                opt.onclick = null;
+                if (correct.includes(optIdx)) {
+                    opt.classList.add('correct');
+                    const badge = opt.querySelector('.badge');
+                    if (badge) badge.textContent = '✅';
+                } else if (userSel.includes(optIdx)) {
+                    opt.classList.add('wrong');
+                    const badge = opt.querySelector('.badge');
+                    if (badge) badge.textContent = '❌';
+                }
+                opt.classList.remove('selected');
+            });
+
+            const resultEl = document.getElementById(`result-${qid}`);
+            resultEl.className = 'result-line ' + (isCorrect ? 'correct' : 'wrong');
+            resultEl.textContent = isCorrect
+                ? `✅ Correct!`
+                : `❌ Wrong. Correct: ${correctSorted.map(c => String.fromCharCode(65 + c)).join(', ')}`;
+
+            document.getElementById(`expl-${qid}`).classList.add('show');
+
+            const buttons = card.querySelectorAll('.card-controls .btn');
+            if (buttons[0]) buttons[0].disabled = true;
+
+            seenSet.add(q.id);
+            if (isCorrect) {
+                correctSet.add(q.id);
+                wrongSet.delete(q.id);
+            } else {
+                wrongSet.add(q.id);
+                correctSet.delete(q.id);
+            }
+            updateStats();
+            saveProgress();
+        }
+
+        function resetQuestion(qid) {
+            const card = document.querySelector(`.question-card[data-qid="${qid}"]`);
+            const q = JSON.parse(card.dataset.qData);
+            tempSelections[qid] = [];
+            const container = document.getElementById(`options-${qid}`);
+            const opts = container.querySelectorAll('.option');
+            opts.forEach(opt => {
+                opt.className = 'option';
+                opt.style.cursor = 'pointer';
+                const badge = opt.querySelector('.badge');
+                if (badge) badge.textContent = '';
+                const cb = opt.querySelector('.option-checkbox');
+                if (cb) cb.checked = false;
+                const idx = parseInt(opt.dataset.idx);
+                opt.onclick = () => selectOption(opt, qid, idx, q.type);
+            });
+            document.getElementById(`result-${qid}`).textContent = '';
+            document.getElementById(`result-${qid}`).className = 'result-line';
+            document.getElementById(`expl-${qid}`).classList.remove('show');
+            const buttons = card.querySelectorAll('.card-controls .btn');
+            if (buttons[0]) buttons[0].disabled = false;
+        }
+
+        function updateStats() {
+            document.getElementById('statsSeen').textContent = `👁️ ${seenSet.size}`;
+            document.getElementById('statsCorrect').textContent = `✅ ${correctSet.size}`;
+            document.getElementById('statsWrong').textContent = `❌ ${wrongSet.size}`;
+            const attempted = correctSet.size + wrongSet.size;
+            document.getElementById('statsAccuracy').textContent = attempted > 0
+                ? `🎯 ${Math.round((correctSet.size / attempted) * 100)}%`
+                : `🎯 —`;
+        }
+
+        function saveProgress() {
+            const data = { seen: [...seenSet], correct: [...correctSet], wrong: [...wrongSet] };
+            try { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); } catch (e) {}
+        }
+
+        function loadProgress() {
+            try {
+                const raw = localStorage.getItem(STORAGE_KEY);
+                if (!raw) return;
+                const data = JSON.parse(raw);
+                (data.seen || []).forEach(id => seenSet.add(id));
+                (data.correct || []).forEach(id => correctSet.add(id));
+                (data.wrong || []).forEach(id => wrongSet.add(id));
+            } catch (e) {}
+        }
+
+        function resetProgress() {
+            if (!confirm('Reset all study progress? This cannot be undone.')) return;
+            seenSet.clear(); correctSet.clear(); wrongSet.clear();
+            try { localStorage.removeItem(STORAGE_KEY); } catch (e) {}
+            applyFilter();
+        }
+
+        window.onload = loadQuestions;
+    </script>
+</body>
+</html>

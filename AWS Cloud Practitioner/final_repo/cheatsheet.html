@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CLF-C02 - Data-Driven Cheatsheet</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f0f2f5; color: #232f3e; }
+        .topbar { background: #232f3e; color: white; padding: 15px 20px; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 8px rgba(0,0,0,0.2); }
+        .topbar-inner { max-width: 1100px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
+        .topbar h1 { font-size: 1.35em; }
+        .topbar .meta { font-size: 13px; opacity: 0.85; }
+        .topbar a { color: white; text-decoration: none; padding: 8px 16px; background: #ff9900; border-radius: 6px; font-size: 14px; font-weight: bold; }
+        .topbar a.sec { background: #3b4a5e; }
+        .topbar a.sec:hover { background: #4a5d75; }
+        .wrap { max-width: 1100px; margin: 0 auto; padding: 25px 20px; }
+        .section { background: white; border-radius: 10px; padding: 30px; box-shadow: 0 2px 10px rgba(0,0,0,0.08); margin-bottom: 25px; }
+        .section h2 { font-size: 1.5em; color: #232f3e; border-bottom: 3px solid #ff9900; padding-bottom: 8px; margin-bottom: 16px; }
+        .section p.lead { color: #555; margin-bottom: 16px; line-height: 1.6; }
+        .callout { background: #eaf6ff; border-left: 4px solid #2196f3; padding: 14px 18px; border-radius: 8px; margin: 14px 0; line-height: 1.6; font-size: 14px; }
+        .callout.tip { background: #e8f5e9; border-left-color: #4caf50; }
+        .callout.warn { background: #fff8e1; border-left-color: #ff9900; }
+        table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 14px; display: block; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+        th { background: #232f3e; color: white; padding: 10px 12px; text-align: left; white-space: nowrap; }
+        td { padding: 10px 12px; border-bottom: 1px solid #e0e0e0; vertical-align: top; line-height: 1.5; }
+        tr:nth-child(even) { background: #f8f9fa; }
+        .card-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(220px, 100%), 1fr)); gap: 14px; margin: 16px 0; }
+        .info-card { background: #f8f9fa; border: 1px solid #e0e0e0; border-radius: 8px; padding: 14px; border-top: 4px solid #ff9900; }
+        .info-card h4 { margin: 0 0 6px; color: #b06000; font-size: 1em; }
+        .info-card p { font-size: 13px; margin: 0; color: #333; line-height: 1.4; }
+        .focus-list { columns: 2; column-gap: 30px; font-size: 14px; line-height: 1.9; list-style: none; }
+        .focus-list li::before { content: '▸ '; color: #ff9900; font-weight: bold; }
+        @media (max-width: 700px) {
+            .focus-list { columns: 1; }
+            .wrap { padding: 16px 12px; }
+            .section { padding: 18px 14px; }
+            .section h2 { font-size: 1.25em; }
+            .topbar-inner { flex-direction: column; align-items: flex-start; gap: 8px; }
+            .topbar h1 { font-size: 1.15em; }
+            .card-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+  <script src="/assets/js/auth.js"></script>
+  <script src="/assets/js/login.js"></script>
+</head>
+<body>
+    <div class="topbar">
+        <div class="topbar-inner">
+            <div>
+                <h1>📊 CLF-C02 Data-Driven Cheatsheet</h1>
+                <div class="meta">Generated from 1050 practice questions · AWS Certified Cloud Practitioner</div>
+            </div>
+            <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                <a href="study_app.html">📚 Study Mode</a>
+                <a href="exam_mode.html">📝 Exam</a>
+                <a href="index.html" class="sec">🏠 Hub</a>
+            </div>
+        </div>
+    </div>
+    <div class="wrap">
+
+        <div class="section">
+            <h2>🎯 How to Read This Cheatsheet</h2>
+            <p class="lead">Every insight below is computed from the actual 1050-question practice bank — these are the services and scenarios the exam actually asks about, not generic advice.</p>
+            <div class="callout tip"><strong>Strategy:</strong> CLF-C02 is foundational. Focus on <em>what each service does in one sentence</em> + <em>which support plan covers what</em> + <em>free vs paid</em>. You do NOT need hands-on depth.</div>
+        </div>
+
+        <div class="section">
+            <h2>🏆 Service Frequency (What the Exam Asks About Most)</h2>
+            <p class="lead">Top 30 services by question count across the bank. The bar chart shows relative frequency.</p>
+            <table>
+                <tr><th>#</th><th>Service</th><th>Questions</th><th>Dominant Domain</th></tr>
+                
+        <tr>
+            <td>1</td>
+            <td><strong>Amazon EC2</strong></td>
+            <td>179 <div style="background:#e0e0e0;height:6px;border-radius:3px;margin-top:4px;max-width:120px;"><div style="background:#ff9900;height:6px;border-radius:3px;width:100%"></div></div></td>
+            <td>D3</td>
+        </tr>
+        <tr>
+            <td>2</td>
+            <td><strong>Amazon S3</strong></td>
+            <td>134 <div style="background:#e0e0e0;height:6px;border-radius:3px;margin-top:4px;max-width:120px;"><div style="background:#ff9900;height:6px;border-radius:3px;width:75%"></div></div></td>
+            <td>D3</td>
+        </tr>
+        <tr>
+            <td>3</td>
+            <td><strong>AWS Trusted Advisor</strong></td>
+            <td>82 <div style="background:#e0e0e0;height:6px;border-radius:3px;margin-top:4px;max-width:120px;"><div style="background:#ff9900;height:6px;border-radius:3px;width:46%"></div></div></td>
+            <td>D4</td>
+        </tr>
+        <tr>
+            <td>4</td>
+            <td><strong>Amazon RDS</strong></td>
+            <td>77 <div style="background:#e0e0e0;height:6px;border-radius:3px;margin-top:4px;max-width:120px;"><div style="background:#ff9900;height:6px;border-radius:3px;width:43%"></div></div></td>
+            <td>D3</td>
+        </tr>
+        <tr>
+            <td>5</td>
+            <td><strong>AWS CloudTrail</strong></td>
+            <td>71 <div style="background:#e0e0e0;height:6px;border-radius:3px;margin-top:4px;max-width:120px;"><div style="background:#ff9900;height:6px;border-radius:3px;width:40%"></div></div></td>
+            <td>D2</td>
+        </tr>
+        <tr>
+            <td>6</td>
+            <td><strong>AWS Config</strong></td>
+            <td>69 <div style="background:#e0e0e0;height:6px;border-radius:3px;margin-top:4px;max-width:120px;"><div style="background:#ff9900;height:6px;border-radius:3px;width:39%"></div></div></td>
+            <td>D2</td>
+        </tr>
+        <tr>
+            <td>7</td>
+            <td><strong>AWS Support</strong></td>
+            <td>62 <div style="background:#e0e0e0;height:6px;border-radius:3px;margin-top:4px;max-width:120px;"><div style="background:#ff9900;height:6px;border-radius:3px;width:35%"></div></div></td>
+            <td>D4</td>
+        </tr>
+        <tr>
+            <td>8</td>
+            <td><strong>Amazon CloudFront</strong></td>
+            <td>58 <div style="background:#e0e0e0;height:6px;border-radius:3px;margin-top:4px;max-width:120px;"><div style="background:#ff9900;height:6px;border-radius:3px;width:32%"></div></div></td>
+            <td>D3</td>
+        </tr>
+        <tr>
+            <td>9</td>
+            <td><strong>Amazon CloudWatch</strong></td>
+            <td>58 <div style="background:#e0e0e0;height:6px;border-radius:3px;margin-top:4px;max-width:120px;"><div style="background:#ff9900;height:6px;border-radius:3px;width:32%"></div></div></td>
+            <td>D2</td>
+        </tr>
+        <tr>
+            <td>10</td>
+            <td><strong>AWS Direct Connect</strong></td>
+            <td>57 <div style="background:#e0e0e0;height:6px;border-radius:3px;margin-top:4px;max-width:120px;"><div style="background:#ff9900;height:6px;border-radius:3px;width:32%"></div></div></td>
+            <td>D3</td>
+        </tr>
+        <tr>
+            <td>11</td>
+            <td><strong>AWS Organizations</strong></td>
+            <td>52 <div style="background:#e0e0e0;height:6px;border-radius:3px;margin-top:4px;max-width:120px;"><div style="background:#ff9900;height:6px;border-radius:3px;width:29%"></div></div></td>
+            <td>D4</td>
+        </tr>
+        <tr>
+            <td>12</td>
+            <td><strong>Amazon EBS</strong></td>
+            <td>46 <div style="background:#e0e0e0;height:6px;border-radius:3px;margin-top:4px;max-width:120px;"><div style="background:#ff9900;height:6px;border-radius:3px;width:26%"></div></div></td>
+            <td>D3</td>
+        </tr>
+        <tr>
+            <td>13</td>
+            <td><strong>Amazon Inspector</strong></td>
+            <td>46 <div style="background:#e0e0e0;height:6px;border-radius:3px;margin-top:4px;max-width:120px;"><div style="background:#ff9900;height:6px;border-radius:3px;width:26%"></div></div></td>
+            <td>D2</td>
+        </tr>
+        <tr>
+            <td>14</td>
+            <td><strong>Amazon DynamoDB</strong></td>
+            <td>45 <div style="background:#e0e0e0;height:6px;border-radius:3px;margin-top:4px;max-width:120px;"><div style="background:#ff9900;height:6px;border-radius:3px;width:25%"></div></div></td>
+            <td>D3</td>
+        </tr>
+        <tr>
+            <td>15</td>
+            <td><strong>AWS Cost Explorer</strong></td>
+            <td>43 <div style="background:#e0e0e0;height:6px;border-radius:3px;margin-top:4px;max-width:120px;"><div style="background:#ff9900;height:6px;border-radius:3px;width:24%"></div></div></td>
+            <td>D4</td>
+        </tr>
+        <tr>
+            <td>16</td>
+            <td><strong>AWS Lambda</strong></td>
+            <td>42 <div style="background:#e0e0e0;height:6px;border-radius:3px;margin-top:4px;max-width:120px;"><div style="background:#ff9900;height:6px;border-radius:3px;width:23%"></div></div></td>
+            <td>D3</td>
+        </tr>
+        <tr>
+            <td>17</td>
+            <td><strong>AWS Budgets</strong></td>
+            <td>39 <div style="background:#e0e0e0;height:6px;border-radius:3px;margin-top:4px;max-width:120px;"><div style="background:#ff9900;height:6px;border-radius:3px;width:22%"></div></div></td>
+            <td>D4</td>
+        </tr>
+        <tr>
+            <td>18</td>
+            <td><strong>AWS IAM</strong></td>
+            <td>38 <div style="background:#e0e0e0;height:6px;border-radius:3px;margin-top:4px;max-width:120px;"><div style="background:#ff9900;height:6px;border-radius:3px;width:21%"></div></div></td>
+            <td>D2</td>
+        </tr>
+        <tr>
+            <td>19</td>
+            <td><strong>Amazon Redshift</strong></td>
+            <td>37 <div style="background:#e0e0e0;height:6px;border-radius:3px;margin-top:4px;max-width:120px;"><div style="background:#ff9900;height:6px;border-radius:3px;width:21%"></div></div></td>
+            <td>D3</td>
+        </tr>
+        <tr>
+            <td>20</td>
+            <td><strong>AWS Artifact</strong></td>
+            <td>36 <div style="background:#e0e0e0;height:6px;border-radius:3px;margin-top:4px;max-width:120px;"><div style="background:#ff9900;height:6px;border-radius:3px;width:20%"></div></div></td>
+            <td>D2</td>
+        </tr>
+        <tr>
+            <td>21</td>
+            <td><strong>Amazon VPC</strong></td>
+            <td>34 <div style="background:#e0e0e0;height:6px;border-radius:3px;margin-top:4px;max-width:120px;"><div style="background:#ff9900;height:6px;border-radius:3px;width:19%"></div></div></td>
+            <td>D3</td>
+        </tr>
+        <tr>
+            <td>22</td>
+            <td><strong>Amazon Route 53</strong></td>
+            <td>34 <div style="background:#e0e0e0;height:6px;border-radius:3px;margin-top:4px;max-width:120px;"><div style="background:#ff9900;height:6px;border-radius:3px;width:19%"></div></div></td>
+            <td>D3</td>
+        </tr>
+        <tr>
+            <td>23</td>
+            <td><strong>AWS CloudFormation</strong></td>
+            <td>30 <div style="background:#e0e0e0;height:6px;border-radius:3px;margin-top:4px;max-width:120px;"><div style="background:#ff9900;height:6px;border-radius:3px;width:17%"></div></div></td>
+            <td>D3</td>
+        </tr>
+        <tr>
+            <td>24</td>
+            <td><strong>Amazon SNS</strong></td>
+            <td>27 <div style="background:#e0e0e0;height:6px;border-radius:3px;margin-top:4px;max-width:120px;"><div style="background:#ff9900;height:6px;border-radius:3px;width:15%"></div></div></td>
+            <td>D3</td>
+        </tr>
+        <tr>
+            <td>25</td>
+            <td><strong>Amazon Connect</strong></td>
+            <td>26 <div style="background:#e0e0e0;height:6px;border-radius:3px;margin-top:4px;max-width:120px;"><div style="background:#ff9900;height:6px;border-radius:3px;width:15%"></div></div></td>
+            <td>D3</td>
+        </tr>
+        <tr>
+            <td>26</td>
+            <td><strong>Amazon EFS</strong></td>
+            <td>25 <div style="background:#e0e0e0;height:6px;border-radius:3px;margin-top:4px;max-width:120px;"><div style="background:#ff9900;height:6px;border-radius:3px;width:14%"></div></div></td>
+            <td>D3</td>
+        </tr>
+        <tr>
+            <td>27</td>
+            <td><strong>Amazon S3 Glacier</strong></td>
+            <td>25 <div style="background:#e0e0e0;height:6px;border-radius:3px;margin-top:4px;max-width:120px;"><div style="background:#ff9900;height:6px;border-radius:3px;width:14%"></div></div></td>
+            <td>D3</td>
+        </tr>
+        <tr>
+            <td>28</td>
+            <td><strong>AWS Pricing Calculator</strong></td>
+            <td>25 <div style="background:#e0e0e0;height:6px;border-radius:3px;margin-top:4px;max-width:120px;"><div style="background:#ff9900;height:6px;border-radius:3px;width:14%"></div></div></td>
+            <td>D4</td>
+        </tr>
+        <tr>
+            <td>29</td>
+            <td><strong>AWS Snowball</strong></td>
+            <td>24 <div style="background:#e0e0e0;height:6px;border-radius:3px;margin-top:4px;max-width:120px;"><div style="background:#ff9900;height:6px;border-radius:3px;width:13%"></div></div></td>
+            <td>D3</td>
+        </tr>
+        <tr>
+            <td>30</td>
+            <td><strong>AWS Shield</strong></td>
+            <td>24 <div style="background:#e0e0e0;height:6px;border-radius:3px;margin-top:4px;max-width:120px;"><div style="background:#ff9900;height:6px;border-radius:3px;width:13%"></div></div></td>
+            <td>D2</td>
+        </tr>
+            </table>
+        </div>
+
+        <div class="section">
+            <h2>⚖️ Domain Weights vs Question Bank</h2>
+            <table>
+                <tr><th>Domain</th><th>Exam Weight</th><th>Bank Coverage</th></tr>
+                
+        <tr>
+            <td><strong>Domain 1 - Cloud Concepts</strong></td>
+            <td>24%</td>
+            <td>187 (18% of bank)</td>
+        </tr>
+        <tr>
+            <td><strong>Domain 2 - Security and Compliance</strong></td>
+            <td>30%</td>
+            <td>247 (24% of bank)</td>
+        </tr>
+        <tr>
+            <td><strong>Domain 3 - Cloud Technology and Services</strong></td>
+            <td>34%</td>
+            <td>384 (37% of bank)</td>
+        </tr>
+        <tr>
+            <td><strong>Domain 4 - Billing, Pricing, and Support</strong></td>
+            <td>12%</td>
+            <td>232 (22% of bank)</td>
+        </tr>
+            </table>
+            <div class="callout warn"><strong>Note:</strong> Domain 3 (Cloud Technology &amp; Services) is the biggest chunk — know the core service catalog well. Domain 4 (Billing) is only 12% but contains the most-memorized facts (support plans, free tier).</div>
+        </div>
+
+        <div class="section">
+            <h2>🔁 Scenario → Answer Patterns</h2>
+            <p class="lead">When the question mentions X, the correct answer usually involves Y. Computed from correct answers in the bank.</p>
+            <table>
+                <tr><th>Scenario Trigger</th><th>Questions</th><th>Correct Answer Usually Involves</th></tr>
+                
+        <tr>
+            <td><strong>lowest cost / cheapest</strong></td>
+            <td>28</td>
+            <td>Amazon S3, Amazon S3 Glacier, Amazon EBS, AWS Snowball</td>
+        </tr>
+        <tr>
+            <td><strong>high availability / fault tolerance</strong></td>
+            <td>29</td>
+            <td>AWS Direct Connect, Amazon VPC, Amazon CloudFront, AWS CloudFormation</td>
+        </tr>
+        <tr>
+            <td><strong>security audit / compliance</strong></td>
+            <td>151</td>
+            <td>AWS Trusted Advisor, AWS Config, AWS CloudTrail, AWS Artifact</td>
+        </tr>
+        <tr>
+            <td><strong>encryption / keys</strong></td>
+            <td>50</td>
+            <td>AWS KMS, Amazon S3, AWS Certificate Manager, Amazon EC2</td>
+        </tr>
+        <tr>
+            <td><strong>monitoring / alerts</strong></td>
+            <td>63</td>
+            <td>Amazon CloudWatch, AWS CloudTrail, AWS Config, AWS Trusted Advisor</td>
+        </tr>
+        <tr>
+            <td><strong>user management / access</strong></td>
+            <td>313</td>
+            <td>AWS IAM, AWS CloudTrail, Amazon S3, AWS Config</td>
+        </tr>
+        <tr>
+            <td><strong>billing / cost tracking</strong></td>
+            <td>242</td>
+            <td>AWS Cost Explorer, AWS Budgets, AWS Organizations, Amazon S3</td>
+        </tr>
+        <tr>
+            <td><strong>disaster recovery / backup</strong></td>
+            <td>33</td>
+            <td>Amazon S3, Amazon RDS, Amazon S3 Glacier, Amazon CloudFront</td>
+        </tr>
+        <tr>
+            <td><strong>containers</strong></td>
+            <td>20</td>
+            <td>Amazon ECS, Amazon S3, AWS Fargate, Amazon EKS</td>
+        </tr>
+        <tr>
+            <td><strong>databases</strong></td>
+            <td>161</td>
+            <td>Amazon RDS, Amazon DynamoDB, Amazon EC2, Amazon S3</td>
+        </tr>
+        <tr>
+            <td><strong>storage</strong></td>
+            <td>178</td>
+            <td>Amazon S3, Amazon EBS, Amazon EC2, Amazon EFS</td>
+        </tr>
+        <tr>
+            <td><strong>networking / connectivity</strong></td>
+            <td>135</td>
+            <td>AWS Direct Connect, Amazon CloudFront, Amazon VPC, AWS VPN</td>
+        </tr>
+            </table>
+        </div>
+
+        <div class="section">
+            <h2>🆘 AWS Support Plans (Memorize Cold — Domain 4 Favorite)</h2>
+            <table>
+                <tr><th>Plan</th><th>Price</th><th>Key Coverage</th></tr>
+                <tr><td><strong>Basic</strong></td><td>Free</td><td>Account-only help: docs, whitepapers, support forums, account-level billing &amp; service limit checks</td></tr><tr><td><strong>Developer</strong></td><td>From $29/mo</td><td>Email business-hours access to Cloud Support Associates; 1 primary contact; general guidance &lt; 24 bus. hrs</td></tr><tr><td><strong>Business</strong></td><td>From $100/mo</td><td>24×7 phone/chat/email, unlimited contacts, case SLAs (prod-impacting &lt; 4 hrs), Trusted Advisor full checks + API, contextual guidance</td></tr><tr><td><strong>Enterprise On-Ramp</strong></td><td>From $5500/mo</td><td>24×7 access, workload architecture guidance, 30-min SLA for business-critical (Enterprise-level on select workloads)</td></tr><tr><td><strong>Enterprise</strong></td><td>From $15000/mo</td><td>Dedicated Technical Account Manager (TAM), concierge billing, 15-min SLA business-critical, Operations Reviews + best-practice guidance</td></tr>
+            </table>
+            <div class="callout"><strong>Exam trap:</strong> Only <strong>Business+</strong> plans get full Trusted Advisor checks and the TA/TAM starts at <strong>Enterprise On-Ramp</strong>. Phone support starts at <strong>Business</strong>.</div>
+        </div>
+
+        <div class="section">
+            <h2>🌍 Global vs Regional (Classic CLF Question)</h2>
+            <table>
+                <tr><th>Concept</th><th>Key Facts</th></tr>
+                <tr><td><strong>Global services</strong></td><td>IAM, Route 53, CloudFront, WAF, Shield, Organizations, Billing</td></tr><tr><td><strong>Regional services</strong></td><td>EC2, S3 (regional but global namespace), RDS, Lambda, DynamoDB (regional, global tables optional)</td></tr><tr><td><strong>AZ concept</strong></td><td>One or more discrete data centers in a Region; isolated from failures in other AZs</td></tr><tr><td><strong>Region choice factors</strong></td><td>Latency, cost, compliance/data residency, service availability</td></tr>
+            </table>
+        </div>
+
+        <div class="section">
+            <h2>🔥 High-Frequency Services — One-Liners</h2>
+            <div class="card-grid">
+                <div class="info-card"><h4>IAM</h4><p>Users, groups, roles, policies. Global. MFA + least privilege. Root = only for billing.</p></div>
+                <div class="info-card"><h4>Amazon EC2</h4><p>Virtual servers. On-Demand, Reserved, Spot, Savings Plans. Scale with ASG.</p></div>
+                <div class="info-card"><h4>Amazon S3</h4><p>Object storage, 11 nines durability. Standard / IA / One-Zone IA / Glacier tiers.</p></div>
+                <div class="info-card"><h4>Amazon RDS</h4><p>Managed relational DBs. Multi-AZ = HA; Read Replicas = read scaling.</p></div>
+                <div class="info-card"><h4>AWS Lambda</h4><p>Serverless functions, 15-min max, pay-per-invocation. No infra to manage.</p></div>
+                <div class="info-card"><h4>CloudWatch</h4><p>Metrics, logs, alarms, dashboards. AWS-native monitoring default answer.</p></div>
+                <div class="info-card"><h4>CloudTrail</h4><p>API call audit log. "Who did what when" = CloudTrail, always.</p></div>
+                <div class="info-card"><h4>Trusted Advisor</h4><p>Account-level best-practice checks: cost, performance, security, fault tolerance.</p></div>
+                <div class="info-card"><h4>Cost Explorer</h4><p>Visualize/forecast spend over time. Budgets = alerts on thresholds.</p></div>
+                <div class="info-card"><h4>AWS Organizations</h4><p>Multi-account management, SCPs, consolidated billing (one bill).</p></div>
+                <div class="info-card"><h4>Route 53</h4><p>Global managed DNS. Latency / failover / geolocation routing policies.</p></div>
+                <div class="info-card"><h4>Shield + WAF</h4><p>Shield = DDoS (Standard free / Advanced paid). WAF = L7 firewall rules.</p></div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>📋 Prioritized Study Order</h2>
+            <p class="lead">Study in this order — highest exam frequency first:</p>
+            <ul class="focus-list">
+                <li>Amazon EC2</li><li>Amazon S3</li><li>AWS Trusted Advisor</li><li>Amazon RDS</li><li>AWS CloudTrail</li><li>AWS Config</li><li>AWS Support</li><li>Amazon CloudFront</li><li>Amazon CloudWatch</li><li>AWS Direct Connect</li><li>AWS Organizations</li><li>Amazon EBS</li>
+            </ul>
+            <div class="callout tip"><strong>Source:</strong> Question bank from <a href="https://github.com/nastaso/cloudcertprep">cloudcertprep</a> (MIT). Frequency analysis of 1050 explained questions.</div>
+        </div>
+
+    </div>
+</body>
+</html>

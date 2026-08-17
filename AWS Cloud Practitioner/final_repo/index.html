@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AWS Cloud Practitioner (CLF-C02) - Study Hub</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg, #1565c0 0%, #0d47a1 100%); min-height: 100vh; }
+        .container { max-width: 1100px; margin: 0 auto; padding: 40px 20px; }
+        .header { text-align: center; color: white; margin-bottom: 50px; }
+        .header h1 { font-size: clamp(1.6em, 6vw, 2.8em); margin-bottom: 10px; text-shadow: 2px 2px 4px rgba(0,0,0,0.3); }
+        .header p { font-size: clamp(1em, 3vw, 1.2em); opacity: 0.9; }
+        .apps-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(320px, 100%), 1fr)); gap: 25px; }
+        .app-card { background: white; border-radius: 16px; padding: 30px; box-shadow: 0 12px 30px rgba(0,0,0,0.15); transition: transform 0.3s, box-shadow 0.3s; text-decoration: none; color: inherit; display: block; }
+        .app-card:hover { transform: translateY(-8px); box-shadow: 0 20px 40px rgba(0,0,0,0.25); }
+        .app-icon { font-size: 3.5em; text-align: center; margin-bottom: 15px; }
+        .app-title { font-size: 1.5em; font-weight: bold; margin-bottom: 12px; text-align: center; color: #232f3e; }
+        .app-description { color: #555; margin-bottom: 18px; line-height: 1.5; font-size: 15px; }
+        .app-stats { background: #f8f9fa; padding: 12px 15px; border-radius: 8px; font-size: 14px; color: #444; line-height: 1.7; }
+        .back-link { text-align: center; margin-top: 40px; }
+        .back-link a { display: inline-block; padding: 12px 28px; background: rgba(255,255,255,0.2); color: white; text-decoration: none; border-radius: 25px; font-weight: bold; }
+        .back-link a:hover { background: rgba(255,255,255,0.3); }
+        @media (max-width: 600px) {
+            .container { padding: 25px 14px; }
+            .header { margin-bottom: 30px; }
+            .apps-grid { gap: 18px; }
+            .app-card { padding: 22px 16px; }
+            .app-icon { font-size: 2.8em; margin-bottom: 10px; }
+            .app-title { font-size: 1.25em; }
+            .back-link a { padding: 10px 22px; font-size: 14px; }
+        }
+    </style>
+  <script src="/assets/js/auth.js"></script>
+  <script src="/assets/js/login.js"></script>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>☁️ AWS Certified Cloud Practitioner</h1>
+            <p>CLF-C02 · Foundational Cloud Certification</p>
+        </div>
+
+        <div class="apps-grid">
+            <a href="study_app.html" class="app-card">
+                <div class="app-icon">📚</div>
+                <div class="app-title">Study Mode</div>
+                <div class="app-description">
+                    Review all questions one-by-one with instant feedback and detailed explanations. Filter by domain, track accuracy, progress saved in browser.
+                </div>
+                <div class="app-stats">
+                    <strong>📝 Questions:</strong> 1050<br>
+                    <strong>🎯 Features:</strong> Domain filter · instant feedback · explanations<br>
+                    <strong>💾 Progress:</strong> Saved locally
+                </div>
+            </a>
+
+            <a href="exam_mode.html" class="app-card">
+                <div class="app-icon">📝</div>
+                <div class="app-title">Practice Exam</div>
+                <div class="app-description">
+                    Timed exam simulation. 65 random questions, 90 minutes, flag for review, scaled scoring, full answer review at the end.
+                </div>
+                <div class="app-stats">
+                    <strong>⏱️ Duration:</strong> 90 minutes<br>
+                    <strong>📊 Format:</strong> 65 questions · pass 700/1000<br>
+                    <strong>🔄 Randomized:</strong> From 1050-question bank
+                </div>
+            </a>
+
+            <a href="cheatsheet.html" class="app-card">
+                <div class="app-icon">📊</div>
+                <div class="app-title">Data Cheatsheet</div>
+                <div class="app-description">
+                    Service frequency, domain weights, scenario-answer patterns, support plans, and global vs regional facts — computed from the question bank.
+                </div>
+                <div class="app-stats">
+                    <strong>🏆 Top services:</strong> Ranked by exam frequency<br>
+                    <strong>🔁 Patterns:</strong> Scenario → answer mapping<br>
+                    <strong>🆘 Support plans:</strong> Memorization table
+                </div>
+            </a>
+        </div>
+
+        <div class="back-link">
+            <a href="../master_study_launcher.html">🏠 Master Hub</a>
+        </div>
+    </div>
+</body>
+</html>
