@@ -134,7 +134,8 @@
                 <option value="all">All Domains</option>
             </select>
             <select id="modeFilter" onchange="applyFilter()">
-                <option value="sequential">One-by-One</option>
+                <option value="smart">🎯 Smart 50</option>
+                <option value="sequential">One-by-One (All)</option>
                 <option value="instant">Show All</option>
             </select>
             <button class="secondary" onclick="resetProgress()">🔄 Reset</button>
@@ -157,7 +158,9 @@
         // ===== State =====
         let allQuestions = [];
         let filteredQuestions = [];
+        let activeList = [];      // paged-mode list (smart session or full sequential)
         let currentSeqIndex = 0;
+        let qStats = {};          // question id -> {c: correctCount, w: wrongCount}
         const seenSet = new Set();
         const correctSet = new Set();
         const wrongSet = new Set();
@@ -200,12 +203,17 @@
                 ? [...allQuestions]
                 : allQuestions.filter(q => q.domain === domain);
             currentSeqIndex = 0;
-            if (mode === 'sequential') {
-                document.getElementById('appBottombar').classList.remove('hidden');
-                renderSequential();
-            } else {
+            if (mode === 'instant') {
                 document.getElementById('appBottombar').classList.add('hidden');
                 renderAll();
+            } else {
+                document.getElementById('appBottombar').classList.remove('hidden');
+                if (mode === 'smart') {
+                    activeList = weightedSample(filteredQuestions, Math.min(50, filteredQuestions.length));
+                } else {
+                    activeList = filteredQuestions;
+                }
+                renderPaged();
             }
             updateStats();
         }
@@ -218,28 +226,59 @@
             });
         }
 
-        function renderSequential() {
+        function renderPaged() {
             const list = document.getElementById('questionsList');
             list.innerHTML = '';
-            if (filteredQuestions.length === 0) return;
-            const q = filteredQuestions[currentSeqIndex];
+            if (activeList.length === 0) return;
+            const q = activeList[currentSeqIndex];
             list.appendChild(buildQuestionCard(q, currentSeqIndex, true));
             document.getElementById('seqCounter').textContent =
-                `${currentSeqIndex + 1} / ${filteredQuestions.length}`;
+                `${currentSeqIndex + 1} / ${activeList.length}`;
             document.getElementById('appMain').scrollTop = 0;
         }
 
         function seqNext() {
-            if (currentSeqIndex < filteredQuestions.length - 1) {
+            const mode = document.getElementById('modeFilter').value;
+            if (currentSeqIndex < activeList.length - 1) {
                 currentSeqIndex++;
-                renderSequential();
+                renderPaged();
+            } else if (mode === 'smart') {
+                // session finished -> rebuild from updated accuracy stats
+                activeList = weightedSample(filteredQuestions, Math.min(50, filteredQuestions.length));
+                currentSeqIndex = 0;
+                renderPaged();
             }
         }
         function seqPrev() {
             if (currentSeqIndex > 0) {
                 currentSeqIndex--;
-                renderSequential();
+                renderPaged();
             }
+        }
+
+        // ===== Accuracy-weighted sampling (Smart 50) =====
+        function weightOf(qid) {
+            const st = qStats[qid];
+            if (!st || (st.c + st.w) === 0) return 3;   // unseen material
+            const acc = st.c / (st.c + st.w);
+            return 1 + (1 - acc) * 4;                   // 1 = mastered .. 5 = all wrong
+        }
+
+        function weightedSample(pool, n) {
+            const items = pool.map(q => ({ q, w: weightOf(q.id) }));
+            const picked = [];
+            while (picked.length < n && items.length) {
+                const total = items.reduce((s, it) => s + it.w, 0);
+                let r = Math.random() * total;
+                let i = 0;
+                for (; i < items.length; i++) {
+                    r -= items[i].w;
+                    if (r <= 0) break;
+                }
+                i = Math.min(i, items.length - 1);
+                picked.push(items.splice(i, 1)[0].q);
+            }
+            return picked;
         }
 
         function buildQuestionCard(q, idx, isSeq) {
@@ -360,12 +399,15 @@
             if (buttons[0]) buttons[0].disabled = true;
 
             seenSet.add(q.id);
+            if (!qStats[q.id]) qStats[q.id] = { c: 0, w: 0 };
             if (isCorrect) {
                 correctSet.add(q.id);
                 wrongSet.delete(q.id);
+                qStats[q.id].c++;
             } else {
                 wrongSet.add(q.id);
                 correctSet.delete(q.id);
+                qStats[q.id].w++;
             }
             updateStats();
             saveProgress();
@@ -405,7 +447,7 @@
         }
 
         function saveProgress() {
-            const data = { seen: [...seenSet], correct: [...correctSet], wrong: [...wrongSet] };
+            const data = { seen: [...seenSet], correct: [...correctSet], wrong: [...wrongSet], stats: qStats };
             try { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); } catch (e) {}
         }
 
@@ -417,12 +459,20 @@
                 (data.seen || []).forEach(id => seenSet.add(id));
                 (data.correct || []).forEach(id => correctSet.add(id));
                 (data.wrong || []).forEach(id => wrongSet.add(id));
+                if (data.stats) {
+                    qStats = data.stats;
+                } else {
+                    // migrate old format: seed counts from last-result sets
+                    seenSet.forEach(id => {
+                        qStats[id] = { c: correctSet.has(id) ? 1 : 0, w: wrongSet.has(id) ? 1 : 0 };
+                    });
+                }
             } catch (e) {}
         }
 
         function resetProgress() {
             if (!confirm('Reset all study progress? This cannot be undone.')) return;
-            seenSet.clear(); correctSet.clear(); wrongSet.clear();
+            seenSet.clear(); correctSet.clear(); wrongSet.clear(); qStats = {};
             try { localStorage.removeItem(STORAGE_KEY); } catch (e) {}
             applyFilter();
         }
