@@ -1,0 +1,36 @@
+name: Sync from aws-certificates
+
+on:
+  schedule:
+    - cron: '*/5 * * * *'   # chạy 5 phút/lần
+  workflow_dispatch:        # hoặc bấm nút chạy tay
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Checkout source (repo org private)
+        uses: actions/checkout@v4
+        with:
+          repository: ops4vn/aws-certificates
+          token: ${{ secrets.SOURCE_READ_TOKEN }}
+          path: source
+
+      - name: Mirror source sang site (giữ lại .github để workflow này không bị xóa)
+        run: |
+          rsync -a --delete --exclude '.github' source/ ./
+          rm -rf source
+
+      - name: Commit va push
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "Sync from ops4vn/aws-certificates"
+          commit_user_name: github-actions[bot]
+          commit_user_email: 41898282+github-actions[bot]@users.noreply.github.com
