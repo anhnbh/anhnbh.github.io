@@ -25,7 +25,7 @@ jobs:
 
       - name: Mirror source sang site (giữ lại .github để workflow này không bị xóa)
         run: |
-          rsync -a --delete --exclude '.github' source/ ./
+          rsync -a --delete --exclude '.github' --exclude 'source' source/ ./
           rm -rf source
 
       - name: Commit va push
