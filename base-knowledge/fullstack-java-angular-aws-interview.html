@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Savycom R1 Interview Cheatsheet — Java + Angular</title>
+<style>
+  :root {
+    --ink: #1a1f28;
+    --muted: #5b6472;
+    --paper: #fafbfc;
+    --card: #ffffff;
+    --line: #e3e7ec;
+    --accent: #2563eb;
+    --java: #e76f00;
+    --ng: #dd0031;
+    --green: #0f7b4d;
+    --amber: #92400e;
+    --amberbg: #fff7e6;
+    --greenbg: #ecfdf3;
+    --bluebg: #eef4ff;
+    --code: #d6336c;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; scroll-padding-top: 64px; }
+  body {
+    margin: 0; background: var(--paper); color: var(--ink);
+    font: 16px/1.65 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+  .wrap { max-width: 920px; margin: 0 auto; padding: 0 20px 80px; }
+
+  header.hero {
+    background: linear-gradient(135deg, #101623 0%, #1d2a45 60%, #233b6e 100%);
+    color: #fff; padding: 40px 20px 30px; margin-bottom: 28px;
+  }
+  .hero-inner { max-width: 920px; margin: 0 auto; }
+  .hero h1 { margin: 0 0 6px; font-size: 26px; letter-spacing: .2px; }
+  .hero p { margin: 0; color: #b8c4da; font-size: 14.5px; }
+  .hero .pill {
+    display: inline-block; margin: 10px 8px 0 0; padding: 3px 12px; border-radius: 999px;
+    font-size: 12.5px; font-weight: 600; background: rgba(255,255,255,.12); color: #e7edf7;
+  }
+
+  nav.toc {
+    position: sticky; top: 0; z-index: 50; background: rgba(250,251,252,.92);
+    backdrop-filter: blur(6px); border-bottom: 1px solid var(--line);
+    display: flex; flex-wrap: wrap; gap: 4px; padding: 8px 14px; font-size: 13px;
+  }
+  nav.toc a { color: var(--muted); text-decoration: none; padding: 3px 9px; border-radius: 6px; }
+  nav.toc a:hover { background: var(--bluebg); color: var(--accent); }
+  nav.toc a.be:hover { background: #fff1e4; color: var(--java); }
+  nav.toc a.fe:hover { background: #ffe9ee; color: var(--ng); }
+  nav.toc .exp { margin-left: auto; cursor: pointer; border: 1px solid var(--line); background: #fff; color: var(--ink); border-radius: 6px; padding: 3px 10px; font-size: 12.5px; }
+  nav.toc .exp:hover { border-color: var(--accent); color: var(--accent); }
+
+  section.card {
+    background: var(--card); border: 1px solid var(--line); border-radius: 12px;
+    padding: 22px 26px; margin: 22px 0; box-shadow: 0 1px 2px rgba(16,22,35,.04);
+  }
+  h2.sec {
+    display: flex; align-items: center; gap: 10px;
+    font-size: 19px; margin: 0 0 6px; letter-spacing: .2px;
+  }
+  .tag {
+    font-size: 11px; font-weight: 700; letter-spacing: .8px; text-transform: uppercase;
+    padding: 3px 9px; border-radius: 6px; color: #fff;
+  }
+  .tag.be { background: var(--java); } .tag.fe { background: var(--ng); }
+  .tag.core { background: var(--accent); } .tag.misc { background: #475569; }
+  .where {
+    font-size: 13.5px; color: var(--muted); background: var(--bluebg);
+    border-left: 3px solid var(--accent); padding: 8px 12px; border-radius: 0 8px 8px 0; margin: 10px 0 4px;
+  }
+  h3 { font-size: 15.5px; margin: 20px 0 8px; color: #101623; }
+  ul { padding-left: 22px; margin: 8px 0; }
+  li { margin: 6px 0; }
+  li::marker { color: #9aa4b2; }
+  b, strong { color: #101623; }
+  code, .kw {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: .9em; background: #f1f3f7; border: 1px solid #e5e9ef;
+    border-radius: 5px; padding: 1px 5px; color: var(--code); white-space: nowrap;
+  }
+  .pitch {
+    background: #0f172a; color: #e7edf7; border-radius: 10px; padding: 18px 22px;
+    font-size: 15.5px; line-height: 1.7; border-left: 4px solid var(--accent);
+  }
+  .pitch em { color: #93c5fd; font-style: normal; font-weight: 600; }
+  .numbers { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 10px; margin-top: 12px; }
+  .numbers div {
+    background: var(--greenbg); border: 1px solid #bfe8d2; border-radius: 10px;
+    padding: 10px 14px; font-size: 13.5px; color: #14532d;
+  }
+  .numbers b { font-size: 17px; color: var(--green); display: block; }
+
+  details.trap, details.qa {
+    border: 1px solid #f1dfb8; background: var(--amberbg); border-radius: 10px;
+    padding: 10px 16px; margin: 14px 0;
+  }
+  details.trap summary, details.qa summary {
+    cursor: pointer; font-weight: 650; color: var(--amber); font-size: 14.5px;
+    list-style: none; display: flex; align-items: baseline; gap: 8px;
+  }
+  details.trap summary::before, details.qa summary::before { content: "▸"; transition: transform .15s; }
+  details[open].trap summary::before, details[open].qa summary::before { transform: rotate(90deg); }
+  details.trap p, details.trap li, details.qa p { color: #4a3a1d; font-size: 14.5px; }
+  details.qa { border-color: #cfe0fb; background: var(--bluebg); }
+  details.qa summary { color: #1d4ed8; }
+
+  .killshot {
+    background: var(--greenbg); border: 1px solid #bfe8d2; border-radius: 10px;
+    padding: 14px 18px; margin: 14px 0; color: #14532d;
+  }
+  .killshot b { color: var(--green); }
+  table { border-collapse: collapse; width: 100%; margin: 12px 0; font-size: 14px; }
+  th, td { border: 1px solid var(--line); padding: 8px 12px; text-align: left; vertical-align: top; }
+  th { background: #f4f6f9; font-size: 13px; text-transform: uppercase; letter-spacing: .4px; color: var(--muted); }
+  tr:nth-child(even) td { background: #fafbfc; }
+  .warn { color: var(--ng); font-weight: 650; }
+  .study-order { counter-reset: so; list-style: none; padding-left: 0; }
+  .study-order li { counter-increment: so; position: relative; padding-left: 38px; margin: 10px 0; }
+  .study-order li::before {
+    content: counter(so); position: absolute; left: 0; top: 2px;
+    background: var(--accent); color: #fff; width: 25px; height: 25px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 13px;
+  }
+  footer { text-align: center; color: var(--muted); font-size: 13px; margin-top: 30px; }
+
+  @media print {
+    nav.toc { display: none; }
+    body { background: #fff; font-size: 12px; }
+    section.card { break-inside: avoid; border: none; box-shadow: none; padding: 10px 0; border-bottom: 1px solid #ccc; }
+    details { display: block; } details.trap, details.qa { background: #fff; }
+    details[open] summary { color: #000; }
+    details:not([open]) .reveal { display: block !important; }
+  }
+  @media (max-width: 640px) {
+    section.card { padding: 16px; }
+    .hero h1 { font-size: 21px; }
+  }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="hero-inner">
+    <h1>Savycom Senior Fullstack — Round 1 Cheatsheet</h1>
+    <p>Java-heavy client interview + Angular. Everything is anchored to <b style="color:#fff">Project 1: mobile-banking orchestration platform (01/2022–Present)</b> — lead every answer with it.</p>
+    <span class="pill">Round 1 · Client · Java focus</span>
+    <span class="pill">BE: Kafka · ES · Batch · @Transactional · Exceptions · Spring Cloud · AWS</span>
+    <span class="pill">FE: Binding · Observable · Interceptor · Auth</span>
+  </div>
+</header>
+
+<nav class="toc">
+  <a href="#pitch">Pitch</a>
+  <a class="be" href="#kafka">Kafka</a>
+  <a class="be" href="#es">Elasticsearch</a>
+  <a class="be" href="#batch">Spring Batch</a>
+  <a class="be" href="#tx">@Transactional</a>
+  <a class="be" href="#exc">Exceptions</a>
+  <a class="be" href="#cloud">Spring Cloud</a>
+  <a class="be" href="#aws">AWS</a>
+  <a class="fe" href="#binding">Binding</a>
+  <a class="fe" href="#rxjs">Observable</a>
+  <a class="fe" href="#interceptor">Interceptor</a>
+  <a class="fe" href="#auth">Authorized</a>
+  <a href="#quickfire">Quick-fire</a>
+  <a href="#star">STAR</a>
+  <button class="exp" onclick="toggleAll()">Expand all traps</button>
+</nav>
+
+<div class="wrap">
+
+<!-- ============ PITCH ============ -->
+<section class="card" id="pitch">
+  <h2 class="sec"><span class="tag core">Memorize</span> Your 30-second pitch</h2>
+  <div class="pitch">
+    "I've spent the last 4+ years as senior fullstack on a <em>mobile-banking orchestration platform</em>: Java 17/Spring Boot microservices on Spring Cloud, <em>Kafka as the event backbone</em>, Spring Batch for reconciliation and compliance jobs, Elasticsearch for centralized logging and transaction search, running on <em>AWS (EKS, MSK, RDS)</em>. On the frontend I own the <em>Angular 15+ portal</em> — admin dashboards and partner consoles — with reactive forms, RxJS, NgRx, and interceptors for JWT/RBAC. I'm strongest where backend Java meets real integration work: exactly-once processing, transactional boundaries, and API design."
+  </div>
+  <div class="numbers">
+    <div><b>40%</b>avg API response time reduction (query optimization + indexing + Redis caching)</div>
+    <div><b>~40%</b>portal initial-load reduction (bundle budgets, lazy routes, OnPush)</div>
+    <div><b>75%+</b>test coverage on critical business logic (JUnit/Mockito, Jasmine/Karma)</div>
+    <div><b>Kafka</b>event backbone across all orchestration services</div>
+  </div>
+  <h3>If you only have 2 hours — study in this order</h3>
+  <ol class="study-order">
+    <li><b>@Transactional</b> — proxy mechanics, <code>rollbackFor</code>, REQUIRES_NEW, self-invocation. Most common senior trap.</li>
+    <li><b>Kafka</b> — especially the <b>outbox pattern</b>; it also answers "how do you keep DB and Kafka consistent?"</li>
+    <li><b>Angular 401-refresh interceptor flow</b> + <code>switchMap</code> vs <code>concatMap</code> vs <code>exhaustMap</code></li>
+    <li><b>The STAR story</b> — a concrete incident makes the whole CV believable.</li>
+  </ol>
+</section>
+
+<!-- ============ KAFKA ============ -->
+<section class="card" id="kafka">
+  <h2 class="sec"><span class="tag be">Backend 1</span> Apache Kafka</h2>
+  <div class="where"><b>Where in your story:</b> event backbone of the orchestration platform — payment orchestration events, notification dispatch (email/SMS), audit trail. Multiple consumer services read the same events.</div>
+
+  <h3>Core answers</h3>
+  <ul>
+    <li><b>Why Kafka over RabbitMQ:</b> pull-based log with retention → consumers can <b>replay history</b> (audit/recovery), much higher throughput, multiple independent <b>consumer groups</b> on the same topic. RabbitMQ = per-message routing/ack queues; Kafka = distributed append-only log.</li>
+    <li><b>Delivery semantics:</b> default is <b>at-least-once</b>. We make processing <b>effectively-once</b> by (1) idempotent producer (<code>enable.idempotence=true</code>, <code>acks=all</code>, <code>min.insync.replicas=2</code>), (2) <b>idempotent consumers</b> — dedupe by <code>event_id</code> in Redis/DB table.</li>
+    <li><b>Ordering:</b> guaranteed only <b>within a partition</b>. We key messages by <code>transactionId</code>/<code>accountId</code>, so all events for one entity are ordered; global ordering isn't needed.</li>
+    <li><b>Error handling (they WILL ask):</b> Spring Kafka <code>@RetryableTopic</code> — non-blocking retries with exponential backoff on retry topics → after N attempts, publish to <b>DLT (dead-letter topic)</b>; alerting to Grafana, ops dashboard for DLT triage.</li>
+    <li><b>Offset management:</b> manual ack after successful processing; commit = checkpoint. Poison pill → seek past + record, never block the partition.</li>
+    <li><b>Rebalance:</b> group rebalances when a member dies; tune <code>max.poll.interval.ms</code> so slow batches don't trigger rebalance storms; cooperative-sticky assignor for smoother handover.</li>
+  </ul>
+
+  <div class="killshot">
+    <b>Senior kill-shot — Transactional Outbox pattern.</b><br>
+    Problem: dual-write — commit DB tx then publish to Kafka and the publish fails (or vice versa) → inconsistency.<br>
+    Solution: write the event to an <code>outbox</code> table <b>inside the same DB transaction</b> as the business change; a relay (or Debezium CDC) publishes it to Kafka. <b>Kafka publish is never inside the DB transaction.</b> Deploy this answer whenever they ask about DB↔Kafka consistency.
+  </div>
+
+  <details class="trap"><summary>Trap: "Is Kafka exactly-once?"</summary><div class="reveal">
+    <p>Transactional producer gives EOS for <b>Kafka→Kafka</b> consume-transform-produce flows. For side-effectful consumers (send SMS, write external API) you still dedupe: at-least-once delivery + idempotent processing.</p>
+  </div></details>
+  <details class="trap"><summary>Trap: "Consumer lag spikes at peak — what do you do?"</summary><div class="reveal">
+    <p>Increase partitions + listener <code>concurrency</code>, batch listeners, monitor lag with an exporter → Grafana alert before it hurts SLA.</p>
+  </div></details>
+</section>
+
+<!-- ============ ELASTICSEARCH ============ -->
+<section class="card" id="es">
+  <h2 class="sec"><span class="tag be">Backend 2</span> Elasticsearch</h2>
+  <div class="where"><b>Where in your story:</b> centralized logging for all microservices (Grafana dashboards on top) + transaction search module.</div>
+
+  <h3>Core answers</h3>
+  <ul>
+    <li><b>Why not SQL <code>LIKE '%x%'</code>:</b> leading wildcard = full table scan, no index. ES uses an <b>inverted index</b> (token → list of documents) built at index time → fast full-text + filters.</li>
+    <li><b>Our pipeline:</b> services log structured JSON with <code>trace_id</code> → Filebeat → Logstash (parse/enrich) → ES → Grafana/Kibana. Trace ID correlates one request across gateway → services → Kafka consumers.</li>
+    <li><b>NRT:</b> searchable after ~1s refresh interval; durability comes from translog + flush, not refresh.</li>
+    <li><b>Cluster basics:</b> data nodes hold shards; index = primary shards + replicas (HA + read throughput); <b>explicit mapping</b> in prod — a wrong <code>text</code> vs <code>keyword</code> mapping ruins aggregations. <code>keyword</code> = exact/filter/agg, <code>text</code> = full-text with analyzer.</li>
+    <li><b>Ops we did:</b> ILM policy — rollover daily alias, delete after 30 days; shard sizing ~30–50GB max; yellow cluster = replicas unassigned.</li>
+    <li><b>Zero-downtime mapping change:</b> reindex into a new index behind an <b>alias</b>, swap the alias when done.</li>
+  </ul>
+
+  <details class="trap"><summary>Trap: "Is ES a primary datastore?"</summary><div class="reveal">
+    <p>No: no joins/ACID across documents, eventual consistency. PostgreSQL stays the source of truth; ES is a search/projection.</p>
+  </div></details>
+  <details class="trap"><summary>Trap: "Filter vs query context?"</summary><div class="reveal">
+    <p>Filter context is non-scoring and <b>cacheable</b> — put exact conditions (status, date range) in <code>filter</code>; only relevance terms in <code>must</code>.</p>
+  </div></details>
+</section>
+
+<!-- ============ SPRING BATCH ============ -->
+<section class="card" id="batch">
+  <h2 class="sec"><span class="tag be">Backend 3</span> Spring Batch</h2>
+  <div class="where"><b>Where in your story:</b> nightly reconciliation (bank statements vs internal ledger), monthly compliance reports, partner data sync, backup validation — millions of records.</div>
+
+  <h3>Core answers</h3>
+  <ul>
+    <li><b>Chunk-oriented model:</b> read items → process → write per chunk; <b>each chunk = its own transaction</b> (commit-interval). ItemReader → ItemProcessor → ItemWriter.</li>
+    <li><b>Metadata tables:</b> JobRepository persists JOB_INSTANCE / JOB_EXECUTION / STEP_EXECUTION in the DB → <b>restartable</b>: a failed job restarts from its checkpoint (ExecutionContext), and a completed instance with the same params won't rerun (idempotent scheduling).</li>
+    <li><b>Fault tolerance:</b> <code>skip</code> (SkipPolicy + skip-limit; bad rows → SkipListener logs them to a dead-letter table) and <code>retry</code> (retry-limit, e.g. transient partner API errors):
+      <br><code>faultTolerant().skip(FlatFileParseException.class).skipLimit(100).retry(DeadlockLoserDataAccessException.class).retryLimit(3)</code></li>
+    <li><b>Scaling:</b> multi-threaded step (simple); <b>partitioning</b> — manager splits by date range into worker steps (our default for reconciliation); remote partitioning via Kafka for very big loads.</li>
+    <li><b>Tuning:</b> chunk size 500–1000, page size on readers, never load all in memory; listeners push duration/skip-count metrics to Grafana.</li>
+    <li><b>Scheduling:</b> Spring <code>@Scheduled</code> / Quartz + a distributed lock (ShedLock/DB lock) so only one node runs the job in a multi-pod deployment.</li>
+  </ul>
+
+  <details class="trap"><summary>Trap: "Chunk transaction fails at item 990 — what happens?"</summary><div class="reveal">
+    <p>The whole chunk rolls back. With skip configured, Spring <b>re-reads the chunk item-by-item</b> and skips only the offender — that's why skip + restart semantics matter.</p>
+  </div></details>
+  <details class="trap"><summary>Trap: "Is JdbcCursorItemReader restartable?"</summary><div class="reveal">
+    <p>Cursor readers aren't transactional-restartable by themselves — use paging readers or the <b>process-indicator pattern</b> (mark rows processed) for restartability.</p>
+  </div></details>
+</section>
+
+<!-- ============ TRANSACTIONAL ============ -->
+<section class="card" id="tx">
+  <h2 class="sec"><span class="tag be">Backend 4</span> @Transactional in Spring</h2>
+  <div class="where"><b>Where in your story:</b> anywhere money moves — orchestration sagas, payment records, audit logs.</div>
+
+  <h3>Core answers</h3>
+  <ul>
+    <li><b>How it works:</b> Spring AOP wraps the bean in a <b>proxy</b>; the proxy begins/commits/rolls back the tx around public method calls. JDK dynamic proxy (interface) or CGLIB (subclass).</li>
+    <li><b>Rollback rules (classic question):</b> default rolls back on <b>RuntimeException and Error only</b> — checked exceptions do NOT roll back unless <code>rollbackFor = Exception.class</code>. We set it explicitly on money-path methods.</li>
+    <li><b>Propagation:</b>
+      <ul>
+        <li><code>REQUIRED</code> (default) — join existing or create new.</li>
+        <li><code>REQUIRES_NEW</code> — suspends outer tx, independent commit/rollback. Our use: <b>the audit log of a failed attempt must persist even when the main payment tx rolls back.</b></li>
+        <li><code>NESTED</code> — savepoint within the same tx (JDBC only).</li>
+        <li><code>MANDATORY / NEVER / SUPPORTS / NOT_SUPPORTED</code> — know the names.</li>
+      </ul>
+    </li>
+    <li><b>Isolation:</b> PostgreSQL default = READ_COMMITTED, MySQL InnoDB = REPEATABLE_READ; phenomena: dirty / non-repeatable / phantom read. In practice: <b>optimistic locking with <code>@Version</code></b>; pessimistic (<code>SELECT ... FOR UPDATE</code>) only for hot contention.</li>
+    <li><b>The two classic bugs:</b>
+      <ol>
+        <li><b>Self-invocation:</b> <code>this.method2()</code> inside the same bean bypasses the proxy → no new transaction. Fix: move it to another bean (or self-injection).</li>
+        <li><code>@Transactional</code> on <b>private/final</b> methods doesn't work (proxy can't intercept/override).</li>
+      </ol>
+    </li>
+    <li><b>Keep transactions short:</b> never call Kafka/HTTP/SMTP inside a DB tx → connection-pool exhaustion + dual-write problem → <b>outbox pattern</b> (links back to Kafka — sounds great).</li>
+    <li><code>readOnly = true</code> for report/query methods: Hibernate skips dirty-checking (flush MANUAL), driver hint to DB.</li>
+  </ul>
+
+  <details class="trap"><summary>Trap: "Outer REQUIRED + inner REQUIRES_NEW; inner rolls back — what does outer see?"</summary><div class="reveal">
+    <p>Inner is independent: it rolled back, its resources released. Outer continues and can still commit — <b>unless</b> the inner exception propagates out and hits outer's rollback rule.</p>
+  </div></details>
+  <details class="trap"><summary>Trap: "How do you test transactions?"</summary><div class="reveal">
+    <p><code>@DataJpaTest</code> is transactional-rollback by default — REQUIRES_NEW is invisible inside it. Test real commits with <b>Testcontainers</b>.</p>
+  </div></details>
+</section>
+
+<!-- ============ EXCEPTIONS ============ -->
+<section class="card" id="exc">
+  <h2 class="sec"><span class="tag be">Backend 5</span> Exception handling in REST APIs</h2>
+  <div class="where"><b>Where in your story:</b> platform-wide error contract used by web + mobile + partner clients.</div>
+
+  <h3>Core answers</h3>
+  <ul>
+    <li><b>Central handler:</b> <code>@RestControllerAdvice</code> + <code>@ExceptionHandler(SomeException.class)</code> returning a consistent envelope. Local handlers only as rare exception.</li>
+    <li><b>Custom hierarchy:</b> base <code>ApiException(code, message)</code> → <code>NotFoundException</code> (404), <code>ValidationException</code> (400), <code>ConflictException</code> (409), <code>ExternalServiceException</code> (502), <code>AuthException</code> (401/403). <code>ErrorCode</code> enum = stable machine-readable code (<code>PAY-4021</code>) so clients branch on it.</li>
+    <li><b>Validation:</b> <code>@Valid</code> + Bean Validation on DTOs; catch <code>MethodArgumentNotValidException</code> globally → 400 with per-field <code>field, message</code> list.</li>
+    <li><b>Error body shape:</b> <code>timestamp, status, code, message, path, traceId</code> — traceId jumps straight to the logs in ELK. <span class="warn">Never leak stack traces or SQL messages.</span></li>
+    <li><b>Modern note:</b> Spring 6 supports <b>RFC 7807 Problem Details</b> (<code>ProblemDetail</code>) — say you know it even if you keep a custom envelope for legacy clients.</li>
+    <li><b>Log once, in the advice</b> (warn for 4xx, error for 5xx) with MDC traceId — not scattered catch blocks.</li>
+    <li>Same discipline elsewhere: Kafka listeners use a listener error handler → DLT; WebClient/RestClient <code>onStatus</code> maps partner errors to <code>ExternalServiceException</code>.</li>
+  </ul>
+
+  <details class="trap"><summary>Trap: "Two @ControllerAdvice with overlapping handlers — order?"</summary><div class="reveal">
+    <p><code>@Order</code> decides; the more specific advice should win.</p>
+  </div></details>
+  <details class="trap"><summary>Trap: "Exception thrown in a filter — does the advice catch it?"</summary><div class="reveal">
+    <p>No — advice only covers controllers. Handle it inside the filter (try/catch + error response) or via a custom <code>ErrorController</code>.</p>
+  </div></details>
+</section>
+
+<!-- ============ SPRING CLOUD ============ -->
+<section class="card" id="cloud">
+  <h2 class="sec"><span class="tag be">Backend 6</span> Spring Cloud</h2>
+  <div class="where"><b>Where in your story:</b> the microservices layer — but be smart: you run on <b>Kubernetes</b>, so tell the modern version.</div>
+
+  <h3>Core answers (your stack)</h3>
+  <ul>
+    <li><b>API Gateway — Spring Cloud Gateway:</b> single edge for all clients — routing, JWT validation at the edge, rate limiting (<b>Redis RequestRateLimiter</b> filter) per client/API key, retry + timeout filters, centralized CORS.</li>
+    <li><b>Service discovery:</b> on K8s we do <b>not run Eureka</b> — K8s Services + DNS is the registry (platform-native, one less stateful system; Eureka/Consul for VM/on-prem).</li>
+    <li><b>Circuit breaking — Resilience4j</b> (Hystrix is dead — say that): <code>CircuitBreaker</code> + <code>TimeLimiter</code> + <code>Retry</code> around partner/banking integrations with fallbacks (return last-known status / queue for retry). Sliding-window ratio opens the breaker; half-open probes recovery. Also Project 2: retry + circuit breaker on REST/SOAP integrations.</li>
+    <li><b>Config:</b> Spring Cloud Config Server for externalized config (on-prem variant); in K8s → ConfigMaps + Secrets. Modern Spring Cloud dropped <code>bootstrap.yml</code> → <code>spring.config.import</code>.</li>
+    <li><b>Load balancing:</b> Spring Cloud LoadBalancer (replaced Ribbon) for client-side balancing to non-K8s services.</li>
+    <li><b>Distributed tracing:</b> Micrometer Tracing (ex-Sleuth) + Zipkin/Tempo — <code>traceId</code> propagated gateway → service → <b>Kafka header</b> → consumer. This cross-Kafka propagation detail impresses.</li>
+    <li><b>OpenFeign:</b> declarative REST clients with a custom ErrorDecoder mapping partner 4xx/5xx to domain exceptions — mention as an option alongside WebClient/RestClient.</li>
+  </ul>
+
+  <details class="trap"><summary>Trap: "Why circuit breaker at all if the LB retries?"</summary><div class="reveal">
+    <p>Retry without a breaker <b>amplifies</b> an overloaded dependency (retry storm); the breaker sheds load and fails fast. Use both, with backoff.</p>
+  </div></details>
+  <details class="trap"><summary>Trap: "Config server is down at startup — what happens?"</summary><div class="reveal">
+    <p>Services fail fast (<code>fail-fast=true</code>) unless config is cached / retried — mention caching + retry as the production answer.</p>
+  </div></details>
+</section>
+
+<!-- ============ AWS ============ -->
+<section class="card" id="aws">
+  <h2 class="sec"><span class="tag be">Backend 7</span> AWS</h2>
+  <div class="where"><b>Where in your story:</b> the whole platform runs there — map services to platform components, that's how you prove it.</div>
+
+  <table>
+    <tr><th>Platform component</th><th>AWS service</th><th>Talking point</th></tr>
+    <tr><td>Microservices</td><td><b>EKS</b></td><td>Helm deployments, HPA autoscaling, pods across multi-AZ</td></tr>
+    <tr><td>Kafka</td><td><b>MSK</b></td><td>Managed 3-broker multi-AZ cluster; we tune partitions/retention, not zookeeping</td></tr>
+    <tr><td>PostgreSQL</td><td><b>RDS multi-AZ</b></td><td>Sync standby + failover; read replica for reporting queries</td></tr>
+    <tr><td>Redis</td><td><b>ElastiCache</b></td><td>Token blacklist, hot-data cache, rate-limit counters</td></tr>
+    <tr><td>Files/reports</td><td><b>S3</b></td><td>Report archive + audit export, lifecycle → Glacier</td></tr>
+    <tr><td>Secrets</td><td><b>Secrets Manager + KMS</b></td><td>No credentials in images/env; rotation; encryption at rest</td></tr>
+    <tr><td>Observability</td><td>CloudWatch + Grafana</td><td>ELK/ES for logs, CloudWatch for infra alarms</td></tr>
+    <tr><td>Network</td><td>VPC</td><td>Private subnets for the data tier, SGs per layer, NAT for egress</td></tr>
+  </table>
+
+  <h3>Core answers</h3>
+  <ul>
+    <li><b>IAM done right:</b> <b>IRSA</b> — EKS service accounts mapped to IAM roles; no static access keys in pods.</li>
+    <li><b>CI/CD on AWS:</b> GitHub Actions → build + SonarQube gate → push to <b>ECR</b> → Helm upgrade to EKS (canary for risky services).</li>
+    <li><b>HA story:</b> everything multi-AZ; RDS automated backups + PITR; DR = infra-as-code (Terraform) so region rebuild is scripted.</li>
+    <li><b>Cost awareness:</b> right-size from Grafana usage data, Savings Plans for steady baseline, S3 lifecycle — one sentence each is enough.</li>
+    <li><b>Security:</b> TLS in transit + KMS at rest (RDS/S3/MSK), least-privilege security groups, private-only data tier.</li>
+  </ul>
+
+  <details class="trap"><summary>Trap: "Security group vs NACL?"</summary><div class="reveal">
+    <p>SG = stateful, instance/ENI level; NACL = stateless, subnet level (needs allow rules for return traffic).</p>
+  </div></details>
+  <details class="trap"><summary>Trap: "RDS multi-AZ vs read replica?"</summary><div class="reveal">
+    <p>Multi-AZ = <b>availability</b> (synchronous standby, automatic failover); read replica = <b>scalability</b> for reads (async, promotable).</p>
+  </div></details>
+  <details class="trap"><summary>Trap: "App is slow — how do you find the bottleneck on AWS?"</summary><div class="reveal">
+    <p>Follow the chain, don't guess: CloudWatch infra metrics → Grafana app metrics/traces → ELK logs by traceId → narrow to DB / GC / dependency. Shows a method.</p>
+  </div></details>
+</section>
+
+<!-- ============ BINDING ============ -->
+<section class="card" id="binding">
+  <h2 class="sec"><span class="tag fe">Frontend 1</span> Angular data binding</h2>
+  <ul>
+    <li><b>Four forms</b> (one example each, fast):
+      <ul>
+        <li>Interpolation <code>{{ user.name }}</code> — display.</li>
+        <li>Property binding <code>[disabled]="isSaving"</code> — DOM property ← component.</li>
+        <li>Event binding <code>(click)="save()"</code> — component ← DOM.</li>
+        <li>Two-way <code>[(ngModel)]="form.name"</code> — both (needs <code>FormsModule</code>).</li>
+      </ul>
+    </li>
+    <li><b>Component communication:</b> parent→child <code>@Input()</code>, child→parent <code>@Output() + EventEmitter</code>.</li>
+    <li><b>Change detection:</b> default checks everything; we use <b>OnPush</b> + immutable updates + <b><code>async</code> pipe</b> so Angular checks only on input reference change / event / observable emission — ties into the ~40% load/interaction story.</li>
+    <li><b>If asked "what's new":</b> on Angular 17+, signals (<code>signal()</code>, <code>computed()</code>) = value + dependency tracking, fine-grained reactivity without zone-based tree walks.</li>
+  </ul>
+</section>
+
+<!-- ============ OBSERVABLE ============ -->
+<section class="card" id="rxjs">
+  <h2 class="sec"><span class="tag fe">Frontend 2</span> Observables / RxJS</h2>
+  <ul>
+    <li><b>What:</b> a lazy push-based stream of values over time; subscriber gets next / error / complete. <code>HttpClient</code> returns a <b>cold</b> observable — nothing happens until subscribe.</li>
+    <li><b>Unsubscribe discipline (always asked):</b> <code>async</code> pipe (auto-unsubscribes, works with OnPush) or <code>takeUntilDestroyed(this.destroyRef)</code>; leaking subscriptions = memory leaks + stale API calls.</li>
+    <li><b>Operators with real portal examples:</b>
+      <ul>
+        <li><code>debounceTime(300)</code> + <code>distinctUntilChanged()</code> — transaction search box.</li>
+        <li><b><code>switchMap</code></b> — typeahead: cancels the stale request on new input. The trio: <code>switchMap</code> (cancel stale — searches) / <code>concatMap</code> (order matters — sequential saves) / <code>exhaustMap</code> (ignore while in-flight — login submits).</li>
+        <li><code>forkJoin</code> — parallel dashboard API loads, render when all done; <code>combineLatest</code> — live filter + data streams.</li>
+        <li><code>catchError</code> → <code>throwError(() => new ApiError(...))</code> or <code>EMPTY</code> + user toast; retry APIs with <code>retry({ count: 2, delay: 500 })</code>.</li>
+        <li><code>shareReplay(1)</code> — cache reference data (currencies, branches): one HTTP call shared by many components.</li>
+      </ul>
+    </li>
+    <li><b>State:</b> <code>BehaviorSubject</code> for local service state; <b>NgRx</b> for cross-module state — component dispatches action → reducer produces new state → selectors → <code>async</code> pipe; effects isolate side effects. One-liner: "state as immutable single source of truth."</li>
+  </ul>
+</section>
+
+<!-- ============ INTERCEPTOR ============ -->
+<section class="card" id="interceptor">
+  <h2 class="sec"><span class="tag fe">Frontend 3</span> Interceptors</h2>
+  <ul>
+    <li><b>What:</b> middleware on every HTTP call in/out (a chain, order matters — we register auth → trace-id → error).</li>
+    <li><b>Angular 15+ style:</b> functional interceptor — <code>authInterceptor: HttpInterceptorFn = (req, next) => ...</code> (say you use the modern functional form; matches your Angular 15+ story).</li>
+    <li><b>Auth interceptor:</b> <code>req.clone({ setHeaders: { Authorization: 'Bearer ' + token } })</code>.</li>
+    <li><b>The 401 refresh flow — know it step by step:</b>
+      <ol>
+        <li>Call fails with 401 → <code>catchError</code> → skip if the request <b>is</b> the refresh call (marker header/context).</li>
+        <li>Call <code>authService.refresh()</code> and <b>share the in-flight refresh observable</b> — 10 parallel 401s trigger ONE refresh; the rest queue on it.</li>
+        <li>On success, <code>switchMap</code> → retry the original request with the new token.</li>
+        <li>Refresh also fails → logout + redirect.</li>
+      </ol>
+    </li>
+    <li><b>Other uses we have:</b> inject <code>X-Trace-Id</code> header (correlates with backend ELK logs — connects to your BE story), normalize HTTP errors into the app error model, dev logging.</li>
+  </ul>
+</section>
+
+<!-- ============ AUTHORIZED ============ -->
+<section class="card" id="auth">
+  <h2 class="sec"><span class="tag fe">Frontend 4</span> Authorization (Authorized) in Angular</h2>
+  <ul>
+    <li><b>Guards — functional style (v15+):</b> <code>canActivate: [authGuard, roleGuard]</code>; guard returns <code>boolean | UrlTree</code> (UrlTree redirects to <code>/login</code> or <code>/403</code>).
+      <ul>
+        <li><code>authGuard</code>: token exists / not expired; async validation returns <code>Observable&lt;boolean&gt;</code>.</li>
+        <li><code>roleGuard</code>: reads required roles from <b>route data</b> (<code>data: { roles: ['ADMIN'] }</code>), compares with decoded JWT claims (<code>jwt-decode</code>).</li>
+      </ul>
+    </li>
+    <li><b>Guard types:</b> <code>CanActivate</code> (page), <code>CanActivateChild</code> (subtree), <b><code>CanMatch</code></b> (v15+, replaces CanLoad — blocks even downloading the lazy chunk), <code>CanDeactivate</code> (unsaved form warning).</li>
+    <li><b>UI-level:</b> structural directive <code>*appHasRole="'ADMIN'"</code> to hide buttons; role-based menu config.</li>
+  </ul>
+  <div class="killshot">
+    <b>The line that scores points:</b> "Frontend authorization is UX only — every route and action is re-authorized server-side: JWT verified at the <b>Spring Cloud Gateway</b>, method-level with <code>@PreAuthorize</code> in the services, and data-layer checks. Bypassing the UI still gets a 403." (Mirrors the RBAC bullet in your CV.)
+  </div>
+</section>
+
+<!-- ============ QUICK-FIRE ============ -->
+<section class="card" id="quickfire">
+  <h2 class="sec"><span class="tag misc">Expect a few</span> Quick-fire</h2>
+  <ul>
+    <li><b>Java 17/21 (your CV says 8–21):</b> records (immutable DTOs), sealed interfaces (closed domain hierarchies), switch expressions, text blocks; <b>virtual threads (21)</b> — cheap blocking-IO threads; we're piloting for IO-heavy partner calls (honest: not prod-critical yet).</li>
+    <li><b>Streams vs loops:</b> streams for declarative collection transforms; not for everything — readability first.</li>
+    <li><b>REST versioning (in your CV):</b> URL <code>/v1/</code> for breaking changes (simple, cacheable, gateway-routable) and header <code>Accept: version=2</code> for internal clients; deprecation window + Sunset header.</li>
+    <li><b>Microservices vs monolith:</b> start with a modular monolith; split when scaling/deployment/team demands it; the cost = distributed tx, tracing, eventual consistency.</li>
+    <li><b>Idempotency in payments:</b> idempotency key on write APIs — first call executes, retries return the same result (ties to the Kafka dedupe answer).</li>
+  </ul>
+</section>
+
+<!-- ============ STAR ============ -->
+<section class="card" id="star">
+  <h2 class="sec"><span class="tag core">Rehearse 90s</span> STAR story to have ready</h2>
+  <div class="pitch" style="font-size:15px">
+    <b style="color:#93c5fd">Situation:</b> peak-season load → a consumer group rebalance caused event redelivery → customers received duplicate SMS/email notifications.<br><br>
+    <b style="color:#93c5fd">Task:</b> guarantee single delivery without losing the at-least-once safety net.<br><br>
+    <b style="color:#93c5fd">Action:</b> event_id dedupe table + Redis TTL cache checked before processing; manual offset commit only after successful processing; cooperative-sticky assignor to reduce rebalances; DLT + alerting for anything still failing.<br><br>
+    <b style="color:#93c5fd">Result:</b> zero duplicate sends after rollout; consumer-lag alarm tuned on Grafana; the same dedupe pattern got reused by two other teams.
+  </div>
+
+  <h3>Questions to ask THEM (leaves a good impression)</h3>
+  <ol>
+    <li>Current architecture — monolith being split, or greenfield microservices? Team split BE/FE or fullstack squads?</li>
+    <li>Which Angular version and state management are you on today — any migration planned (e.g. to signals)?</li>
+    <li>How do you run Kafka and search today — MSK/self-managed? Who owns DevOps vs the dev team?</li>
+    <li>What does success look like in the first 3 months for this role?</li>
+  </ol>
+</section>
+
+<footer>Savycom Senior Fullstack · Round 1 · Generated 2026-10-15 · pairs with savvycom-interview-cheatsheet.md</footer>
+</div>
+
+<script>
+  let allOpen = false;
+  function toggleAll() {
+    allOpen = !allOpen;
+    document.querySelectorAll('details').forEach(d => d.open = allOpen);
+    document.querySelector('.exp').textContent = allOpen ? 'Collapse all traps' : 'Expand all traps';
+  }
+</script>
+</body>
+</html>
