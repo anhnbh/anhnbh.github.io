@@ -459,28 +459,38 @@
   <h2 class="sec"><span class="tag be">Backend 0.5</span> Hibernate / JPA (banking = data layer questions)</h2>
   <div class="where"><b>Where in your story:</b> the whole data layer of the orchestration platform — Spring Data JPA, complex JPQL, stored procedures, Flyway, indexing (straight from the CV, incl. the 40% query win).</div>
 
-  <h3>Core answers</h3>
-  <ul>
-    <li><b>Entity lifecycle:</b> transient → managed (persist/find) → detached (tx ends) → removed. <b>Dirty checking</b>: managed entities are diffed at flush — you don't call <code>update()</code>; that's the #1 JPA misconception to get right.</li>
-    <li><b>save vs persist vs merge:</b> Spring Data <code>save()</code> calls <code>persist</code> for new entities (null id/version) else <code>merge</code>. <code>merge</code> copies state into a <b>new managed instance</b> — the original stays detached; keep using the return value.</li>
-    <li><b>N+1 (they WILL ask):</b> 1 query for parents + 1 per parent for a lazy association. Detect with SQL logging / <code>hibernate.generate_statistics</code>. Fix ladder: <code>JOIN FETCH</code> in JPQL → <code>@EntityGraph(attributePaths = …)</code> → <code>@BatchSize</code> / <code>hibernate.default_batch_fetch_size=50</code> (in-batch loading) → <b>DTO projections</b> for read-only screens (no entity management at all).</li>
-    <li><b>Pagination + collection fetch trap:</b> <code>JOIN FETCH</code> a collection with <code>Pageable</code> → Hibernate warns <code>HHH000104</code> and paginates <b>in memory</b>. Fix: page a parent-id query first, then fetch children <code>WHERE parent_id IN (…)</code>.</li>
-    <li><b>LazyInitializationException:</b> proxy accessed after the session closed. Right fix: fetch what the view needs inside the service boundary and map to DTOs. We disable <b>open-in-view</b> (<code>spring.jpa.open-in-view=false</code>) so the problem surfaces in dev, not as a prod surprise.</li>
-    <li><b>getID strategies:</b> <code>IDENTITY</code> forces a per-row round-trip and <b>disables JDBC insert batching</b>; use <code>SEQUENCE</code> + <code>allocationSize=50</code> with <code>hibernate.jdbc.batch_size=50</code>, <code>order_inserts=true</code> — this is exactly how we made batch writes fast.</li>
-    <li><b>Locking:</b> optimistic <code>@Version</code> (Spring translates to <code>ObjectOptimisticLockingFailureException</code>; retry the business op) — default everywhere; pessimistic <code>LockModeType.PESSIMISTIC_WRITE</code> (<code>SELECT … FOR UPDATE</code>) only on hot contention like balance-style rows.</li>
-    <li><b>First-level cache</b> = the persistence context, per transaction, free; second-level cache — we skip it and cache projections in Redis instead (invalidation is business-driven and explicit).</li>
-    <li><b>Migrations:</b> Flyway versioned <code>V123__desc.sql</code> + repeatable <code>R__views.sql</code>, expand/contract pattern for zero-downtime schema changes (add column → backfill → switch reads → drop).</li>
-    <li><b>The 40% story, decomposed:</b> slow-query log + <code>EXPLAIN</code> → missing composite indexes (order by selectivity) → rewritten N+1 to joins/projections → Redis cache-aside for hot reference data → correct fetch strategies.</li>
-  </ul>
-
-  <details class="trap"><summary>Trap: "getReference vs findById?"</summary><div class="reveal">
-    <p><code>getReference</code> returns a lazy proxy with no SQL — perfect to set an FK (<code>order.setUser(userRef)</code>); <code>findById</code> actually loads the row. Also mention: accessing a proxy's state after session close → LazyInitializationException.</p>
+  <h3>Hỏi–đáp (bấm từng câu để tự test)</h3>
+  <details class="qa"><summary>"Đổi entity mà không gọi save() — sao vẫn vào DB?"</summary><div class="reveal">
+    <p>"Because of dirty checking. Inside a transaction, Hibernate keeps a snapshot of every managed entity; at flush it compares current state with the snapshot and generates UPDATE for what changed. So save() on a managed entity is mostly a no-op habit — the flush does the work."</p>
+    <p><i>Tiếng Việt:</i> Hibernate chụp ảnh entity lúc load, cuối transaction so sánh — khác chỗ nào thì tự sinh UPDATE. Không cần gọi save().</p>
   </div></details>
-  <details class="trap"><summary>Trap: "Why did a flushed change appear without any save() call?"</summary><div class="reveal">
-    <p>Dirty checking: any managed entity changed inside a transaction is written at flush. Calling <code>save</code> on managed entities is mostly a no-op habit from other ORMs.</p>
+  <details class="qa"><summary>"N+1 problem là gì? Fix thế nào?" (hỏi nhiều nhất)</summary><div class="reveal">
+    <p>"You query a list of parents — 1 query — then for each parent Hibernate lazily loads its children — N more queries. I detect it with SQL logging or Hibernate statistics. The fix ladder: JOIN FETCH in the query, or @EntityGraph — then batch-size loading, and the cleanest for read-only screens: DTO projections, so no entities are managed at all."</p>
+    <p><i>Tiếng Việt:</i> Lấy 100 orders → 1 query, rồi mỗi order lại 1 query lấy items → 101 query. Fix theo bậc: JOIN FETCH → @EntityGraph → batch size → DTO projection (sạch nhất cho màn hình chỉ đọc).</p>
   </div></details>
-  <details class="trap"><summary>Trap: "Batch insert of 100k rows is slow — what do you check?"</summary><div class="reveal">
-    <p>IDENTITY id strategy (kills batching) → switch to SEQUENCE; enable <code>jdbc.batch_size</code> + <code>order_inserts</code>; clear the persistence context every N entities (memory + dirty-check cost); consider plain JDBC/JdbcTemplate for pure loads.</p>
+  <details class="qa"><summary>"save vs persist vs merge?"</summary><div class="reveal">
+    <p>"Spring Data's save() delegates: persist for new entities — null id — and merge for existing ones. The trap is merge: it copies state into a NEW managed instance and returns that; the object you passed in stays detached. So always keep using the return value."</p>
+    <p><i>Tiếng Việt:</i> save() = persist nếu mới, merge nếu cũ. merge trả về bản managed MỚI — phải dùng giá trị trả về, object cũ vẫn detached.</p>
+  </div></details>
+  <details class="qa"><summary>"getReference vs findById?"</summary><div class="reveal">
+    <p>"findById loads the row — a real SELECT. getReference returns a lazy proxy with no query — perfect when I just need to set a foreign key, like order.setUser(userRef). Just don't read fields from the proxy after the session closes."</p>
+    <p><i>Tiếng Việt:</i> findById = có SELECT thật; getReference = proxy rỗng không query — chỉ để gán FK cho quan hệ.</p>
+  </div></details>
+  <details class="qa"><summary>"LazyInitializationException khi nào xảy ra, fix sao?"</summary><div class="reveal">
+    <p>"When a lazy proxy is accessed after the session closed — typically mapping to a view after the transaction ended. The right fix is to fetch everything the screen needs inside the service boundary and map to DTOs there. We also turn open-in-view off, so this problem shows up in development, not as a surprise in production."</p>
+    <p><i>Tiếng Việt:</i> Truy cập lazy field sau khi session đóng. Fix: load đủ data trong service rồi map ra DTO. Tắt open-in-view để lỗi lộ sớm ở dev.</p>
+  </div></details>
+  <details class="qa"><summary>"Chọn ID strategy nào? Sao ảnh hưởng batch insert?"</summary><div class="reveal">
+    <p>"IDENTITY makes Hibernate ask the DB for the id right after every insert — one round trip per row — which kills JDBC batching. So for high-volume writes we use SEQUENCE with allocation size 50, plus jdbc.batch_size 50 and order_inserts. That's how we made batch writes fast."</p>
+    <p><i>Tiếng Việt:</i> IDENTITY = mỗi insert phải hỏi DB lấy id → batching tê liệt. Dùng SEQUENCE (cấp 50 số 1 lần) + jdbc.batch_size để insert hàng loạt nhanh.</p>
+  </div></details>
+  <details class="qa"><summary>"Hai người update cùng record thì sao?"</summary><div class="reveal">
+    <p>"Optimistic locking with @Version — the second save sees the version changed and throws, and we retry the business operation or tell the user. Only for genuinely hot rows, like balance-style records, we use pessimistic locking — SELECT FOR UPDATE."</p>
+    <p><i>Tiếng Việt:</i> Mặc định @Version (optimistic) — người sau fail, retry hoặc báo user. Chỉ row quá "nóng" mới SELECT FOR UPDATE (pessimistic).</p>
+  </div></details>
+  <details class="qa"><summary>"Phân trang + JOIN FETCH có vấn đề gì?"</summary><div class="reveal">
+    <p>"Yes — Hibernate can't paginate in SQL when you fetch a collection, so it warns and paginates in memory, which can kill the app on big data. The fix is two queries: page the parent ids first, then fetch children WHERE parent_id IN (...)."</p>
+    <p><i>Tiếng Việt:</i> JOIN FETCH collection + Pageable → Hibernate phân trang bằng bộ nhớ (nguy hiểm). Fix: query id cha có phân trang trước, rồi WHERE IN lấy con.</p>
   </div></details>
 </section>
 
@@ -489,20 +499,39 @@
   <h2 class="sec"><span class="tag be">Backend 1</span> Apache Kafka</h2>
   <div class="where"><b>Where in your story:</b> event backbone of the orchestration platform — payment orchestration events, notification dispatch (email/SMS), audit trail. Multiple consumer services read the same events.</div>
 
-  <h3>Core answers</h3>
-  <ul>
-    <li><b>Why Kafka over RabbitMQ/SQS:</b> pull-based <b>append-only log with retention</b> → consumers can <b>replay history</b> (audit/recovery/new services), much higher throughput, multiple independent <b>consumer groups</b> on the same topic. Queue systems delete on ack; the log is the difference.</li>
-    <li><b>Architecture:</b> brokers; topics split into <b>partitions</b> (unit of parallelism & ordering); each partition has a <b>leader</b> and follower replicas; <b>ISR</b> = in-sync replicas; leaders fail over to an ISR member; <b>KRaft</b> replaced ZooKeeper for metadata (Kafka 4.x is KRaft-only). MSK abstracts all of this — we tune partitions/retention, not broker ops.</li>
-    <li><b>Delivery semantics:</b> default <b>at-least-once</b>. We make processing <b>effectively-once</b>: (1) idempotent producer (<code>enable.idempotence=true</code>, <code>acks=all</code>, <code>min.insync.replicas=2</code>) — broker dedupes by producer-id + sequence; (2) <b>idempotent consumers</b> — dedupe by <code>event_id</code> in Redis/DB before side effects.</li>
-    <li><b>Ordering:</b> guaranteed only <b>within a partition</b>. We key by <code>transactionId</code>/<code>accountId</code> (default partitioner = murmur2(key) % partitions) so each entity's events stay ordered; global order isn't needed — say that explicitly.</li>
-    <li><b>Producer tuning:</b> <code>linger.ms</code> + <code>batch.size</code> (throughput vs latency), compression (<code>lz4</code>/<code>zstd</code>), <code>delivery.timeout.ms</code> bounds the total send attempt window.</li>
-    <li><b>Consumer mechanics:</b> heartbeats keep group membership (<code>session.timeout.ms</code>); <b>polls</b> prove liveness (<code>max.poll.interval.ms</code>) — a slow batch that stops polling gets evicted → rebalance storm. Cooperative-sticky assignor makes rebalances incremental instead of stop-the-world; <b>static membership</b> (<code>group.instance.id</code>) survives restarts without rebalance.</li>
-    <li><b>Offset management:</b> commit = checkpoint; we ack after successful processing (Spring <code>AckMode.RECORD/MANUAL</code>). Poison pill → <code>DLT</code> or seek-past-and-record — never block the partition.</li>
-    <li><b>Error handling (they WILL ask):</b> Spring Kafka <code>@RetryableTopic</code> — non-blocking retries with backoff on retry topics (<code>-retry-0/1/…</code>) → <b>DLT</b> with <code>@DltHandler</code> + Grafana alerting and an ops dashboard for triage/replay. <b>Know the trade-off:</b> retry topics break per-key ordering — if order matters for that event, retry inline (blocking) or use per-key retry lanes.</li>
-    <li><b>Schema governance:</b> Schema Registry + Avro; compatibility modes — BACKWARD (new consumers read old data), FORWARD, FULL; producers can't register breaking schemas. Alternatives: JSON Schema / Protobuf.</li>
-    <li><b>Lag monitoring:</b> lag = log-end-offset − committed offset; Kafka exporter → Grafana alert before SLA hurt. Remedies: more partitions + listener <code>concurrency</code>, batch listeners, and backpressure via container <code>pause()/resume()</code>.</li>
-    <li><b>DR:</b> MirrorMaker 2 (or MSK replication) to a second region; consumers offset-translate on failover.</li>
-  </ul>
+  <h3>Hỏi–đáp (bấm từng câu để tự test)</h3>
+  <details class="qa"><summary>"Vì sao Kafka mà không phải RabbitMQ/SQS?"</summary><div class="reveal">
+    <p>"Because Kafka is a log, not a queue. Messages are kept for a retention window, so consumers can replay history — important for audit and recovery — and multiple independent consumer groups can read the same events. Queue systems delete on ack; Kafka's replay plus throughput is why we use it as the event backbone."</p>
+    <p><i>Tiếng Việt:</i> Kafka là "nhật ký" giữ message theo thời gian retain → replay được (kiểm toán, phục hồi), nhiều nhóm consumer đọc chung 1 topic. Queue xóa message sau khi ack.</p>
+  </div></details>
+  <details class="qa"><summary>"Làm sao không mất và không trùng message?" (chắc chắn được hỏi)</summary><div class="reveal">
+    <p>"Delivery is at-least-once by default. Producer side: idempotent producer with acks=all and min.insync.replicas=2, so a broker crash doesn't lose or duplicate acknowledged writes. Consumer side: we dedupe by event_id in Redis or a DB table before doing any side effect. Together that's effectively-once processing."</p>
+    <p><i>Tiếng Việt:</i> Mặc định at-least-once. Bên gửi: idempotent producer + acks=all + min.insync.replicas=2. Bên nhận: check event_id đã xử lý chưa trước khi làm gì đó. Kết quả: xử lý 1 lần (effectively-once).</p>
+  </div></details>
+  <details class="qa"><summary>"Thứ tự message đảm bảo thế nào?"</summary><div class="reveal">
+    <p>"Only within a partition — so we key messages by transactionId or accountId. All events of one transaction go to the same partition in order. Global ordering across a topic isn't needed, and saying that shows you understand the model."</p>
+    <p><i>Tiếng Việt:</i> Chỉ thứ tự trong 1 partition. Gắn key = transactionId → mọi event của 1 giao dịch nằm chung partition, đúng thứ tự.</p>
+  </div></details>
+  <details class="qa"><summary>"Consumer xử lý lỗi / message hỏng thì sao?"</summary><div class="reveal">
+    <p>"Spring Kafka's @RetryableTopic — failed messages retry on separate retry topics with backoff, and after N attempts go to a dead-letter topic, with alerting and a dashboard so ops can fix and replay. One trade-off to know: retry topics break per-key ordering — if order matters for that event, retry inline instead."</p>
+    <p><i>Tiếng Việt:</i> @RetryableTopic → retry topic với backoff → sau N lần thì sang DLT (dead-letter) + cảnh báo. Lưu ý: retry topic làm mất thứ tự theo key — event cần thứ tự thì retry tại chỗ.</p>
+  </div></details>
+  <details class="qa"><summary>"Consumer lag tăng cao lúc cao điểm — xử lý?"</summary><div class="reveal">
+    <p>"First check it's not a stuck consumer — thread or GC problem. Then scale: more partitions and listener concurrency, batch listeners. And we alert on lag trend, not just absolute lag, so we act before the SLA hurts."</p>
+    <p><i>Tiếng Việt:</i> Kiểm tra consumer có treo không trước, rồi tăng partition + concurrency + batch. Cảnh báo theo xu hướng lag chứ không chỉ con số tuyệt đối.</p>
+  </div></details>
+  <details class="qa"><summary>"DB và Kafka làm sao nhất quán? (dual-write)"</summary><div class="reveal">
+    <p>"That's the dual-write problem — commit the DB then the Kafka publish fails, and you're inconsistent. We solve it with the outbox pattern: the event is written to an outbox table inside the same DB transaction, and a relay publishes it to Kafka afterwards. The Kafka publish never sits inside the DB transaction."</p>
+    <p><i>Tiếng Việt:</i> Ghi DB xong mà gửi Kafka fail → lệch. Outbox pattern: ghi event vào bảng outbox CÙNG transaction với business, relay đọc outbox rồi mới publish lên Kafka.</p>
+  </div></details>
+  <details class="qa"><summary>"Các service thống nhất schema message thế nào?"</summary><div class="reveal">
+    <p>"Schema Registry with Avro. When a producer registers a new schema, the registry checks compatibility — backward means new consumers can still read old data — and rejects breaking changes. So teams can evolve messages safely."</p>
+    <p><i>Tiếng Việt:</i> Schema Registry + Avro — đăng schema mới sẽ bị check tương thích (BACKWARD/FORWARD/FULL), schema phá vỡ cấu trúc bị từ chối.</p>
+  </div></details>
+  <details class="qa"><summary>"Một topic nên bao nhiêu partition?"</summary><div class="reveal">
+    <p>"Enough for target throughput with headroom — but not too many: more partitions mean more open files and slower elections. The key point: you can add partitions later, but the key-to-partition mapping changes, so ordering guarantees break. We size with growth headroom from day one."</p>
+    <p><i>Tiếng Việt:</i> Đủ cho throughput + dư chút. Có thể tăng partition sau NHƯNG mapping key→partition đổi → mất thứ tự. Nên tính trước từ đầu.</p>
+  </div></details>
 
   <div class="killshot">
     <b>Senior kill-shot — Transactional Outbox pattern.</b><br>
@@ -516,9 +545,6 @@
   <details class="trap"><summary>Trap: "Consumer lag spikes at peak — what do you do?"</summary><div class="reveal">
     <p>First: is it throughput or a stuck consumer? Check thread/GC health, then scale: partitions + <code>concurrency</code> (≤ partitions per instance), batch listeners, <code>fetch.min.bytes</code>. Longer term: alert on lag-rate, not absolute lag.</p>
   </div></details>
-  <details class="trap"><summary>Trap: "How many partitions should a topic have?"</summary><div class="reveal">
-    <p>Target max throughput × headroom, but bounded: partitions multiply open files, leader elections, and end-to-end latency (more replication), and <b>you can add partitions later but never reorder</b> — key-to-partition mapping breaks. We start with growth headroom (e.g., 12) and size consumers to match.</p>
-  </div></details>
   <details class="trap"><summary>Trap: "min.insync.replicas=2 with acks=all — why not 3?"</summary><div class="reveal">
     <p>With RF=3, min ISR=2 tolerates one broker down while still blocking writes only when two are down. min ISR=3 means any single broker failure stops all writes — availability gone. It's the durability/availability dial.</p>
   </div></details>
@@ -529,27 +555,38 @@
   <h2 class="sec"><span class="tag be">Backend 2</span> Elasticsearch</h2>
   <div class="where"><b>Where in your story:</b> the CV's exact claim — "Grafana monitoring dashboards with centralized ElasticSearch logging". Transaction search = <b>stretch claim</b> (not on the CV) — lead with logging, offer search only if you can defend the search_after story below.</div>
 
-  <h3>Core answers</h3>
-  <ul>
-    <li><b>Why not SQL <code>LIKE '%x%'</code>:</b> leading wildcard = full table scan, no index. ES builds an <b>inverted index</b> (token → posting list of docs) at index time → fast full-text + filters. Shard = a Lucene index; segments are immutable (that's why updates = mark-delete + append).</li>
-    <li><b>Our pipeline:</b> services log structured JSON with <code>trace_id</code> → Filebeat → Logstash (parse/enrich) → ES → Grafana/Kibana. Trace ID correlates one request across gateway → services → Kafka consumers.</li>
-    <li><b>Text vs keyword (mapping):</b> <code>text</code> = analyzed full-text (match queries, relevance); <code>keyword</code> = exact filter/agg/sort. <b>Explicit mappings in prod</b> — dynamic mapping guessing wrong ruins aggregations. Zero-downtime mapping change: reindex behind an <b>alias</b>, swap alias when done.</li>
-    <li><b>Analysis chain:</b> character filters → tokenizer → token filters (lowercase, stemmer). For autocomplete we use <b>edge n-grams</b> / <code>search_as_you_type</code>; <code>normalizer</code> (e.g. lowercase) for keyword fields.</li>
-    <li><b>Query DSL:</b> <code>bool</code> with <code>must</code> (scored) / <code>filter</code> (non-scoring, <b>cacheable</b> — put status/date ranges there) / <code>should</code> / <code>must_not</code>. <code>match</code> vs <code>term</code> (analyzed vs exact) vs <code>match_phrase</code> (ordered proximity).</li>
-    <li><b>Relevance:</b> BM25 — term frequency (saturating, k1) × inverse doc frequency × field-length normalization (b). Enough to explain the three factors.</li>
-    <li><b>Aggregations:</b> metrics (avg, cardinality approx), bucket (<code>terms</code>, <code>date_histogram</code>), pipeline (derivative, moving avg). Terms-agg counts are approximate on high-cardinality fields (shard-level top-k, <code>doc_count_error_approximation</code> — raise <code>shard_size</code> if precision matters).</li>
-    <li><b>Deep pagination:</b> <code>from+size</code> capped at 10k (<code>max_result_window</code>); <b><code>search_after</code> + point-in-time</b> for the transaction-search UI; scroll only for exports.</li>
-    <li><b>Writes & visibility:</b> refresh (~1s) makes docs searchable; <b>translog</b> gives durability per request; flush = Lucene commit clearing the translog. Don't set refresh=-1 blindly; do force-merge only on write-once indices (logs after rollover).</li>
-    <li><b>Concurrency:</b> optimistic control with <code>if_seq_no</code>/<code>if_primary_term</code>, or <b>external versioning</b> (e.g. DB <code>updated_at</code>) when projecting Postgres → ES — our actual pattern for the transaction-search projection.</li>
-    <li><b>Ops we did:</b> ILM — hot (rollover daily by size), warm (shrink/force-merge), delete at 30d; shards ≤ ~50GB; yellow = replicas unassigned; snapshots to S3 (SLM) for restore drills.</li>
-    <li><b>Node roles:</b> master-eligible / data (hot/warm/cold tiers) / ingest / coordinating — small clusters combine roles; the split matters at scale.</li>
-  </ul>
-
-  <details class="trap"><summary>Trap: "Is ES a primary datastore?"</summary><div class="reveal">
-    <p>No: no joins/ACID across documents, near-real-time, eventual consistency. PostgreSQL stays the source of truth; ES is a search/projection rebuilt from the source (external versioning keeps them in sync).</p>
+  <h3>Hỏi–đáp (bấm từng câu để tự test)</h3>
+  <details class="qa"><summary>"Tìm kiếm sao không dùng SQL LIKE được?"</summary><div class="reveal">
+    <p>"A leading-wildcard LIKE can't use any index — it's a full table scan. Elasticsearch builds an inverted index at write time: for every word it stores the list of documents containing it. So full-text search and filters come back in milliseconds."</p>
+    <p><i>Tiếng Việt:</i> LIKE '%x%' quét cả bảng. ES xây "chỉ mục đảo ngược" lúc ghi: mỗi từ → danh sách document chứa nó → tìm nhanh hơn nhiều.</p>
   </div></details>
-  <details class="trap"><summary>Trap: "Filter vs query context?"</summary><div class="reveal">
-    <p>Filter context is non-scoring and <b>cacheable</b> — put exact conditions (status, date range) in <code>filter</code>; only relevance terms in <code>must</code>. Free performance, one-word answer.</p>
+  <details class="qa"><summary>"Pipeline log của hệ thế nào?"</summary><div class="reveal">
+    <p>"Services log structured JSON with a trace_id. Filebeat ships them, Logstash parses and enriches, Elasticsearch stores, Grafana dashboards on top. With the traceId I can follow one request from the gateway through every service and into the Kafka consumers."</p>
+    <p><i>Tiếng Việt:</i> Service ghi JSON có trace_id → Filebeat → Logstash → ES → Grafana. Nhờ traceId lần theo 1 request qua tất cả service.</p>
+  </div></details>
+  <details class="qa"><summary>"text vs keyword khác nhau thế nào?"</summary><div class="reveal">
+    <p>"text fields are analyzed — split into words for full-text search with relevance. keyword fields are exact — for filters, sorting, aggregations. In production we always set mappings explicitly, because a wrong guess ruins aggregations later."</p>
+    <p><i>Tiếng Việt:</i> text = tách từ cho tìm full-text; keyword = khớp chính xác cho filter/agg/sort. Prod phải khai báo mapping tường minh.</p>
+  </div></details>
+  <details class="qa"><summary>"filter vs must trong query — khác gì?"</summary><div class="reveal">
+    <p>"Filter answers yes/no without scoring — status, date range — and ES caches it, so it's free performance. must is scored for relevance. Rule: exact conditions go in filter, only relevance terms go in must."</p>
+    <p><i>Tiếng Việt:</i> filter không tính điểm + được cache (điều kiện chính xác: status, khoảng ngày); must tính điểm liên quan (từ khóa tìm kiếm).</p>
+  </div></details>
+  <details class="qa"><summary>"Phân trang sâu trong ES làm thế nào?"</summary><div class="reveal">
+    <p>"from+size is capped around 10k — deeper than that, ES would have to sort too much on every shard. For the search UI we use search_after with a point-in-time: each page sorts by the last seen values, so cost stays constant. Scroll is only for exports."</p>
+    <p><i>Tiếng Việt:</i> from+size giới hạn ~10k. UI dùng search_after + PIT (căn theo giá trị cuối trang trước, chi phí cố định mỗi trang). Scroll chỉ để export.</p>
+  </div></details>
+  <details class="qa"><summary>"Đổi mapping mà không downtime?"</summary><div class="reveal">
+    <p>"You can't change an existing field's type. So: create a new index with the corrected mapping, reindex the data into it, both behind an alias — then swap the alias. Clients never see the change."</p>
+    <p><i>Tiếng Việt:</i> Không sửa được field đã có. Tạo index mới đúng mapping → reindex → cả 2 đứng sau 1 alias → đổi trỏ alias.</p>
+  </div></details>
+  <details class="qa"><summary>"Giữ PostgreSQL và ES đồng bộ thế nào?"</summary><div class="reveal">
+    <p>"Postgres is the source of truth; ES is a projection for search. We sync with external versioning — each document carries the DB's updated_at, so an out-of-order update is rejected automatically."</p>
+    <p><i>Tiếng Việt:</i> Postgres là nguồn sự thật, ES chỉ là bản chiếu để search. Sync bằng external version (gắn updated_at của DB) — bản cũ không ghi đè bản mới.</p>
+  </div></details>
+  <details class="qa"><summary>"Cluster chậm / đèn đỏ — xử lý thế nào?"</summary><div class="reveal">
+    <p>"Red means unassigned primaries — usually disk watermark or a node down; allocation explain tells me why. For slow: hot threads API, check for queries with huge size, too many shards per GB of heap, and heavy aggregations on high-cardinality keyword fields."</p>
+    <p><i>Tiếng Việt:</i> Đỏ = primary shard không phân phối được (hết disk / node chết). Chậm: xem hot threads, query quá lớn, quá nhiều shard, aggregation trên trường quá nhiều giá trị khác nhau.</p>
   </div></details>
   <details class="trap"><summary>Trap: "Cluster is red / slow — first moves?"</summary><div class="reveal">
     <p>Red = unassigned primaries (disk watermark, node down) — check allocation explain. Slow: hot threads API, are queries fetching huge <code>size</code>? too many shards per GB heap (~aim ≤ 20/GB)? heavy aggregations on high-cardinality keyword fields?</p>
@@ -561,29 +598,34 @@
   <h2 class="sec"><span class="tag be">Backend 3</span> Spring Batch</h2>
   <div class="where"><b>Where in your story:</b> CV words — "report generation, data synchronization, backup operations, and automated compliance checks". Your concrete story: a nightly data-sync job (reconciliation-style checks vs partner data) + monthly compliance reports — millions of records.</div>
 
-  <h3>Core answers</h3>
-  <ul>
-    <li><b>Chunk-oriented model:</b> read → process → write per chunk; <b>each chunk = its own transaction</b> (commit-interval). ItemReader → ItemProcessor (return null = filter, not skip) → ItemWriter. Tasklet = single-task step (cleanup, API call).</li>
-    <li><b>The metadata model (know cold):</b> <b>JobInstance</b> = job name + identifying parameters; each run = <b>JobExecution</b> → <b>StepExecution</b>s, all persisted by the <b>JobRepository</b>. Consequences: <b>restartability</b> (failed execution resumes from the step's <code>ExecutionContext</code> checkpoint — e.g. read.count), and <b>run-idempotency</b> (same params + COMPLETED → <code>JobInstanceAlreadyCompleteException</code>); daily runs need a <code>run.id</code> incrementer parameter.</li>
-    <li><b>Fault tolerance:</b> <code>skip</code> (SkipPolicy + skip-limit; bad rows logged by SkipListener to a dead-letter table for ops) and <code>retry</code> (per-item, for transient errors like deadlock or partner 503s):
-      <br><code>faultTolerant().skip(FlatFileParseException.class).skipLimit(100).retry(DeadlockLoserDataAccessException.class).retryLimit(3)</code></li>
-    <li><b>How skip actually works (senior detail):</b> a failing item rolls back the whole chunk, then Spring <b>re-scans the chunk item-by-item</b> and skips only the offender — so failures cost a re-read, and skip-limit protects against pathological files.</li>
-    <li><b>Scaling ladder:</b> single-threaded → <b>multi-threaded step</b> (readers/processors must be thread-safe; stateless processors) → <b>parallel steps</b> (flows) → <b>partitioning</b> (manager splits by date-range/range into worker step executions — our default for reconciliation) → <b>remote chunking/partitioning over Kafka</b> for very big loads (workers get chunks via topics; watch backpressure).</li>
-    <li><b>Reader restartability:</b> paging readers (<code>JpaPagingItemReader</code>) checkpoint cleanly; cursor readers (<code>JdbcCursorItemReader</code>) hold a DB cursor — for them use the <b>process-indicator pattern</b> (mark rows processed) or restartable queries.</li>
-    <li><b>Tuning:</b> align chunk size with reader page size (we use 500–1000), never load all in memory, IDENTITY→SEQUENCE + JDBC batching for inserts, clear persistence context every N items; listeners push duration/skip/read-count metrics to Grafana via Micrometer.</li>
-    <li><b>Scheduling & single-runner:</b> Quartz/<code>@Scheduled</code> + a <b>distributed lock (ShedLock/DB lock)</b> so exactly one node runs the job in a multi-pod deployment; graceful stop via <code>JobOperator.stop()</code> mid-chunk so restart picks up from the checkpoint.</li>
-    <li><b>Flow control:</b> exit status → conditional transitions (<code>.on(FAILED).to(errorStep)</code>), decide with JobExecutionDecider; <code>stopAndRestart(step)</code> for controlled pauses.</li>
-    <li><b>Spring Batch 5 (Boot 3):</b> builders take the JobRepository explicitly (<code>new JobBuilder("job", jobRepository)</code> — old JobBuilderFactory removed), transaction manager passed to the chunk step; know this so version talk doesn't trip you.</li>
-  </ul>
+  <h3>Hỏi–đáp (bấm từng câu để tự test)</h3>
+  <details class="qa"><summary>"Spring Batch hoạt động thế nào? Chunk là gì?"</summary><div class="reveal">
+    <p>"The core model is chunk-oriented: read items, process, write per chunk — say 500 — and each chunk commits in its own transaction. Reader, processor, writer. For single-shot tasks like cleanup there's Tasklet. All executions are persisted by Spring Batch itself, in metadata tables."</p>
+    <p><i>Tiếng Việt:</i> Đọc → xử lý → ghi theo từng chunk (vd 500 bản ghi), mỗi chunk là 1 transaction riêng. Toàn bộ lịch sử chạy được lưu vào metadata tables của Spring Batch.</p>
+  </div></details>
+  <details class="qa"><summary>"Job fail giữa chừng thì sao? Restart được không?"</summary><div class="reveal">
+    <p>"Yes — that's the main reason we use Spring Batch. The JobRepository stores every execution and each step keeps a checkpoint — how many items were read. A failed job restarts from that checkpoint, not from zero. Also: same job name plus same parameters, if it already completed, won't run again — so daily runs need a distinguishing parameter like run.id."</p>
+    <p><i>Tiếng Việt:</i> Restartable — step lưu checkpoint (đã đọc tới bản thứ mấy), chạy lại tiếp từ đó. Job + params trùng đã hoàn thành sẽ không chạy lại → chạy mỗi ngày phải thêm param (run.id).</p>
+  </div></details>
+  <details class="qa"><summary>"Record lỗi trong file 1 triệu dòng thì xử lý thế nào?"</summary><div class="reveal">
+    <p>"Configure skip with a limit — bad rows go to a dead-letter table via a listener so ops can fix them, and the job continues. For transient errors like a partner 503, retry per item with a limit. The detail worth knowing: when one item fails, the whole chunk rolls back and Spring re-reads that chunk one-by-one to skip just the offender."</p>
+    <p><i>Tiếng Việt:</i> skip + skipLimit — dòng hỏng ghi ra bảng dead-letter, job chạy tiếp. Lỗi tạm thời (503, deadlock) thì retry. Chi tiết hay: item lỗi làm cả chunk rollback, Spring đọc lại từng item của chunk đó để skip đúng con lỗi.</p>
+  </div></details>
+  <details class="qa"><summary>"Job nặng scale thế nào?"</summary><div class="reveal">
+    <p>"The ladder: multi-threaded step first — simple, but everything must be thread-safe. Our default for reconciliation-style jobs is partitioning: a manager splits the data by date range into partitions, workers process them in parallel. For really big loads, remote partitioning over Kafka across pods."</p>
+    <p><i>Tiếng Việt:</i> Bậc thang: multi-threaded step → partitioning (chia theo khoảng ngày, chạy song song — mặc định của mình) → remote partitioning qua Kafka cho data cực lớn.</p>
+  </div></details>
+  <details class="qa"><summary>"Nhiều pod — sao chỉ 1 node chạy job?"</summary><div class="reveal">
+    <p>"Quartz or @Scheduled for the trigger, plus a distributed lock — ShedLock or a DB lock — so only one node takes the job. And we stop gracefully through JobOperator, so a manual stop still restarts from the checkpoint."</p>
+    <p><i>Tiếng Việt:</i> @Scheduled/Quartz + lock phân tán (ShedLock/DB lock) → chỉ 1 node chạy. Dừng manual qua JobOperator, restart vẫn từ checkpoint.</p>
+  </div></details>
+  <details class="qa"><summary>"Tuning job như thế nào?"</summary><div class="reveal">
+    <p>"Align chunk size with the reader's page size — we use 500 to 1000. Never load everything into memory, use paging readers, and for writes: SEQUENCE ids plus JDBC batching. Listeners push duration, read count and skip count to Grafana so we see a slow job before the business does."</p>
+    <p><i>Tiếng Việt:</i> Chunk size ≈ page size (500–1000), không load hết vào memory, dùng paging reader, SEQUENCE id + batch insert, đẩy metrics lên Grafana.</p>
+  </div></details>
 
-  <details class="trap"><summary>Trap: "Chunk transaction fails at item 990 — what happens?"</summary><div class="reveal">
-    <p>Whole chunk rolls back. With skip configured, Spring re-reads the chunk and processes item-by-item, skipping only the offender; the job continues with the next chunk. Without skip/retry, the step fails and the job restarts later from the checkpoint.</p>
-  </div></details>
-  <details class="trap"><summary>Trap: "Same job must run twice a day — what breaks?"</summary><div class="reveal">
-    <p>Identifying params identical → treated as the same JobInstance. Add a distinguishing parameter (timestamp or <code>run.id</code> via <code>JobParametersIncrementer</code>).</p>
-  </div></details>
-  <details class="trap"><summary>Trap: "Restart replays writes — duplicates?"</summary><div class="reveal">
-    <p>Writers must be idempotent/restart-aware: chunk-level the repository tracks committed chunks, but for external side effects use idempotent writes (upsert by natural key) — same principle as the Kafka consumer dedupe.</p>
+  <details class="trap"><summary>Trap: "Job restart — ghi đè hay duplicate data?"</summary><div class="reveal">
+    <p>Writers must be idempotent: upsert theo natural key — nguyên tắc giống consumer dedupe bên Kafka. Nói: "writes are idempotent — upserts by natural key — so a restart can't duplicate."</p>
   </div></details>
 </section>
 
@@ -597,32 +639,39 @@
     "It's implemented with Spring AOP: when the container creates the bean it wraps it in a <em>proxy</em>. When a call enters a <code>@Transactional</code> method <em>through the proxy</em>, the TransactionInterceptor begins a transaction on the connection — joining an existing one under REQUIRED — commits on normal return, and rolls back on uncaught RuntimeException or Error. Checked exceptions do <em>not</em> roll back by default, so on money paths we set <code>rollbackFor</code> explicitly. Two gotchas we guard against in code review: <em>self-invocation</em> bypasses the proxy so no transaction starts, and a failed inner REQUIRED marks the tx rollback-only, so an outer catch explodes with <em>UnexpectedRollbackException</em> at commit. And we keep transactions short — no HTTP or Kafka inside — side effects go through an outbox written in the same transaction."
   </div>
 
-  <h3>Core answers</h3>
-  <ul>
-    <li><b>How it works:</b> Spring AOP wraps the bean in a <b>proxy</b> (JDK dynamic proxy on interfaces, CGLIB subclass otherwise); <code>TransactionInterceptor</code> begins/commits/rolls back around <b>external, public</b> method calls. Only calls that enter through the proxy are transactional.</li>
-    <li><b>Rollback rules (classic):</b> default rolls back on <b>RuntimeException and Error only</b> — checked exceptions do NOT roll back unless <code>rollbackFor = Exception.class</code>. We set it explicitly on money-path methods where checked partner exceptions exist.</li>
-    <li><b>Propagation:</b>
-      <ul>
-        <li><code>REQUIRED</code> (default) — join existing or create new.</li>
-        <li><code>REQUIRES_NEW</code> — suspends outer tx, fully independent commit/rollback. Our use: <b>the audit log of a failed attempt must persist even when the main payment tx rolls back.</b></li>
-        <li><code>NESTED</code> — savepoint inside the same physical tx (JDBC; awkward with JPA — most teams model it as REQUIRES_NEW).</li>
-        <li><code>MANDATORY</code> (fails without tx), <code>NEVER</code> (fails with tx), <code>NOT_SUPPORTED</code> (suspends), <code>SUPPORTS</code> — know the names.</li>
-      </ul>
-    </li>
-    <li><b>Isolation & anomalies:</b> PostgreSQL default READ_COMMITTED; MySQL InnoDB REPEATABLE_READ (MVCC + gap locks). Ladder: dirty read → non-repeatable read → phantom read. Beyond the ladder: <b>lost update</b> (two read-modify-writes) and <b>write skew</b> (two constraints each valid alone). In practice we don't raise isolation — we use <b>optimistic <code>@Version</code></b>, pessimistic <code>SELECT … FOR UPDATE</code> only on hot rows (links to the JPA section).</li>
-    <li><b>The three classic bugs:</b>
-      <ol>
-        <li><b>Self-invocation:</b> <code>this.method2()</code> inside the same bean bypasses the proxy → no transaction. Fix: move it to another bean (or self-injection / <code>TransactionTemplate</code>).</li>
-        <li><b>Private/final/static methods</b> — proxy can't intercept/override.</li>
-        <li><b>UnexpectedRollbackException:</b> inner REQUIRED method throws, someone catches it upstream, outer tries to commit → the tx was already marked rollback-only → commit explodes. Fixes: don't swallow, <code>noRollbackFor</code>, or make the inner REQUIRES_NEW. <b>This trap is a senior-level filter — know it cold.</b></li>
-      </ol>
-    </li>
-    <li><b>Keep transactions short:</b> never Kafka/HTTP/SMTP inside a DB tx → pool exhaustion under load + dual-write problem → <b>outbox pattern</b>. Best-effort alternative: <code>TransactionSynchronization afterCommit</code> callback — but outbox is the durable answer.</li>
-    <li><b>readOnly = true:</b> Hibernate skips dirty-checking snapshots (FlushMode.MANUAL) + driver hint; can also route to a read replica with a routing DataSource.</li>
-    <li><b>Pool math (nice senior touch):</b> HikariCP isn't "bigger is better" — formula ≈ cores × 2 + spindles; more connections = more DB contention. Symptom of starvation: <code>Connection is not available, request timed out after 30000ms</code> → find the tx holding connections (long tx / external call inside tx).</li>
-    <li><b>Transactions don't cross threads:</b> context lives in a ThreadLocal — <code>@Async</code> inside a tx loses it; same reason @Transactional doesn't propagate into CompletableFuture tasks.</li>
-    <li><b>Why no XA/2PC:</b> it exists, but blocking + coordinator fragility; we choose <b>sagas + outbox + idempotency + reconciliation batch</b> — say the whole sentence, it ties three sections together.</li>
-  </ul>
+  <h3>Hỏi–đáp sâu hơn (bấm từng câu)</h3>
+  <details class="qa"><summary>"Mặc định rollback khi nào? rollbackFor để làm gì?"</summary><div class="reveal">
+    <p>"By default only unchecked exceptions — RuntimeException and Error — roll back. A checked exception commits by default, which surprises people. On money-path methods we set rollbackFor = Exception.class explicitly, because a checked partner exception must not leave a half-committed payment."</p>
+    <p><i>Tiếng Việt:</i> Mặc định chỉ RuntimeException/Error mới rollback; checked exception thì KHÔNG. Method liên quan tiền luôn khai rollbackFor = Exception.class rõ ràng.</p>
+  </div></details>
+  <details class="qa"><summary>"REQUIRES_NEW khi nào dùng?"</summary><div class="reveal">
+    <p>"When an inner operation must commit independently. Our classic case: the audit log of a failed attempt — it has to survive even when the main payment transaction rolls back. One caution: REQUIRES_NEW holds a second database connection, so deep nesting under load can starve the pool."</p>
+    <p><i>Tiếng Việt:</i> Dùng khi inner phải commit độc lập — audit log của lần fail phải sống sót dù payment rollback. Cẩn thận: nó giữ thêm 1 connection, lồng sâu nhiều tầng có thể cạn pool.</p>
+  </div></details>
+  <details class="qa"><summary>"method này gọi method kia trong cùng class — có transaction không?"</summary><div class="reveal">
+    <p>"Only if the call goes through the proxy. this.otherMethod() inside the same bean bypasses the Spring proxy, so no new transaction starts. Same reason @Transactional doesn't work on private or final methods. Fix: move the method to another bean."</p>
+    <p><i>Tiếng Việt:</i> this.method2() trong cùng class đi tắt qua proxy → không có transaction. Private/final cũng không được. Fix: tách qua bean khác.</p>
+  </div></details>
+  <details class="qa"><summary>"UnexpectedRollbackException — vì sao xảy ra?" (câu phân biệt senior)</summary><div class="reveal">
+    <p>"Inner method with REQUIRED throws and joins the outer transaction — the transaction is marked rollback-only. Someone above catches the exception and tries to commit anyway, so at commit Spring throws UnexpectedRollbackException. Fixes: don't swallow it, or mark noRollbackFor on the outer method, or make the inner REQUIRES_NEW."</p>
+    <p><i>Tiếng Việt:</i> Inner (REQUIRED) throw → transaction bị đánh dấu "phải rollback". Outer bắt exception rồi vẫn commit → commit nổ ra UnexpectedRollbackException. Fix: đừng nuốt exception, hoặc noRollbackFor, hoặc inner dùng REQUIRES_NEW.</p>
+  </div></details>
+  <details class="qa"><summary>"Isolation level chọn gì? Xử lý concurrent thế nào?"</summary><div class="reveal">
+    <p>"Postgres defaults to READ_COMMITTED and that's what we keep. Instead of raising isolation — which trades performance — we handle concurrency explicitly: optimistic locking with @Version for most cases, and SELECT FOR UPDATE only for genuinely hot rows. If asked, I can name the phenomena — dirty read, non-repeatable read, phantom read — and which level blocks which."</p>
+    <p><i>Tiếng Việt:</i> Giữ mặc định READ_COMMITTED, không nâng isolation. Concurrency xử lý bằng @Version (optimistic) — chỉ row quá tranh chấp mới SELECT FOR UPDATE.</p>
+  </div></details>
+  <details class="qa"><summary>"Gọi Kafka/HTTP bên trong transaction được không?"</summary><div class="reveal">
+    <p>"No — two reasons: the connection is held during the whole remote call, which starves the pool under load; and it's the dual-write problem — DB commits, Kafka fails, inconsistent. Side effects go through the outbox pattern instead."</p>
+    <p><i>Tiếng Việt:</i> Không — giữ connection trong lúc chờ network (cạn pool) + dual-write (DB commit mà Kafka fail). Dùng outbox pattern thay thế.</p>
+  </div></details>
+  <details class="qa"><summary>"readOnly = true để làm gì?"</summary><div class="reveal">
+    <p>"For query-only methods: Hibernate skips dirty-checking snapshots — a real saving when loading many entities — and the driver hints the database. It can also drive routing to a read replica."</p>
+    <p><i>Tiếng Việt:</i> Method chỉ đọc: bỏ dirty checking (tiết kiệm khi load nhiều entity), hint xuống DB, có thể route sang read replica.</p>
+  </div></details>
+  <details class="qa"><summary>"Test transaction thế nào cho đúng?"</summary><div class="reveal">
+    <p>"Not with @DataJpaTest alone — it wraps everything in a rollback transaction, so REQUIRES_NEW and commit-time behavior are invisible. We test against real Postgres with Testcontainers and verify actual commits and rollbacks."</p>
+    <p><i>Tiếng Việt:</i> @DataJpaTest tự rollback mọi thứ → không thấy được REQUIRES_NEW/commit thật. Dùng Testcontainers + Postgres thật để test commit/rollback thực tế.</p>
+  </div></details>
 
   <details class="trap"><summary>Trap: "Outer REQUIRED + inner REQUIRES_NEW; inner rolls back — what does outer see?"</summary><div class="reveal">
     <p>Inner is independent: it rolled back, its locks released. Outer continues and can still commit — <b>unless</b> the inner exception propagates and trips outer's rollback rules. And REQUIRES_NEW holds a second connection — nested deeply under load = pool deadlock risk.</p>
@@ -640,28 +689,34 @@
   <h2 class="sec"><span class="tag be">Backend 5</span> Exception handling in REST APIs</h2>
   <div class="where"><b>Where in your story:</b> platform-wide error contract used by web + mobile + partner clients (CV bullet: exception handling + input validation on REST APIs).</div>
 
-  <h3>Core answers</h3>
-  <ul>
-    <li><b>Central handler:</b> <code>@RestControllerAdvice</code> + <code>@ExceptionHandler(SomeException.class)</code> returning a consistent envelope. Local <code>@ExceptionHandler</code> only for genuinely controller-specific cases.</li>
-    <li><b>Custom hierarchy:</b> base <code>ApiException(code, message)</code> → <code>NotFoundException</code> (404), <code>ValidationException</code> (400), <code>ConflictException</code> (409), <code>ExternalServiceException</code> (502), <code>AuthException</code> (401/403). <code>ErrorCode</code> enum = stable machine-readable code (<code>PAY-4021</code>) so clients branch on codes, not English text; messages resolved via MessageSource → i18n-ready.</li>
-    <li><b>Validation:</b> <code>@Valid</code> + Bean Validation on DTOs; catch <code>MethodArgumentNotValidException</code> globally → 400 with per-field <code>field, message</code>; also map <code>MethodArgumentTypeMismatchException</code> and <code>HttpMessageNotReadableException</code> to clean 400s; class-level constraints for cross-field rules; <code>@Validated</code> on params → <code>ConstraintViolationException</code>.</li>
-    <li><b>Error body shape:</b> <code>timestamp, status, code, message, path, traceId, fieldErrors[]</code> — traceId jumps straight to the logs in ES. <span class="warn">Never leak stack traces or SQL messages.</span></li>
-    <li><b>Modern note:</b> Spring 6 supports <b>RFC 7807 Problem Details</b> (<code>ProblemDetail</code>, media type <code>application/problem+json</code>; enable with <code>spring.mvc.problemdetails.enabled=true</code> for framework errors) — we keep a custom envelope for legacy clients but I can show both. Saying that = instant senior credit.</li>
-    <li><b>Know the resolver chain:</b> <code>@ExceptionHandler</code> advice first → <code>@ResponseStatus</code>-annotated exceptions → framework defaults (e.g. <code>NoResourceFoundException</code> → 404 in Spring 6.1 — catch it in the advice or your catch-all turns missing static paths into 500s).</li>
-    <li><b>Log once, in the advice</b> (warn for 4xx, error for 5xx) with MDC traceId — not scattered catch-and-rethrow stacks.</li>
-    <li><b>Outside the controller:</b> Kafka listeners → retry/DLT path; Feign <code>ErrorDecoder</code> / RestClient <code>onStatus</code> maps partner 4xx/5xx to <code>ExternalServiceException</code>; <code>@Async</code> void methods → <code>AsyncUncaughtExceptionHandler</code>; <code>CompletableFuture</code> → <code>exceptionally</code>/<code>handle</code>.</li>
-    <li><b>Streaming caveat:</b> once SSE/streaming headers are flushed you can't change the status — signal errors in-band (error event frame) and design consumers to handle it.</li>
-    <li><b>Testing:</b> <code>@WebMvcTest</code> + MockMvc asserts status + envelope shape; one test per exception class in the matrix.</li>
-  </ul>
-
-  <details class="trap"><summary>Trap: "Two @ControllerAdvice with overlapping handlers — order?"</summary><div class="reveal">
-    <p><code>@Order</code> decides; the more specific advice wins when ordered first. Also: handler methods are matched by <b>most-specific exception type</b>, not declaration order.</p>
+  <h3>Hỏi–đáp (bấm từng câu để tự test)</h3>
+  <details class="qa"><summary>"Handle exception cho REST API thế nào?"</summary><div class="reveal">
+    <p>"One central handler — @RestControllerAdvice with @ExceptionHandler per exception type — returns a consistent error envelope for all clients: web, mobile, partners. Local try-catch only for genuinely special cases. Log once, in the advice — warn for 4xx, error for 5xx — with the traceId in MDC."</p>
+    <p><i>Tiếng Việt:</i> 1 nơi xử lý trung tâm @RestControllerAdvice + @ExceptionHandler, trả error envelope thống nhất. Log 1 lần ở advice kèm traceId, đừng rải catch khắp nơi.</p>
   </div></details>
-  <details class="trap"><summary>Trap: "Exception thrown in a filter — does the advice catch it?"</summary><div class="reveal">
-    <p>No — advice only covers handler methods (they run after filters, and the DispatcherServlet's resolver chain). Handle inside the filter (try/catch + error response) or a custom <code>ErrorController</code> for the /error path.</p>
+  <details class="qa"><summary>"Error response thiết kế thế nào?"</summary><div class="reveal">
+    <p>"A stable shape: timestamp, status, a machine-readable code like PAY-4021, a safe user message, the path, and traceId so support can jump straight to the logs. Never leak stack traces or SQL messages. Clients branch on the code, not on English text — which also keeps it i18n-friendly."</p>
+    <p><i>Tiếng Việt:</i> Envelope cố định: timestamp, status, code (PAY-4021) để client xử lý theo mã, message an toàn, traceId tra log. Tuyệt đối không lộ stack trace/SQL error.</p>
   </div></details>
-  <details class="trap"><summary>Trap: "404 vs 400 vs 409 vs 422?"</summary><div class="reveal">
-    <p>404 unknown resource id; 400 malformed/unparseable or validation of shape; 422/409 semantic violations (we use 409 for state conflicts like duplicate idempotency-key-with-different-payload). Idempotency conflict ≠ validation error — clients retry one, fix the other.</p>
+  <details class="qa"><summary>"Validation xử lý ở đâu?"</summary><div class="reveal">
+    <p>"Bean Validation annotations on the DTOs, @Valid on the controller, and one handler for MethodArgumentNotValidException that turns it into a 400 with a list of field-plus-message. Type mismatches and unreadable bodies also map to clean 400s."</p>
+    <p><i>Tiếng Việt:</i> Annotation validate trên DTO + @Valid ở controller; bắt MethodArgumentNotValidException → 400 kèm danh sách field lỗi.</p>
+  </div></details>
+  <details class="qa"><summary>"404 vs 400 vs 409 — khi nào dùng cái nào?"</summary><div class="reveal">
+    <p>"404 — the resource id doesn't exist. 400 — the request is malformed or fails shape validation. 409 — a state conflict, like an idempotency key reused with a different payload. Clients retry 409 differently from 400, so the distinction matters."</p>
+    <p><i>Tiếng Việt:</i> 404 không tồn tại; 400 sai định dạng/validation; 409 xung đột trạng thái (vd idempotency key trùng nhưng payload khác).</p>
+  </div></details>
+  <details class="qa"><summary>"Biết RFC 7807 / ProblemDetail chưa?"</summary><div class="reveal">
+    <p>"Yes — Spring 6 supports ProblemDetail with the application/problem+json media type. We keep our custom envelope for legacy clients, but I know both and would use ProblemDetail for a greenfield API."</p>
+    <p><i>Tiếng Việt:</i> Chuẩn RFC 7807 — Spring 6 hỗ trợ sẵn ProblemDetail. Hệ cũ giữ custom envelope, dự án mới thì dùng chuẩn.</p>
+  </div></details>
+  <details class="qa"><summary>"Exception trong filter — handler bắt được không?"</summary><div class="reveal">
+    <p>"No — the advice only covers controller methods. For filters, handle it inside the filter itself or with a custom ErrorController."</p>
+    <p><i>Tiếng Việt:</i> Không — advice chỉ phủ tới controller. Filter phải tự try/catch hoặc dùng ErrorController.</p>
+  </div></details>
+  <details class="qa"><summary>"Ngoài REST thì xử lý lỗi thế nào?"</summary><div class="reveal">
+    <p>"Same discipline everywhere: Kafka listeners go through retry and DLT; Feign and RestClient map partner errors to an ExternalServiceException through an ErrorDecoder; @Async void methods get an AsyncUncaughtExceptionHandler."</p>
+    <p><i>Tiếng Việt:</i> Kafka listener → retry + DLT; Feign/RestClient → ErrorDecoder map lỗi partner thành exception riêng; @Async có handler riêng.</p>
   </div></details>
 </section>
 
@@ -670,25 +725,30 @@
   <h2 class="sec"><span class="tag be">Backend 6</span> Spring Cloud</h2>
   <div class="where"><b>Where in your story:</b> the microservices layer of the orchestration platform — but be smart: you run on <b>Kubernetes</b>, so tell the modern version.</div>
 
-  <h3>Core answers (your stack)</h3>
-  <ul>
-    <li><b>API Gateway — Spring Cloud Gateway:</b> Route = URI + predicates + filters. Predicates: Path/Method/Header/Query/Weight. Filters: add/rewrite headers, <code>StripPrefix</code>, <b>Retry</b> (with backoff — only idempotent methods), <b>Redis RequestRateLimiter</b> (token bucket: <code>replenishRate</code>, <code>burstCapacity</code>, per <code>KeyResolver</code> — user/API-key), centralized CORS, JWT validation at the edge. Custom filters = extend <code>AbstractGatewayFilterFactory</code>; inspect live routes at <code>/actuator/gateway/routes</code>. It's Netty/reactive — non-blocking by design.</li>
-    <li><b>Service discovery:</b> on K8s we do <b>not run Eureka</b> — K8s Services + DNS is the registry (platform-native, one less stateful system; Eureka/Consul for VM/on-prem deployments). Knowing when NOT to use a component is the senior answer.</li>
-    <li><b>Circuit breaking — Resilience4j</b> (Hystrix is dead — say that): <code>CircuitBreaker</code> config that matters: sliding window (count/time), <code>failureRateThreshold</code>, <code>waitDurationInOpenState</code>, half-open probes, <b>slow-call rate</b> (catches brown-outs, not just errors); <code>TimeLimiter</code> for latency ceilings; <code>Bulkhead</code> to cap concurrent calls to one dependency (semaphore-based); fallbacks return last-known status / queue for retry. Same patterns in Project 2 on REST/SOAP integrations.</li>
-    <li><b>Resilience trio as a sentence:</b> retry amplifies load during an outage; the breaker stops amplification; the bulkhead stops one dependency's thread pool from starving everything else; timeouts make failures visible. "Retry inside a breaker, never instead of one."</li>
-    <li><b>Config:</b> Spring Cloud Config Server for externalized config (Git backend, <code>{cipher}</code>-encrypted secrets); on K8s → ConfigMaps + Secrets; modern import: <code>spring.config.import=optional:configserver:</code> (bootstrap.yml is gone); <code>fail-fast</code> + retry for startup resilience.</li>
-    <li><b>Load balancing:</b> Spring Cloud LoadBalancer (replaced Ribbon) for client-side balancing to non-K8s services; on K8s the Service does it.</li>
-    <li><b>Distributed tracing:</b> Micrometer Tracing (ex-Sleuth) + Zipkin/Tempo, <b>W3C traceparent</b> propagation; Boot 3 + spring-kafka 3 propagate the trace context <b>through Kafka headers automatically</b> — gateway → service → consumer in one trace. This detail reliably impresses.</li>
-    <li><b>OpenFeign:</b> declarative REST clients with custom <code>ErrorDecoder</code> mapping partner 4xx/5xx to domain exceptions; timeouts + retryer configured per client — mention as an option alongside WebClient/RestClient.</li>
-    <li><b>K8s health integration:</b> actuator liveness/readiness/startup probe groups — readiness gates traffic during deploys, liveness restarts, startup protects slow boot.</li>
-    <li><b>Service mesh (one-liner, shows range):</b> Istio gives mTLS/traffic-shifting/retries at the sidecar with zero code; we still prefer Spring Cloud where the policy is business-aware (per-client fallbacks, domain-aware routing).</li>
-  </ul>
-
-  <details class="trap"><summary>Trap: "Why circuit breaker at all if the LB retries?"</summary><div class="reveal">
-    <p>Retry without a breaker <b>amplifies</b> an overloaded dependency (retry storm); the breaker sheds load and fails fast so callers degrade gracefully. Use both, with backoff + jitter, and cap retries.</p>
+  <h3>Hỏi–đáp (bấm từng câu để tự test)</h3>
+  <details class="qa"><summary>"Gateway làm gì trong hệ mình?"</summary><div class="reveal">
+    <p>"Spring Cloud Gateway is the single edge for all clients: routing, JWT validation at the edge, rate limiting with Redis — token bucket per client, retries with backoff for idempotent calls, centralized CORS, and it stamps the traceId. Custom logic goes in filters, and we can inspect live routes through the actuator."</p>
+    <p><i>Tiếng Việt:</i> Cửa ngõ duy nhất: route, xác thực JWT, rate limit bằng Redis (token bucket), retry, CORS, gắn traceId. Viết logic riêng bằng filter.</p>
   </div></details>
-  <details class="trap"><summary>Trap: "Rate limiting — token bucket vs fixed window?"</summary><div class="reveal">
-    <p>Fixed window bursts at boundaries (100 at 10:59 + 100 at 11:00 = 200 in a second). Token bucket refills continuously and enforces an average rate with bounded bursts — that's why the Redis limiter uses it. Gateway-level for coarse per-client limits; service-level with Redis counters for fine-grained per-API rules.</p>
+  <details class="qa"><summary>"Service discovery — sao không dùng Eureka?"</summary><div class="reveal">
+    <p>"We run on Kubernetes, and K8s Services plus DNS already are the registry — one less stateful system to operate. Eureka or Consul is the right answer on VMs or on-prem. Knowing when NOT to add a component is also an architecture decision."</p>
+    <p><i>Tiếng Việt:</i> Trên K8s thì Service + DNS đã là registry sẵn → không cần Eureka. Eureka/Consul hợp với VM/on-prem.</p>
+  </div></details>
+  <details class="qa"><summary>"Circuit breaker để làm gì? Cấu hình thế nào?"</summary><div class="reveal">
+    <p>"To stop retry storms. If a partner is down and we keep retrying, we amplify their outage. Resilience4j opens the breaker when the failure rate over a sliding window crosses a threshold, fails fast, and half-opens later to probe recovery. I also set a time limiter for slow calls and a bulkhead to cap concurrent calls to one dependency."</p>
+    <p><i>Tiếng Việt:</i> Chặn "bão retry": partner sụp mà cứ retry thì càng đè partner. Resilience4j: tỷ lệ fail trong sliding window vượt ngưỡng → mở cầu dao, fail fast, thăm dò lại ở half-open. Kèm timeout + bulkhead giới hạn concurrent.</p>
+  </div></details>
+  <details class="qa"><summary>"Có retry rồi cần circuit breaker làm gì?"</summary><div class="reveal">
+    <p>"Because retry without a breaker amplifies an outage — every failed call becomes three. The rule: retry inside a breaker, never instead of one — each retry passes through the breaker so the failure rate is measured and the circuit can open."</p>
+    <p><i>Tiếng Việt:</i> Retry không có breaker = khuếch đại sự cố. Nguyên tắc: retry nằm TRONG breaker, mỗi lần retry vẫn được đo tỷ lệ lỗi.</p>
+  </div></details>
+  <details class="qa"><summary>"Distributed tracing làm thế nào?"</summary><div class="reveal">
+    <p>"Micrometer Tracing with W3C trace context — one traceId from the gateway through every service. The nice detail on Boot 3: with spring-kafka 3 the trace context propagates through Kafka headers automatically, so a message consumer lands in the same trace as the request that produced it."</p>
+    <p><i>Tiếng Việt:</i> Micrometer Tracing + W3C traceparent: 1 traceId từ gateway tới mọi service; Boot 3 tự truyền qua Kafka header — consumer cùng trace với request sinh ra nó.</p>
+  </div></details>
+  <details class="qa"><summary>"Config cho microservices quản lý thế nào?"</summary><div class="reveal">
+    <p>"Externalized, never in the image: on Kubernetes it's ConfigMaps and Secrets; on VM deployments we run Spring Cloud Config Server with encrypted values. Services start with fail-fast so a broken config is caught at boot, not at runtime."</p>
+    <p><i>Tiếng Việt:</i> Config tách khỏi image: K8s = ConfigMap + Secret; VM = Config Server (encrypt giá trị nhạy cảm). fail-fast để lỗi config lộ ngay lúc khởi động.</p>
   </div></details>
   <details class="trap"><summary>Trap: "Circuit breaker is open — user pays again?"</summary><div class="reveal">
     <p>Payment calls are not safely retryable — fallback for the partner-payment path queues the command (Kafka) rather than auto-retrying; idempotency keys make any retry safe. Distinguish read fallbacks (cache/last-known) from write fallbacks (accept + async settle + reconcile).</p>
@@ -712,15 +772,27 @@
     <tr><td>Network</td><td>VPC</td><td>Private subnets for the data tier, SGs per layer, NAT for egress, <b>VPC endpoints</b> to keep S3/ECR traffic off NAT ($)</td></tr>
   </table>
 
-  <h3>Core answers</h3>
-  <ul>
-    <li><b>IAM done right:</b> <b>IRSA</b> — EKS service accounts mapped to IAM roles; no static access keys in pods. (Newer/simpler alternative: EKS Pod Identity — know the name.)</li>
-    <li><b>CI/CD on AWS:</b> GitHub Actions/Jenkins → build + SonarQube gate → push to <b>ECR</b> (scan on push) → Helm upgrade to EKS; canary for risky services; feature flags + rollback = the CV bullet.</li>
-    <li><b>HA story:</b> everything multi-AZ; RDS automated backups + PITR; DR tier = pilot-light/warm-standby with Terraform — state the words <b>RTO/RPO</b> when asked about DR.</li>
-    <li><b>Cost awareness (one sentence each):</b> right-size from Grafana usage data; Savings Plans for steady baseline; S3 lifecycle/Intelligent-Tiering; <b>Graviton (arm64)</b> ~20–40% better price/perf; Spot for batch/CI; NAT-gateway egress is the silent killer → VPC endpoints.</li>
-    <li><b>Security:</b> TLS in transit + KMS at rest (RDS/S3/MSK), least-privilege SGs, private-only data tier; WAF rate-based rules back up the gateway limiter.</li>
-    <li><b>Messaging alternatives (know the trade-off):</b> SQS = queue, per-message ack, visibility timeout, DLQ redrive — great for commands; Kafka/MSK = replayable log — required for audit/event-sourcing. EventBridge for SaaS/webhook fan-out.</li>
-  </ul>
+  <h3>Hỏi–đáp (bấm từng câu để tự test)</h3>
+  <details class="qa"><summary>"Hệ mình chạy trên AWS những gì?" (điểm table phía trên)</summary><div class="reveal">
+    <p>"Microservices on EKS with Helm and autoscaling; Kafka on MSK; Postgres on RDS multi-AZ with a read replica for reporting; Redis on ElastiCache for cache, dedupe and rate-limit counters; S3 for report archives with lifecycle to Glacier; secrets in Secrets Manager with KMS."</p>
+    <p><i>Tiếng Việt:</i> Nhớ theo cặp thành phần→dịch vụ ở bảng trên: EKS, MSK, RDS multi-AZ, ElastiCache, S3, Secrets Manager + KMS.</p>
+  </div></details>
+  <details class="qa"><summary>"Pod lấy credential AWS thế nào?"</summary><div class="reveal">
+    <p>"IRSA — IAM Roles for Service Accounts: each service account maps to an IAM role, so the pod gets temporary credentials automatically. No static access keys anywhere in images or env vars."</p>
+    <p><i>Tiếng Việt:</i> IRSA — service account gắn với IAM role, pod tự nhận credential tạm. Không nhét access key cố định vào image/env.</p>
+  </div></details>
+  <details class="qa"><summary>"Chuyện HA / DR kể nghe?"</summary><div class="reveal">
+    <p>"Everything multi-AZ: EKS nodes, MSK brokers, RDS with a synchronous standby and automatic failover, plus automated backups with point-in-time recovery. DR is scripted in Terraform, so rebuilding in another region is a runbook, not improvisation. I'd frame recovery with RTO and RPO targets."</p>
+    <p><i>Tiếng Việt:</i> Mọi thứ multi-AZ; RDS có standby đồng bộ + failover tự động + PITR; DR bằng Terraform (rebuild theo runbook). Nói được RTO/RPO là điểm cộng.</p>
+  </div></details>
+  <details class="qa"><summary>"Ứng dụng chậm — tìm bottleneck thế nào?"</summary><div class="reveal">
+    <p>"Follow the chain instead of guessing: CloudWatch for infra metrics — CPU, throttling, DB connections; Grafana for app metrics and traces to see which dependency is slow; then the ES logs by traceId. It usually narrows to a slow query, GC pressure, or one partner."</p>
+    <p><i>Tiếng Việt:</i> Đi theo chuỗi: CloudWatch (infra) → Grafana (trace, dependency nào chậm) → ES log theo traceId. Thường té ra là query chậm, GC, hoặc 1 partner.</p>
+  </div></details>
+  <details class="qa"><summary>"Tối ưu cost thì làm gì?"</summary><div class="reveal">
+    <p>"Right-size from real usage metrics, Savings Plans for the steady baseline, S3 lifecycle to Glacier for old reports, Graviton instances where the workload supports ARM — roughly 20-40% better price-performance — and VPC endpoints so S3 and ECR traffic doesn't pay NAT gateway egress."</p>
+    <p><i>Tiếng Việt:</i> Right-size theo metric thật; Savings Plans cho baseline; S3 lifecycle; Graviton (ARM) rẻ hơn 20–40%; VPC endpoint khỏi trả tiền NAT egress.</p>
+  </div></details>
 
   <details class="trap"><summary>Trap: "Security group vs NACL?"</summary><div class="reveal">
     <p>SG = stateful, instance/ENI level, allow rules only; NACL = stateless, subnet level (must allow return traffic), evaluated in rule-number order.</p>
@@ -773,22 +845,31 @@
 <!-- ============ BINDING ============ -->
 <section class="card" id="binding">
   <h2 class="sec"><span class="tag fe">Frontend 1</span> Angular data binding</h2>
-  <ul>
-    <li><b>Four forms</b> (one example each, fast):
-      <ul>
-        <li>Interpolation <code>{{ user.name }}</code> — display.</li>
-        <li>Property binding <code>[disabled]="isSaving"</code> — DOM property ← component.</li>
-        <li>Event binding <code>(click)="save()"</code> — component ← DOM.</li>
-        <li>Two-way <code>[(ngModel)]="form.name"</code> — syntax sugar for <code>[ngModel]</code> + <code>(ngModelChange)</code> (needs <code>FormsModule</code>).</li>
-      </ul>
-    </li>
-    <li><b>Component communication:</b> parent→child <code>@Input()</code> (or signal <code>input()</code>), child→parent <code>@Output() + EventEmitter</code>; template-ref vars locally; <code>@ViewChild/@ContentChild</code> for child/component refs.</li>
-    <li><b>Change detection internals (senior version):</b> zone.js patches async APIs → every event/microtask ends in <code>ApplicationRef.tick()</code> walking the component tree. <b>OnPush</b> narrows checks to: input-reference change, events from the component, <code>markForCheck()</code>, signal reads, <code>async</code> pipe emission. Immutable updates are what make OnPush actually fire — the trio: OnPush + immutability + async pipe = the ~40% load story.</li>
-    <li><b>trackBy in *ngFor / track in @for:</b> identity-stable keys let Angular reuse DOM nodes instead of re-creating rows — list rerenders are the classic jank source in transaction tables.</li>
-    <li><b>Pipes:</b> pure by default (recomputed only when input reference changes — free); async pipe is intentionally impure (subscribes/unsubscribes on every check) — it's the bridge between RxJS and the template.</li>
-    <li><b>Modern Angular you can claim:</b> standalone components (no NgModules), signal inputs <code>input()</code> / two-way <code>model()</code>, <code>computed()</code>/<code>effect()</code>, and the <code>@if/@for</code> control flow (17+) — we generate typed API clients from OpenAPI so components bind to DTO types end-to-end.</li>
-    <li><b>Structural directives:</b> the <code>*</code> is sugar for wrapping the template in <code>&lt;ng-template&gt;</code>; custom ones manipulate <code>TemplateRef + ViewContainerRef</code> (that's how our <code>*appHasRole</code> works).</li>
-  </ul>
+  <h3>Hỏi–đáp (bấm từng câu để tự test)</h3>
+  <details class="qa"><summary>"Các kiểu binding trong Angular?"</summary><div class="reveal">
+    <p>"Four: interpolation for display — double curly braces with user.name; property binding with square brackets, disabled equals isSaving; event binding with parentheses, click equals save; and two-way with the banana-in-a-box syntax, ngModel — which is really property plus event binding combined."</p>
+    <p><i>Tiếng Việt:</i> 4 kiểu: hiển thị <code>{{ }}</code>; property <code>[disabled]</code>; event <code>(click)</code>; two-way <code>[(ngModel)]</code> (thực chất = property + event gộp lại). Cha–con: <code>@Input()</code> xuống, <code>@Output() + EventEmitter</code> lên.</p>
+  </div></details>
+  <details class="qa"><summary>"Change detection hoạt động thế nào? OnPush làm gì?"</summary><div class="reveal">
+    <p>"By default Angular walks the whole component tree after every async event — that's zone.js. With OnPush, a component is checked only when its input reference changes, an event fires inside it, or an observable bound with the async pipe emits. That's why we pair OnPush with immutable updates — mutate in place and nothing refreshes."</p>
+    <p><i>Tiếng Việt:</i> Mặc định mỗi event Angular quét cả cây component. OnPush: chỉ check khi input đổi THAM CHIẾU, event trong component, hoặc async pipe phát giá trị. Vì vậy phải update bất biến (tạo object mới).</p>
+  </div></details>
+  <details class="qa"><summary>"trackBy để làm gì?"</summary><div class="reveal">
+    <p>"When a list re-renders, trackBy tells Angular which row is which — by id, not by object reference. Without it, refreshing the data re-creates all the DOM rows; with it, Angular reuses them. On a transaction table of hundreds of rows this is the difference between smooth and janky."</p>
+    <p><i>Tiếng Việt:</i> trackBy cho Angular biết row nào là row nào (theo id) → render lại danh sách thì tái dùng DOM, không xây lại hết.</p>
+  </div></details>
+  <details class="qa"><summary>"Signals là gì? Dùng khi nào?"</summary><div class="reveal">
+    <p>"A signal is a value that tracks who reads it — so when it changes, Angular updates exactly those views, no tree walk. I use signals for synchronous state and computed values, and bridge HTTP streams with toSignal. Observables still handle the async streams; signals own the state."</p>
+    <p><i>Tiếng Việt:</i> Signal = giá trị tự biết ai đang dùng → đổi thì cập nhật đúng chỗ đó. State đồng bộ dùng signal; stream async (HTTP) vẫn Observable, bắc cầu bằng toSignal.</p>
+  </div></details>
+  <details class="qa"><summary>"Pipe pure vs impure khác nhau thế nào?"</summary><div class="reveal">
+    <p>"Pure pipes recompute only when the input reference changes — that's the default and basically free. Impure pipes run on every change detection cycle — expensive, but that's exactly how the async pipe works: it re-checks the subscription every cycle and unwraps the latest value."</p>
+    <p><i>Tiếng Việt:</i> Pure mặc định — chỉ tính lại khi input đổi tham chiếu. Impure chạy mỗi lần change detection (đắt) — async pipe chính là impure có chủ đích.</p>
+  </div></details>
+  <details class="qa"><summary>"Có gì mới trong Angular mình dùng?"</summary><div class="reveal">
+    <p>"Standalone components — no NgModules; signal inputs and two-way model; the @if and @for control flow with required track; and on our side, typed API clients generated from OpenAPI, so the template binds to real DTO types end to end."</p>
+    <p><i>Tiếng Việt:</i> Standalone components, signal input()/model(), control flow @if/@for (bắt buộc track), client TS sinh từ OpenAPI.</p>
+  </div></details>
 
   <details class="trap"><summary>Trap: "OnPush component didn't update — why?"</summary><div class="reveal">
     <p>Someone mutated the input object in place (same reference = no check) or updated outside Angular's knowledge. Fix: new reference/immutable update, <code>markForCheck()</code>, or move the state into a signal the template reads.</p>
@@ -801,26 +882,49 @@
 <!-- ============ OBSERVABLE ============ -->
 <section class="card" id="rxjs">
   <h2 class="sec"><span class="tag fe">Frontend 2</span> Observables / RxJS</h2>
-  <ul>
-    <li><b>What:</b> a lazy push-based stream of values over time; subscriber gets next/error/complete. <code>HttpClient</code> returns a <b>cold</b> observable — nothing happens until subscribe; each subscriber re-triggers the request.</li>
-    <li><b>Unsubscribe discipline (always asked):</b> <code>async</code> pipe (auto-unsubscribes, plays perfectly with OnPush) or <code>takeUntilDestroyed(this.destroyRef)</code>; leaking subscriptions = memory leaks + stale API calls racing fresh ones.</li>
-    <li><b>Higher-order mapping — the decision table (memorize):</b>
+  <h3>Hai bảng phải thuộc lòng</h3>
+  <b>Bảng 1 — higher-order mapping (map sang observable khác):</b>
       <table>
-        <tr><th>Operator</th><th>Behavior</th><th>Portal example</th></tr>
-        <tr><td><code>switchMap</code></td><td>cancel stale inner stream</td><td>typeahead / transaction search</td></tr>
-        <tr><td><code>concatMap</code></td><td>queue, order preserved</td><td>sequential saves / file uploads in order</td></tr>
-        <tr><td><code>mergeMap</code></td><td>all in parallel, order-free</td><td>fan-out notifications</td></tr>
-        <tr><td><code>exhaustMap</code></td><td>ignore new while in-flight</td><td>login/submit button</td></tr>
+        <tr><th>Operator</th><th>Behavior</th><th>Ví dụ trong portal</th></tr>
+        <tr><td><code>switchMap</code></td><td>hủy request cũ khi có input mới</td><td> ô search / typeahead</td></tr>
+        <tr><td><code>concatMap</code></td><td>xếp hàng, giữ nguyên thứ tự</td><td>lưu tuần tự / upload theo thứ tự</td></tr>
+        <tr><td><code>mergeMap</code></td><td>chạy song song hết, không care thứ tự</td><td>gửi nhiều notification</td></tr>
+        <tr><td><code>exhaustMap</code></td><td>đang chạy thì bỏ qua input mới</td><td>nút Login/Submit (chặn double-click)</td></tr>
       </table>
-    </li>
-    <li><b>Combining — second table they love:</b> <code>forkJoin</code> = Promise.all (last value of each, completes when all do) for dashboard loads; <code>combineLatest</code> = latest of each after each has emitted — live filter + data; <code>zip</code> = pairwise by index; <code>withLatestFrom</code> = snapshot of another stream at emit time (action + current form state).</li>
-    <li><b>Error strategy subtlety:</b> <code>catchError</code> at the top level ends the stream (subscription dies); placed <b>inside</b> a <code>switchMap</code> it protects the outer stream and lets it continue. Retries: <code>retry({ count: 2, delay: 500 })</code> (retryWhen is legacy).</li>
-    <li><b>Sharing:</b> <code>shareReplay({ bufferSize: 1, refCount: true })</code> — one HTTP call, many subscribers (reference data: currencies, branches).</li>
-    <li><b>Subjects family:</b> <code>BehaviorSubject</code> (replays current value — local service state, "current user"), <code>ReplaySubject(n)</code>, <code>AsyncSubject</code> (last on complete). One caution: an <code>error</code> on a Subject terminates all its subscribers — guard the source.</li>
-    <li><b>Realtime (CV bullet):</b> Spring WebSocket/STOMP consumed as an RxJS subject — live transaction updates; reconnection with exponential backoff + jitter.</li>
-    <li><b>State:</b> <code>BehaviorSubject</code> for local service state; <b>NgRx</b> for cross-module state — dispatch action → reducer → <b>memoized selectors</b> → <code>async</code> pipe; effects isolate side effects (<code>ofType</code> + concatMap); entity adapter for collections. One-liner: "state as immutable single source of truth."</li>
-    <li><b>Promises interop:</b> <code>firstValueFrom(obs)</code> when async/await is genuinely clearer — but in templates, the async pipe wins.</li>
-  </ul>
+  <b>Bảng 2 — kết hợp nhiều stream:</b>
+      <table>
+        <tr><th>Operator</th><th>Khi nào</th></tr>
+        <tr><td><code>forkJoin</code></td><td>giống Promise.all — đợi tất cả xong, lấy giá trị cuối mỗi stream (load dashboard song song)</td></tr>
+        <tr><td><code>combineLatest</code></td><td>mỗi stream phát thì lấy "giá trị mới nhất" của cả nhóm (filter + data live)</td></tr>
+        <tr><td><code>zip</code></td><td>ghép theo cặp thứ tự</td></tr>
+        <tr><td><code>withLatestFrom</code></td><td>lấy snapshot 1 stream khác tại thời điểm stream chính phát (action + form state)</td></tr>
+      </table>
+
+  <h3>Hỏi–đáp (bấm từng câu để tự test)</h3>
+  <details class="qa"><summary>"Observable là gì? Khác Promise thế nào?"</summary><div class="reveal">
+    <p>"A lazy push-based stream of values over time — the subscriber gets next, error, or complete. Versus a Promise: it can emit many values, it's cancellable, and it's lazy — HttpClient does nothing until you subscribe. That laziness is exactly what makes search cancellation with switchMap possible."</p>
+    <p><i>Tiếng Việt:</i> Stream đẩy giá trị theo thời gian, lazy (chưa subscribe chưa chạy), phát nhiều giá trị, hủy được — Promise chỉ 1 giá trị 1 lần, không hủy được.</p>
+  </div></details>
+  <details class="qa"><summary>"Unsubscribe ở đâu để không leak?"</summary><div class="reveal">
+    <p>"Two ways: the async pipe in the template — it subscribes and unsubscribes automatically and plays perfectly with OnPush — or takeUntilDestroyed in the component. Manual subscribe without cleanup means memory leaks and stale calls racing fresh ones."</p>
+    <p><i>Tiếng Việt:</i> async pipe (tự sub/unsub) hoặc takeUntilDestroyed. Subscribe tay mà quên unsub → memory leak + gọi API cũ đua với API mới.</p>
+  </div></details>
+  <details class="qa"><summary>"Lỗi trong stream xử lý thế nào?"</summary><div class="reveal">
+    <p>"Placement matters: catchError at the top level ends the whole subscription; inside a switchMap it only replaces the failed inner call, so the outer stream — like a search listener — keeps living. For retries, retry with count and delay. And remember an error on a Subject terminates all its subscribers, so guard the source."</p>
+    <p><i>Tiếng Việt:</i> catchError đặt trong switchMap → chỉ chết request con, stream ngoài vẫn sống (search tiếp được). Đặt ngoài cùng → cả subscription chết. Retry: retry({count, delay}).</p>
+  </div></details>
+  <details class="qa"><summary>"BehaviorSubject dùng khi nào?"</summary><div class="reveal">
+    <p>"When new subscribers need the current value immediately — like 'current user' or a local service state. And for shared reference data — currencies, branches — we fetch once and shareReplay(1), so every component reads one HTTP call."</p>
+    <p><i>Tiếng Việt:</i> Cần giá trị hiện tại ngay khi subscribe (current user, state service). Data tham chiếu dùng chung: 1 HTTP + shareReplay(1).</p>
+  </div></details>
+  <details class="qa"><summary>"Realtime làm thế nào?" (CV có bullet này)</summary><div class="reveal">
+    <p>"Spring WebSocket with STOMP, consumed on the Angular side as an RxJS subject — live transaction updates on the monitoring screens. Reconnection uses exponential backoff with jitter so a blip doesn't stampede the server."</p>
+    <p><i>Tiếng Việt:</i> WebSocket/STOMP phía Spring, phía Angular nhận qua RxJS subject — cập nhật giao dịch live. Reconnect: backoff tăng dần + jitter.</p>
+  </div></details>
+  <details class="qa"><summary>"Khi nào cần NgRx?"</summary><div class="reveal">
+    <p>"When state is shared across screens or modules and the flow gets complex — components dispatch actions, reducers produce new immutable state, memoized selectors feed the templates through the async pipe, and effects isolate the side effects like API calls. For local state, a service with a BehaviorSubject or signals is enough — NgRx is a tool, not a religion."</p>
+    <p><i>Tiếng Việt:</i> State dùng chung nhiều màn hình → NgRx (action → reducer → selector → async pipe, side effect nằm trong effects). State cục bộ: service + BehaviorSubject/signals đủ.</p>
+  </div></details>
 
   <details class="trap"><summary>Trap: "Search sends a request per keystroke — fix it"</summary><div class="reveal">
     <p><code>valueChanges.pipe(debounceTime(300), distinctUntilChanged(), switchMap(search))</code> — and handle errors inside the switchMap so one failed search doesn't kill the listener.</p>
@@ -833,21 +937,27 @@
 <!-- ============ INTERCEPTOR ============ -->
 <section class="card" id="interceptor">
   <h2 class="sec"><span class="tag fe">Frontend 3</span> Interceptors</h2>
-  <ul>
-    <li><b>What:</b> middleware on every HTTP call in/out — a chain where <b>order matters</b>: <code>provideHttpClient(withInterceptors([authInterceptor, traceInterceptor, errorInterceptor, loadingInterceptor]))</code>.</li>
-    <li><b>Angular 15+ style:</b> functional interceptor — <code>authInterceptor: HttpInterceptorFn = (req, next) =&gt; next(req.clone({ setHeaders: { Authorization: 'Bearer ' + token } }))</code>. Skip-auth for public endpoints via <code>HttpContextToken</code> + <code>req.context.set(SKIP_AUTH, true)</code> — a detail that signals real usage.</li>
-    <li><b>The 401 refresh flow — know it step by step:</b>
-      <ol>
-        <li>Call fails with 401 → <code>catchError</code> → skip if the request <b>is</b> the refresh call (marker/context) to avoid loops.</li>
-        <li>Call <code>authService.refresh()</code> and <b>share the in-flight refresh observable</b> (<code>share()</code> or a BehaviorSubject gate) — 10 parallel 401s trigger ONE refresh; the rest queue on it.</li>
-        <li>On success, <code>switchMap</code> → retry the original request with the new token.</li>
-        <li>Refresh also fails → logout + redirect to login (clear state; optional BroadcastChannel to sync logout across tabs).</li>
-      </ol>
-    </li>
-    <li><b>Other uses we have:</b> inject <code>X-Trace-Id</code> header (correlates with backend ES logs — connects to the BE story), normalize HTTP errors into the app error model (backend envelope <code>code</code> → typed domain errors), retry-with-backoff for idempotent GETs, and a <b>loading counter</b> via <code>finalize(() =&gt; count--)</code> driving the global spinner.</li>
-    <li><b>Uploads/downloads:</b> <code>reportProgress: true</code> + filter <code>HttpEventType.UploadProgress</code> for progress bars on report exports.</li>
-    <li><b>Scope note:</b> interceptors only see HttpClient — router navigation errors are handled by guards/router events, not interceptors.</li>
-  </ul>
+  <h3>Hỏi–đáp (bấm từng câu để tự test)</h3>
+  <details class="qa"><summary>"Interceptor là gì? Viết kiểu gì?" (FE focus — leaked)</summary><div class="reveal">
+    <p>"Middleware that sits on every HTTP call in and out — a chain, and order matters. Modern Angular uses functional interceptors — a plain function, registered with provideHttpClient(withInterceptors([...])), no class needed. For requests that must skip auth — like the refresh call itself — we flag them with an HttpContextToken."</p>
+    <p><i>Tiếng Việt:</i> Middleware trên mọi HTTP call, đăng ký theo chuỗi (thứ tự quan trọng). Dùng functional interceptor (HttpInterceptorFn); request nào bỏ qua auth thì đánh dấu bằng HttpContextToken.</p>
+  </div></details>
+  <details class="qa"><summary>"Ngoài auth, interceptor còn dùng làm gì?"</summary><div class="reveal">
+    <p>"Four more in our app: stamp an X-Trace-Id header that correlates with the backend logs; normalize HTTP errors into the app's error model by code; a loading counter with finalize that drives the global spinner; and retry with backoff for idempotent GETs. Uploads use reportProgress to drive progress bars."</p>
+    <p><i>Tiếng Việt:</i> Gắn X-Trace-Id khớp log backend; chuẩn hóa error theo code; đếm request đang chạy (finalize) cho spinner; retry GET an toàn; progress bar upload bằng reportProgress.</p>
+  </div></details>
+  <details class="qa"><summary>"Interceptor xử lý được cả router navigation?"</summary><div class="reveal">
+    <p>"No — interceptors only see HttpClient traffic. Navigation is guarded by router guards, and router errors go through router events."</p>
+    <p><i>Tiếng Việt:</i> Không — interceptor chỉ thấy HttpClient. Điều hướng do guard lo.</p>
+  </div></details>
+
+  <h3>"401 refresh flow nói từng bước" (thuộc lòng)</h3>
+  <ol>
+    <li>Call fails with 401 → <code>catchError</code> → skip if the request <b>is</b> the refresh call (marker/context) to avoid loops.</li>
+    <li>Call <code>authService.refresh()</code> and <b>share the in-flight refresh observable</b> (<code>share()</code> or a BehaviorSubject gate) — 10 parallel 401s trigger ONE refresh; the rest queue on it.</li>
+    <li>On success, <code>switchMap</code> → retry the original request with the new token.</li>
+    <li>Refresh also fails → logout + redirect to login (clear state; optional BroadcastChannel to sync logout across tabs).</li>
+  </ol>
 
   <h3>Be able to WRITE it (recruiter leak: FE focus = HttpInterceptor)</h3>
 <pre class="ascii">export const SKIP_AUTH = new HttpContextToken&lt;boolean&gt;(() =&gt; false);
@@ -896,18 +1006,27 @@ function retryWithRefresh(req: HttpRequest&lt;unknown&gt;, next: HttpHandlerFn, 
 <!-- ============ AUTHORIZED ============ -->
 <section class="card" id="auth">
   <h2 class="sec"><span class="tag fe">Frontend 4</span> Authorization (Authorized) in Angular</h2>
-  <ul>
-    <li><b>Guards — functional style (v15+):</b> <code>canActivate: [authGuard, roleGuard]</code>; guard returns <code>boolean | UrlTree | Observable&lt;boolean&gt;</code> (UrlTree redirects to <code>/login</code> or <code>/403</code>).
-      <ul>
-        <li><code>authGuard</code>: token exists / not expired (async validation via <code>Observable</code>).</li>
-        <li><code>roleGuard</code>: reads required roles from <b>route data</b> (<code>data: { roles: ['ADMIN'] }</code>), compares with decoded JWT claims (<code>jwt-decode</code>).</li>
-      </ul>
-    </li>
-    <li><b>Guard types:</b> <code>CanActivate</code> (page), <code>CanActivateChild</code> (subtree), <b><code>CanMatch</code></b> (v15+; supersedes CanLoad — <b>blocks even downloading the lazy chunk</b>: unauthorized users never receive admin-bundle code), <code>CanDeactivate</code> (unsaved-form warning, our transaction-config screens).</li>
-    <li><b>UI-level:</b> structural directive <code>*appHasRole="'ADMIN'"</code> (TemplateRef + ViewContainerRef) hides buttons; role-based menu config — same RBAC permissions the backend enforces (mirrored from the CV bullet).</li>
-    <li><b>Modern SPA auth (drop these terms):</b> <b>OAuth 2.0 Authorization Code + PKCE</b> — implicit flow is deprecated; access token kept <b>in memory</b>, refresh token in an <b>httpOnly secure cookie</b> (XSS can't read it) — explain why not localStorage. JWT checked for <code>exp</code>/claims locally only as UX.</li>
-    <li><b>SAML (it's on your CV — one-liner ready):</b> "JWT-based auth and OAuth 2.0 flows for our APIs, plus <b>SAML SSO</b> for enterprise client logins" — SAML = XML assertion from an identity provider (Okta/ADFS-style) vs OIDC's JSON tokens; browser-redirect flow with signed XML, SP-initiated or IdP-initiated. One sentence each is enough; nobody expects an Angular dev to configure an IdP.</li>
-  </ul>
+  <h3>Hỏi–đáp (bấm từng câu để tự test)</h3>
+  <details class="qa"><summary>"Guard là gì? Có những loại nào?"</summary><div class="reveal">
+    <p>"Guards decide if a navigation is allowed — modern Angular uses functional guards like authGuard. CanActivate protects a route, CanActivateChild a subtree, CanMatch decides whether even the lazy chunk is downloaded — unauthorized users never receive the admin code — and CanDeactivate warns about unsaved form changes. A guard returns boolean or a UrlTree to redirect to login or 403."</p>
+    <p><i>Tiếng Việt:</i> Guard quyết định cho phép điều hướng hay không (functional style v15+). CanActivate = trang; CanActivateChild = cây con; CanMatch = chặn cả việc tải lazy chunk; CanDeactivate = cảnh báo form chưa lưu. Trả về boolean hoặc UrlTree (redirect).</p>
+  </div></details>
+  <details class="qa"><summary>"Bảo vệ route theo role thế nào?"</summary><div class="reveal">
+    <p>"The route declares its required roles in data — data roles ADMIN — and a roleGuard reads that, decodes the JWT claims, and allows or redirects to 403. Async validation like token refresh returns an Observable of boolean."</p>
+    <p><i>Tiếng Việt:</i> Route khai báo roles trong data; roleGuard đọc roles yêu cầu, decode JWT claims của user, so khớp — không đủ thì redirect /403.</p>
+  </div></details>
+  <details class="qa"><summary>"Ẩn nút theo role thế nào?"</summary><div class="reveal">
+    <p>"A structural directive, appHasRole, built with TemplateRef and ViewContainerRef — it creates or removes the embedded view. Same idea as ngIf, but driven by the RBAC permissions the backend enforces."</p>
+    <p><i>Tiếng Việt:</i> Structural directive *appHasRole (dùng TemplateRef + ViewContainerRef như ngIf nhưng theo role) — ẩn/hiện nút theo quyền RBAC.</p>
+  </div></details>
+  <details class="qa"><summary>"Token lưu ở đâu? localStorage được không?"</summary><div class="reveal">
+    <p>"Not localStorage if we can avoid it — XSS then means token theft. Our pattern: access token in memory only with a short TTL, refresh token in an httpOnly secure cookie that JavaScript can't read, and the OAuth flow is Authorization Code with PKCE — the implicit flow is deprecated."</p>
+    <p><i>Tiếng Việt:</i> localStorage + XSS = mất token. Access token giữ trong memory (TTL ngắn), refresh token trong httpOnly cookie (JS đọc không được), flow = Authorization Code + PKCE.</p>
+  </div></details>
+  <details class="qa"><summary>"SAML là gì?" (CV ghi SAML SSO)</summary><div class="reveal">
+    <p>"Enterprise SSO: the identity provider returns a signed XML assertion after a browser redirect — Okta or ADFS style. We support it for enterprise client logins alongside JWT and OAuth 2.0 for the APIs. One sentence each is enough for a frontend role."</p>
+    <p><i>Tiếng Việt:</i> SSO doanh nghiệp: IdP trả về XML assertion có ký số sau khi redirect. Nói 1 câu là đủ: "SAML SSO cho enterprise clients, JWT/OAuth2 cho APIs".</p>
+  </div></details>
   <div class="killshot">
     <b>The line that scores points:</b> "Frontend authorization is UX only — every route and action is re-authorized server-side: JWT verified at the <b>Spring Cloud Gateway</b>, method-level with <code>@PreAuthorize</code> in the services, and data-layer checks. Bypassing the UI still gets a 403." (Mirrors the RBAC bullet in your CV.)
   </div>
