@@ -357,47 +357,65 @@
 
 <!-- ============ JAVA CORE ============ -->
 <section class="card" id="javacore">
-  <h2 class="sec"><span class="tag be">Backend 0</span> Java core strength (they're testing for "mạnh về Java")</h2>
-  <div class="where"><b>Where in your story:</b> Java 8→21 across all projects. A Java-strong client WILL ask core-Java questions before framework ones.</div>
+  <h2 class="sec"><span class="tag be">Backend 0</span> Java core — bản dễ đọc (hỏi gì, trả lời nấy)</h2>
+  <div class="where"><b>Where in your story:</b> Java 8→21 across all projects. The client tests Java strength, so expect these. Cách dùng: <b>đọc câu hỏi → thử trả lời miệng → mở ra so sánh</b>. Trả lời thật 1–3 câu đơn giản rồi dừng — chỉ đào sâu khi họ hỏi tiếp.</div>
 
-  <h3>Collections & language</h3>
-  <ul>
-    <li><b>HashMap internals (classic):</b> array of buckets; capacity is a power of 2 so <code>index = hash &amp; (n-1)</code>; hash is spread (<code>h ^ (h &gt;&gt;&gt; 16</code>)); default load factor <b>0.75</b>, resize doubles; since Java 8 a bucket treeifies to a <b>red-black tree at 8 entries</b> (back to list at 6, and only when capacity ≥ 64) — defends against hash-collision DoS.</li>
-    <li><b>equals/hashCode contract:</b> equal objects ⟹ equal hashes; violation breaks HashMap/HashSet lookups (object goes to a different bucket). Records generate correct ones.</li>
-    <li><b>ConcurrentHashMap:</b> no segment locks since Java 8 — CAS on empty bins, <code>synchronized</code> on the bin's first node; <b>no null keys/values</b> (ambiguity vs "absent"); weakly consistent iterators (no <code>ConcurrentModificationException</code>); <code>computeIfAbsent</code> is atomic — great for caches.</li>
-    <li><b>Fail-fast iterators:</b> <code>ArrayList</code> iterator throws <code>ConcurrentModificationException</code> on structural change (modCount check). Fix: <code>CopyOnWriteArrayList</code> for read-mostly listener lists, or iterate a snapshot / use <code>removeIf</code>.</li>
-    <li><b>String immutability:</b> thread-safe, hash cached once, enables the string pool and secure use (can't mutate after passing a credentials check). String pool: literals interned; <code>new String("x")</code> always makes a fresh object.</li>
-    <li><b>Optional discipline:</b> return type only — never fields, never parameters, never <code>get()</code> without <code>orElse</code>/<code>orElseThrow</code>.</li>
-  </ul>
-
-  <h3>Concurrency</h3>
-  <ul>
-    <li><b>volatile:</b> visibility + happens-before ordering, <b>not</b> atomicity (<code>count++</code> still races). Atomics use CAS; <code>AtomicInteger.incrementAndGet()</code> is lock-free.</li>
-    <li><b>synchronized vs ReentrantLock:</b> ReentrantLock adds <code>tryLock(timeout)</code>, interruptible acquisition, fairness. Both are on our hot paths only when we can't design the race away.</li>
-    <li><b>Thread pools:</b> <code>newFixedThreadPool</code> for known CPU/IO profile; <span class="warn">never <code>newCachedThreadPool</code> under load</span> (unbounded threads); always <b>bounded queue + named threads + explicit RejectedExecutionHandler</b> (we log-and-alert on <code>CallerRunsPolicy</code> backpressure).</li>
-    <li><b>CompletableFuture:</b> compose async calls — <code>supplyAsync(task, executor)</code> (<b>pass your own executor</b> — the default common ForkJoin pool is sized to cores and hates blocking IO), <code>thenCombine</code>, <code>allOf</code>, <code>exceptionally</code>/<code>handle</code>, <code>orTimeout</code>. Used for fan-out calls to partner APIs in orchestration.</li>
-    <li><b>ThreadLocal:</b> we use it exactly where MDC does (traceId). Rule: <b>remove() in finally</b> — thread pools reuse threads, stale context leaks between requests.</li>
-    <li><b>Virtual threads (Java 21):</b> cheap blocking-IO threads managed by the JVM on carrier threads — great for IO-heavy partner calls; <b>don't pool them</b>, use a semaphore for concurrency limits. Original caveat — pinning on <code>synchronized</code> blocks — was largely fixed in JDK 24. Our stance: piloting, not yet prod-critical. Saying exactly that is credible.</li>
-  </ul>
-
-  <h3>JVM & GC (expect at least one)</h3>
-  <ul>
-    <li><b>Memory:</b> heap (young: eden + survivors / old), <b>metaspace</b> (classes, replaced PermGen in 8), thread stacks, direct buffers.</li>
-    <li><b>Collectors:</b> <b>G1</b> default since JDK 9 — region-based, pause-time target (<code>-XX:MaxGCPauseMillis</code>), concurrent mark + mixed collections; <b>ZGC</b> (generational since 21) for sub-millisecond pauses on large heaps; Parallel for throughput batch jobs; CMS removed in 14.</li>
-    <li><b>OOM vocabulary:</b> heap space, <code>GC overhead limit exceeded</code>, metaspace (class-loader leak), direct buffer, "unable to create native thread" (thread leak).</li>
-    <li><b>Troubleshooting ritual</b> (they like a method, not a guess): alerts from Grafana → <code>jstack</code> thread dump (what's blocked/busy) → <code>jmap</code> heap dump → MAT dominator tree → fix (query, cache unboundedness, thread leak). JFR for always-on profiling.</li>
-    <li><b>Streams:</b> lazy intermediate ops, terminal triggers; short-circuit (<code>limit</code>, <code>findFirst</code>); <code>parallelStream</code> uses the common pool — avoid inside request threads.</li>
-    <li><b>Modern Java you can claim (8→21):</b> records for DTOs, sealed interfaces + pattern-matching switch for closed domain events, text blocks for JSON/SQL, switch expressions.</li>
-  </ul>
-
-  <details class="trap"><summary>Trap: "Two threads run increment() on a shared int 1000× each — result?"</summary><div class="reveal">
-    <p>Less than 2000 — read-modify-write isn't atomic. Fix ladder: <code>AtomicInteger</code> → <code>synchronized</code>/<code>LongAdder</code> (high contention) → redesign to single-writer.</p>
+  <h3>Collections</h3>
+  <details class="qa"><summary>"HashMap hoạt động bên trong thế nào?"</summary><div class="reveal">
+    <p>"Think of it as an array of buckets. When you <code>put(key, value)</code>, Java takes the key's <code>hashCode()</code> to choose a bucket and stores the entry there. <code>get(key)</code> computes the same hash and goes straight to that bucket — that's why it's fast, O(1) on average. If two keys land in the same bucket, they form a small list inside it — and since Java 8, a long list becomes a balanced tree, so even collisions stay fast."</p>
+    <p><i>Tiếng Việt:</i> như tủ nhiều ngăn đánh số — hashCode quyết định ngăn nào. Lấy đồ: tính số rồi đi thẳng tới ngăn. Hai key trùng ngăn thì thành danh sách, dài quá (8+ phần tử) thì chuyển thành cây để vẫn nhanh.</p>
   </div></details>
-  <details class="trap"><summary>Trap: "Why can a HashMap key class need hashCode but must override equals too?"</summary><div class="reveal">
-    <p>Lookup uses hashCode to find the bucket, then equals to find the entry. hashCode-only works only by accident; contract violations make entries vanish.</p>
+  <details class="qa"><summary>"Vì sao phải override cả equals lẫn hashCode?"</summary><div class="reveal">
+    <p>"Because HashMap finds the bucket with hashCode, then compares keys with equals. If two 'equal' objects have different hashCodes, they end up in different buckets — get() returns null even though you just put it in. Rule: equal objects must have equal hashCodes. Records and the IDE generate both correctly — the classic bug is overriding equals but not hashCode."</p>
+    <p><i>Tiếng Việt:</i> hashCode tìm ngăn, equals xác nhận đúng key trong ngăn. Override equals mà quên hashCode → 2 object "bằng nhau" nằm 2 ngăn khác → tìm không ra.</p>
   </div></details>
-  <details class="trap"><summary>Trap: "final fields = thread safety?"</summary><div class="reveal">
-    <p>Immutability removes <i>mutation</i> races and gives safe publication of the object graph after construction (JMM final-field semantics) — but a final <i>reference</i> to a mutable object is still shared mutable state.</p>
+  <details class="qa"><summary>"HashMap có thread-safe không? Không thì dùng gì?"</summary><div class="reveal">
+    <p>"No. Two threads writing at the same time can corrupt it, and modifying while iterating throws ConcurrentModificationException. For multi-threaded access we use ConcurrentHashMap — it locks per bucket, so threads rarely block each other, and it doesn't allow null keys or values."</p>
+    <p><i>Tiếng Việt:</i> HashMap dùng chung nhiều thread → hỏng dữ liệu / lỗi ConcurrentModificationException (vừa duyệt vừa xóa). Chuyển sang ConcurrentHashMap — khóa theo từng ngăn nên ít chặn nhau.</p>
+  </div></details>
+  <details class="qa"><summary>"Vì sao String immutable?"</summary><div class="reveal">
+    <p>"Three reasons: security — once checked, a String value like a filename or URL can't be swapped underneath; thread-safety for free; and performance — the hash is computed once and cached, and string literals share one pool in memory."</p>
+    <p><i>Tiếng Việt:</i> An toàn (kiểm tra xong không ai đổi giá trị được), thread-safe miễn phí, hash cache 1 lần + dùng chung string pool.</p>
+  </div></details>
+
+  <h3>Multithreading</h3>
+  <details class="qa"><summary>"volatile là gì? Có đủ để đếm số an toàn không?"</summary><div class="reveal">
+    <p>"volatile means every thread sees the latest value immediately — no stale local copies. Good for a simple flag like 'stop'. But it does NOT make <code>count++</code> safe, because count++ is three steps: read, add, write — two threads can interleave. For counters I use AtomicInteger — lock-free, based on compare-and-swap."</p>
+    <p><i>Tiếng Việt:</i> volatile = thread nào đọc cũng thấy giá trị mới nhất ngay (hợp cho biến flag). Nhưng count++ gồm 3 bước read-add-write nên vẫn sai → dùng AtomicInteger.</p>
+  </div></details>
+  <details class="qa"><summary>"synchronized vs ReentrantLock?"</summary><div class="reveal">
+    <p>"Both let only one thread in at a time. synchronized is simpler — the lock opens automatically, even on exception. ReentrantLock is for advanced cases — take the lock with a timeout, interruptible waiting, fair ordering. I default to synchronized, or better, the ready-made classes in java.util.concurrent that avoid manual locking altogether."</p>
+    <p><i>Tiếng Việt:</i> Cả hai đều cho 1 thread vào vùng critical tại một thời điểm. synchronized đơn giản, tự nhả khóa kể cả khi exception. ReentrantLock dùng cho ca đặc biệt: chờ có timeout, interrupt được.</p>
+  </div></details>
+  <details class="qa"><summary>"Sao phải dùng thread pool? Cẩn thận gì?"</summary><div class="reveal">
+    <p>"Creating threads is expensive, so pools reuse them. We use fixed-size pools with a bounded queue and named threads. The dangerous one is newCachedThreadPool — it creates unlimited threads under load and can crash the app. And when the queue is full you need a rejection policy — we log and alert; sometimes CallerRunsPolicy to slow the producer down."</p>
+    <p><i>Tiếng Việt:</i> Tạo thread tốn kém → pool tái sử dụng. Tránh newCachedThreadPool (tạo thread vô hạn khi tải cao). Queue phải có giới hạn + quyết định rõ hành vi khi đầy.</p>
+  </div></details>
+  <details class="qa"><summary>"CompletableFuture dùng khi nào?"</summary><div class="reveal">
+    <p>"When I need to call two partner APIs at the same time and combine the results — supplyAsync with our own executor, then thenCombine or allOf, and handle errors with exceptionally. One detail that matters: pass your own thread pool. The default shared pool is small and meant for CPU work, not threads waiting on network."</p>
+    <p><i>Tiếng Việt:</i> Gọi 2 API song song rồi gộp kết quả. Nhớ truyền executor riêng — pool mặc định nhỏ, không dành cho việc chờ mạng.</p>
+  </div></details>
+  <details class="qa"><summary>"Virtual threads (Java 21) là gì?"</summary><div class="reveal">
+    <p>"Very cheap threads made for code that waits on the network. You can run thousands of them blocked on IO without memory problems. We're piloting them for partner calls. Two rules: don't pool them — create per task; and limit concurrency with a semaphore, not a pool size."</p>
+    <p><i>Tiếng Việt:</i> Thread "rẻ" cho tác vụ chờ mạng — mở hàng nghìn cái thoải mái. Đừng pool chúng; muốn giới hạn thì dùng semaphore.</p>
+  </div></details>
+
+  <h3>JVM &amp; GC</h3>
+  <details class="qa"><summary>"Bộ nhớ JVM có những gì?"</summary><div class="reveal">
+    <p>"Day to day two areas matter: the heap, where all objects live and GC cleans up; and one stack per thread, holding local variables. Plus metaspace for class metadata. So a memory leak in Java is objects still referenced but never used again — usually stuck in a cache or a listener list."</p>
+    <p><i>Tiếng Việt:</i> Heap chứa object (GC dọn), mỗi thread có stack riêng chứa biến cục bộ, metaspace chứa thông tin class. Memory leak = object còn được tham chiếu nhưng không ai dùng nữa — thường kẹt trong cache hoặc danh sách listener.</p>
+  </div></details>
+  <details class="qa"><summary>"GC hoạt động thế nào? G1, ZGC khác gì?"</summary><div class="reveal">
+    <p>"GC frees objects nothing references anymore. The default is G1 — it splits the heap into regions and cleans them step by step, keeping pauses short; ZGC is for apps needing sub-millisecond pauses on big heaps. And when we get memory alerts, the routine is fixed: thread dump first to see what's stuck, then heap dump, then look at the biggest objects — usually a query loading too much data or an unbounded cache."</p>
+    <p><i>Tiếng Việt:</i> GC tự dọn object không còn tham chiếu. Mặc định G1 (chia heap thành vùng, dọn từng phần, pause ngắn); ZGC cho hệ cần pause cực ngắn. Sự cố memory: thread dump → heap dump → xem object nào chiếm nhiều nhất.</p>
+  </div></details>
+  <details class="qa"><summary>"Stream vs vòng lặp thường?"</summary><div class="reveal">
+    <p>"Streams for declarative transforms — filter, map, collect — especially two-step chains; classic loops when the logic is simple or performance-critical. Readability decides. And I'm careful with parallelStream — it shares one small common pool, so I don't use it inside request threads."</p>
+    <p><i>Tiếng Việt:</i> Stream hợp cho phép biến đổi dữ liệu (filter/map/collect); vòng lặp cho logic đơn giản. Ưu tiên cái nào dễ đọc. Cẩn thận parallelStream trong web request.</p>
+  </div></details>
+
+  <details class="trap"><summary>Trap: "final field là thread-safe rồi chứ?"</summary><div class="reveal">
+    <p>Gần đúng, đừng trả lời "đúng" — <code>final List&lt;String&gt; list</code> thì <b>con trỏ</b> không đổi nhưng vẫn <code>add()</code> được → vẫn phải đồng bộ. Nói: "final makes the reference immutable and gives safe publication, but if it points to a mutable object, the object itself still needs synchronization."</p>
   </div></details>
 </section>
 
