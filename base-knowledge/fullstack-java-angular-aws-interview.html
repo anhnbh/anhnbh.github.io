@@ -149,7 +149,7 @@
 <header class="hero">
   <div class="hero-inner">
     <h1>Savvycom Senior Fullstack — Round 1 · Deep Edition</h1>
-    <p>Client interview is <b style="color:#fff">Java-strength-focused</b> and expects you to <b style="color:#fff">showcase strong Java projects</b>. Everything is anchored to <b style="color:#fff">Project 1: mobile-banking orchestration platform (01/2022–Present)</b> — lead every answer with it.</p>
+    <p>Client interview is <b style="color:#fff">Java-strength-focused</b> and expects you to <b style="color:#fff">showcase strong Java projects</b>. Everything is anchored to <b style="color:#fff">your first CV project — heading "Healthcare &amp; Enterprise Management Systems / Senior Java Developer", described in its first line as a mobile-banking orchestration platform</b> (the CV lists <b style="color:#fff">no per-project dates</b> — say "the last few years", never a specific month).</p>
     <span class="pill">Round 1 · Client · Java focus</span>
     <span class="pill">BE: Java Core · JPA · Kafka · ES · Batch · @Transactional · Exceptions · Spring Cloud · AWS</span>
     <span class="pill">FE: Binding · Observable · Interceptor · Authorized</span>
@@ -160,6 +160,7 @@
 <nav class="toc">
   <a href="#pitch">Pitch</a>
   <a href="#protocol">Protocol</a>
+  <a href="#cvmap">CV Map</a>
   <a href="#showcase">Showcase</a>
   <a href="#feature">Feature</a>
   <a class="be" href="#javacore">Java Core</a>
@@ -234,6 +235,37 @@
   </ul>
 </section>
 
+<!-- ============ CV CONSISTENCY MAP ============ -->
+<section class="card" id="cvmap">
+  <h2 class="sec"><span class="tag core">Reality check</span> CV ↔ cheatsheet consistency map</h2>
+  <div class="where"><b>Why this card exists:</b> everything you say must trace back to a line in the CV the interviewer is holding ("Savvycom_Senior Fullstack Developer_Thai Le-DRM-FM003"). Re-checked against the PDF on 2026-10-19. If it's not in the "Solid" table, treat it as a stretch claim.</div>
+
+  <h3>Solid — the claim has a CV line behind it</h3>
+  <table>
+    <tr><th>You say</th><th>CV line that backs it</th></tr>
+    <tr><td>"Banking orchestration platform — our services process what happens in the mobile app"</td><td>Description: "mobile-banking orchestration platform… event-driven flows that orchestrate multiple banking services and partner integrations"</td></tr>
+    <tr><td>"I own the Angular 15+ admin/partner portal"</td><td>"Developed and maintained the platform's Angular 15+ portal (admin dashboards, partner consoles, transaction-monitoring screens)… Angular Material, RxJS, lazy-loaded feature modules"</td></tr>
+    <tr><td>Kafka + payment/notification integrations</td><td>"Built integrations… payment processors (Stripe, PayPal) and notification services (email, SMS), with asynchronous message processing using Apache Kafka"</td></tr>
+    <tr><td>Data layer story (JPA, JPQL, Flyway, indexing, 40% win)</td><td>"Built and maintained the Hibernate/JPA data access layer… complex JPQL, stored procedures, Flyway migrations, indexing strategies" + "reducing average API response time by 40%"</td></tr>
+    <tr><td>Spring Batch jobs</td><td>"Built background processing services using Spring Batch for report generation, data synchronization, backup operations, and automated compliance checks"</td></tr>
+    <tr><td>Observability story</td><td>"real-time notifications using Spring WebSocket (STOMP)… Grafana monitoring dashboards with centralized ElasticSearch logging"</td></tr>
+    <tr><td>Transaction-config feature, RBAC + guards/interceptors mirror, OpenAPI→TS clients, CI/CD GitHub Actions/Jenkins→K8s, ~40% portal load, 75%+ coverage, feature flags/rollback, Java 17/21, 4 AWS certs</td><td>All present as literal CV bullets/tech lines</td></tr>
+  </table>
+
+  <h3>Stretch — beyond the CV text; say only if you can defend them live</h3>
+  <ul>
+    <li><b>EKS / MSK / RDS multi-AZ / ElastiCache / S3 / Secrets Manager:</b> CV says only "AWS (Docker, Kubernetes, CI/CD)". Expanding "K8s on AWS" into EKS verbally is credible — but expect "which services exactly?" follow-ups (the AWS section preps you for them).</li>
+    <li><b>"Transaction search on Elasticsearch":</b> CV claims ES for <b>centralized logging only</b>. Lead with logging + Grafana; offer transaction search only if you can whiteboard the search_after story.</li>
+    <li><b>Spring Cloud Gateway / outbox + Debezium / saga state machine:</b> CV says "Spring Cloud" and "event-driven flows". These patterns are your <i>design vocabulary</i>, not named CV projects — present them as "how we handle X", not as product names.</li>
+    <li><b>"Reconciliation":</b> not a CV word. CV says "data synchronization / compliance checks" — so: "a nightly sync job — reconciliation-style checks against partner data".</li>
+    <li><b>Team size, "since 01/2022":</b> not on the CV — no per-project dates exist. Say "the last few years"; if you give a team size, pick one number now and never change it.</li>
+  </ul>
+
+  <div class="killshot">
+    <b>The Healthcare-title bridge (they can see the heading too):</b> the project heading reads "Healthcare &amp; Enterprise Management Systems — Senior Java Developer" while the description is a banking platform. If anyone asks, keep it light: "That's the internal domain name for the program — the product described in the first line, the piece I work on, is the banking orchestration platform." Then move on. Bonus: the Java-focused client will like that your role line says <b>Senior Java Developer</b> — "my role is senior Java developer, and I additionally own the Angular portal."
+  </div>
+</section>
+
 <!-- ============ SHOWCASE ============ -->
 <section class="card" id="showcase">
   <h2 class="sec"><span class="tag core">The JD's #1 ask</span> Project showcase — your 90-second walkthrough</h2>
@@ -241,9 +273,9 @@
 
   <h3>The script (Project 1 — mobile-banking orchestration platform) — natural version</h3>
   <div class="pitch" style="font-size:14.5px">
-    "The project I'd bring up is that banking orchestration system. Simple version: the customer has a mobile banking app, but behind it there are many services and third parties — payment processors, SMS and email providers, the core bank itself. Our platform sits in the middle and makes one transfer work end to end.
+    "The project I'd bring up is that banking orchestration system. Simple version: the customer has a mobile banking app, but behind it there are many services and third parties — payment processors like Stripe and PayPal, SMS and email providers, the core bank itself. Our platform sits in the middle and makes one transfer work end to end.
     <br><br>
-    I'm the senior in a team of about 6–7 people. My daily work is mostly backend Java — designing the APIs between services, writing the Kafka consumers, some Spring Batch jobs. For example, there's a reconciliation job that runs every night, comparing our records with the partner statements. The whole thing runs on AWS — Kubernetes, managed Kafka, RDS.
+    My role on the project is senior Java developer — mostly backend: designing the APIs between services, writing the Kafka consumers, some Spring Batch jobs. For example, nightly jobs that generate reports and sync data with partners — reconciliation-style checks against their statements. The whole thing runs on AWS — Kubernetes, managed Kafka, RDS.
     <br><br>
     Besides that I own the Angular portal for the ops team — transaction monitoring screens, config management, that kind of thing. Reactive forms, NgRx where it makes sense.
     <br><br>
@@ -477,7 +509,7 @@
 <!-- ============ ELASTICSEARCH ============ -->
 <section class="card" id="es">
   <h2 class="sec"><span class="tag be">Backend 2</span> Elasticsearch</h2>
-  <div class="where"><b>Where in your story:</b> centralized logging for all microservices (Grafana dashboards on top) + transaction search module.</div>
+  <div class="where"><b>Where in your story:</b> the CV's exact claim — "Grafana monitoring dashboards with centralized ElasticSearch logging". Transaction search = <b>stretch claim</b> (not on the CV) — lead with logging, offer search only if you can defend the search_after story below.</div>
 
   <h3>Core answers</h3>
   <ul>
@@ -509,7 +541,7 @@
 <!-- ============ SPRING BATCH ============ -->
 <section class="card" id="batch">
   <h2 class="sec"><span class="tag be">Backend 3</span> Spring Batch</h2>
-  <div class="where"><b>Where in your story:</b> nightly reconciliation (bank statements vs internal ledger), monthly compliance reports, partner data sync, backup validation — millions of records. Straight from the CV bullet.</div>
+  <div class="where"><b>Where in your story:</b> CV words — "report generation, data synchronization, backup operations, and automated compliance checks". Your concrete story: a nightly data-sync job (reconciliation-style checks vs partner data) + monthly compliance reports — millions of records.</div>
 
   <h3>Core answers</h3>
   <ul>
@@ -648,7 +680,7 @@
 <!-- ============ AWS ============ -->
 <section class="card" id="aws">
   <h2 class="sec"><span class="tag be">Backend 7</span> AWS</h2>
-  <div class="where"><b>Where in your story:</b> the whole platform runs there — map services to platform components, that's how you prove it. You hold <b>SA-Pro + DevOps-Pro</b>: own this conversation confidently.</div>
+  <div class="where"><b>Where in your story:</b> the CV claims "AWS (Docker, Kubernetes, CI/CD)" — the specific services below are your <b>verbal expansion</b> of that (defensible, but beyond the CV text; see the CV Map). Map services to platform components, that's how you prove it. You hold <b>SA-Pro + DevOps-Pro</b>: own this conversation confidently.</div>
 
   <table>
     <tr><th>Platform component</th><th>AWS service</th><th>Talking point</th></tr>
@@ -856,6 +888,7 @@ function retryWithRefresh(req: HttpRequest&lt;unknown&gt;, next: HttpHandlerFn, 
     <li><b>Guard types:</b> <code>CanActivate</code> (page), <code>CanActivateChild</code> (subtree), <b><code>CanMatch</code></b> (v15+; supersedes CanLoad — <b>blocks even downloading the lazy chunk</b>: unauthorized users never receive admin-bundle code), <code>CanDeactivate</code> (unsaved-form warning, our transaction-config screens).</li>
     <li><b>UI-level:</b> structural directive <code>*appHasRole="'ADMIN'"</code> (TemplateRef + ViewContainerRef) hides buttons; role-based menu config — same RBAC permissions the backend enforces (mirrored from the CV bullet).</li>
     <li><b>Modern SPA auth (drop these terms):</b> <b>OAuth 2.0 Authorization Code + PKCE</b> — implicit flow is deprecated; access token kept <b>in memory</b>, refresh token in an <b>httpOnly secure cookie</b> (XSS can't read it) — explain why not localStorage. JWT checked for <code>exp</code>/claims locally only as UX.</li>
+    <li><b>SAML (it's on your CV — one-liner ready):</b> "JWT-based auth and OAuth 2.0 flows for our APIs, plus <b>SAML SSO</b> for enterprise client logins" — SAML = XML assertion from an identity provider (Okta/ADFS-style) vs OIDC's JSON tokens; browser-redirect flow with signed XML, SP-initiated or IdP-initiated. One sentence each is enough; nobody expects an Angular dev to configure an IdP.</li>
   </ul>
   <div class="killshot">
     <b>The line that scores points:</b> "Frontend authorization is UX only — every route and action is re-authorized server-side: JWT verified at the <b>Spring Cloud Gateway</b>, method-level with <code>@PreAuthorize</code> in the services, and data-layer checks. Bypassing the UI still gets a 403." (Mirrors the RBAC bullet in your CV.)
@@ -876,6 +909,7 @@ function retryWithRefresh(req: HttpRequest&lt;unknown&gt;, next: HttpHandlerFn, 
     <li><b>Java 8→21 features:</b> records (immutable DTOs), sealed interfaces + pattern-matching switch (closed domain events), switch expressions, text blocks, <b>virtual threads (21)</b> — cheap blocking-IO threads; piloting for partner calls, not prod-critical (honest beats bluffing).</li>
     <li><b>Streams vs loops:</b> streams for declarative collection transforms; not for everything — readability first; parallelStream uses the common ForkJoin pool.</li>
     <li><b>REST versioning (in your CV):</b> URL <code>/v1/</code> for breaking changes (simple, cacheable, gateway-routable) and header <code>Accept: version=2</code> for internal clients; deprecation window + Sunset header.</li>
+    <li><b>GraphQL / gRPC (also in your CV skills — expect a probe):</b> GraphQL = client-shaped queries over one endpoint, kills over-fetching for complex screens; gRPC = HTTP/2 + protobuf contracts, fast internal service-to-service calls with strict schemas; REST stays the public contract — versioned, cacheable, gateway-friendly. "Each has its place" is a safe senior stance.</li>
     <li><b>Idempotency in payments:</b> idempotency key on write APIs — first call executes, retries return the same result (ties to the Kafka dedupe answer).</li>
     <li><b>Microservices vs monolith:</b> start with a modular monolith; split on scaling/deployment/team boundaries; the cost = distributed tx, tracing, eventual consistency — which is why outbox/sagas exist.</li>
     <li><b>Docker/K8s basics:</b> Pod/Deployment/Service/Ingress/HPA; readiness vs liveness (traffic gating vs restart); we deploy via Helm, canary for risky services.</li>
