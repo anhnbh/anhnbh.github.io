@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Savycom R1 Interview Cheatsheet — Java + Angular</title>
+<title>Savvycom R1 Deep Edition — Java + Angular + AWS Interview Cheatsheet</title>
 <style>
   :root {
     --ink: #1a1f28;
@@ -92,7 +92,11 @@
     padding: 10px 14px; font-size: 13.5px; color: #14532d;
   }
   .numbers b { font-size: 17px; color: var(--green); display: block; }
-
+  pre.ascii {
+    background: #0f172a; color: #c9d6ea; border-radius: 10px; padding: 16px 18px;
+    font: 12.5px/1.5 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    overflow-x: auto; border-left: 4px solid var(--java);
+  }
   details.trap, details.qa {
     border: 1px solid #f1dfb8; background: var(--amberbg); border-radius: 10px;
     padding: 10px 16px; margin: 14px 0;
@@ -144,16 +148,23 @@
 
 <header class="hero">
   <div class="hero-inner">
-    <h1>Savycom Senior Fullstack — Round 1 Cheatsheet</h1>
-    <p>Java-heavy client interview + Angular. Everything is anchored to <b style="color:#fff">Project 1: mobile-banking orchestration platform (01/2022–Present)</b> — lead every answer with it.</p>
+    <h1>Savvycom Senior Fullstack — Round 1 · Deep Edition</h1>
+    <p>Client interview is <b style="color:#fff">Java-strength-focused</b> and expects you to <b style="color:#fff">showcase strong Java projects</b>. Everything is anchored to <b style="color:#fff">Project 1: mobile-banking orchestration platform (01/2022–Present)</b> — lead every answer with it.</p>
     <span class="pill">Round 1 · Client · Java focus</span>
-    <span class="pill">BE: Kafka · ES · Batch · @Transactional · Exceptions · Spring Cloud · AWS</span>
-    <span class="pill">FE: Binding · Observable · Interceptor · Auth</span>
+    <span class="pill">BE: Java Core · JPA · Kafka · ES · Batch · @Transactional · Exceptions · Spring Cloud · AWS</span>
+    <span class="pill">FE: Binding · Observable · Interceptor · Authorized</span>
+    <span class="pill">Leaked R1 Qs: @Transactional · Java upgrades · recent feature · HttpInterceptor</span>
   </div>
 </header>
 
 <nav class="toc">
   <a href="#pitch">Pitch</a>
+  <a href="#protocol">Protocol</a>
+  <a href="#showcase">Showcase</a>
+  <a href="#feature">Feature</a>
+  <a class="be" href="#javacore">Java Core</a>
+  <a class="be" href="#upgrade">Upgrade</a>
+  <a class="be" href="#jpa">JPA</a>
   <a class="be" href="#kafka">Kafka</a>
   <a class="be" href="#es">Elasticsearch</a>
   <a class="be" href="#batch">Spring Batch</a>
@@ -161,6 +172,7 @@
   <a class="be" href="#exc">Exceptions</a>
   <a class="be" href="#cloud">Spring Cloud</a>
   <a class="be" href="#aws">AWS</a>
+  <a href="#sysdesign">Sys Design</a>
   <a class="fe" href="#binding">Binding</a>
   <a class="fe" href="#rxjs">Observable</a>
   <a class="fe" href="#interceptor">Interceptor</a>
@@ -176,21 +188,250 @@
 <section class="card" id="pitch">
   <h2 class="sec"><span class="tag core">Memorize</span> Your 30-second pitch</h2>
   <div class="pitch">
-    "I've spent the last 4+ years as senior fullstack on a <em>mobile-banking orchestration platform</em>: Java 17/Spring Boot microservices on Spring Cloud, <em>Kafka as the event backbone</em>, Spring Batch for reconciliation and compliance jobs, Elasticsearch for centralized logging and transaction search, running on <em>AWS (EKS, MSK, RDS)</em>. On the frontend I own the <em>Angular 15+ portal</em> — admin dashboards and partner consoles — with reactive forms, RxJS, NgRx, and interceptors for JWT/RBAC. I'm strongest where backend Java meets real integration work: exactly-once processing, transactional boundaries, and API design."
+    "I've been with Savvycom about 7 years now, senior fullstack. The last few years I've been on one main project — a banking system that sits behind a mobile banking app. When a customer transfers money or pays a bill in the app, it's our services that talk to the core bank and the partner systems to actually process it. Backend is Java — Spring Boot microservices, we use Kafka a lot for events between services, Spring Batch for the nightly jobs like reconciliation. I also take care of the Angular portal our ops team uses to monitor transactions and manage config. Before that I did a modernization project, moving a legacy .NET system to Java and Angular. So — Java backend is my strong side, and I'm comfortable on the frontend too."
+  </div>
+
+  <h3>If the client speaks Vietnamese — same pitch, natural Vietnamese</h3>
+  <div class="pitch" style="font-size:14.5px">
+    "Em làm ở Savvycom được gần 7 năm rồi, senior fullstack. Dạo gần đây em làm chính ở một dự án banking — hệ thống đứng sau app mobile banking của khách. Kiểu khi khách chuyển tiền hay thanh toán trong app thì dịch vụ bên em sẽ gọi ra core bank và các hệ thống đối tác để xử lý. Backend thì Java — Spring Boot, microservices, Kafka em dùng nhiều, Spring Batch chạy các job ban đêm như đối soát. Ngoài ra em cũng maintain portal Angular cho team vận hành — màn hình monitor giao dịch, quản lý cấu hình. Trước đó em làm dự án modernize, chuyển hệ thống .NET cũ sang Java với Angular. Nói chung mạnh nhất là Java backend, còn frontend em làm được luôn."
+  </div>
+
+  <div class="killshot">
+    <b>Delivery rules — why the old version sounded scripted:</b> never stack more than 3 tech names in one sentence; say what the product <i>does for users</i> before any tech; use contractions and normal connectors ("so", "besides that", "that kind of thing"); end by inviting them to drill deeper. A paragraph that hits every JD keyword with perfect parallel structure = instant "memorized script" signal. Elasticsearch, AWS details, certs, metrics — hold them back; they come out naturally in the follow-up questions, where they land much harder.
   </div>
   <div class="numbers">
     <div><b>40%</b>avg API response time reduction (query optimization + indexing + Redis caching)</div>
     <div><b>~40%</b>portal initial-load reduction (bundle budgets, lazy routes, OnPush)</div>
+    <div><b>~45%</b>dashboard load reduction in the Angular 12 modernization project</div>
     <div><b>75%+</b>test coverage on critical business logic (JUnit/Mockito, Jasmine/Karma)</div>
-    <div><b>Kafka</b>event backbone across all orchestration services</div>
+    <div><b>60%</b>DB load cut during peak via Redis caching (50K DAU platform)</div>
+    <div><b>SA-Pro + DevOps-Pro</b>AWS certifications — own the cloud conversation</div>
   </div>
   <h3>If you only have 2 hours — study in this order</h3>
   <ol class="study-order">
-    <li><b>@Transactional</b> — proxy mechanics, <code>rollbackFor</code>, REQUIRES_NEW, self-invocation. Most common senior trap.</li>
-    <li><b>Kafka</b> — especially the <b>outbox pattern</b>; it also answers "how do you keep DB and Kafka consistent?"</li>
-    <li><b>Angular 401-refresh interceptor flow</b> + <code>switchMap</code> vs <code>concatMap</code> vs <code>exhaustMap</code></li>
-    <li><b>The STAR story</b> — a concrete incident makes the whole CV believable.</li>
+    <li><b>Recent-feature walkthrough</b> (<a href="#feature">Feature</a>) — leaked: "chức năng gần nhất em triển khai" then "BE thế nào? FE thế nào?". Rehearse <b>both halves</b> aloud.</li>
+    <li><b>@Transactional 60-second answer</b> (<a href="#tx">@Transactional</a>) — leaked word-for-word: "Transactional hoạt động thế nào".</li>
+    <li><b>Java version upgrade story</b> (<a href="#upgrade">Upgrade</a>) — leaked as a 3-question drill: do you upgrade / process / watch-outs.</li>
+    <li><b>HttpInterceptor</b> (<a href="#interceptor">Interceptor</a>) — FE focus per the recruiter; be ready to <b>write the code</b> plus the 401-refresh flow.</li>
+    <li><b>90-second project walkthrough + one STAR story</b> — still the frame every answer hangs on; the Kafka outbox remains your kill-shot.</li>
   </ol>
+</section>
+
+<!-- ============ PROTOCOL ============ -->
+<section class="card" id="protocol">
+  <h2 class="sec"><span class="tag misc">From Savvycom</span> Interview protocol — non-negotiables</h2>
+  <div class="where"><b>Source:</b> "Một số lưu ý khi phỏng vấn với khách hàng của Savvycom". Break one of these and it reflects on Savvycom, not just you.</div>
+  <ul>
+    <li><b>Join 10 minutes early.</b> Never late. Test mic, speaker, connection beforehand; quiet room, no background noise.</li>
+    <li><b>Camera ON the whole time.</b> Good lighting; blur/replace background (office = blurred background, home = good light or blur). Professional dress.</li>
+    <li><b>Teams or Google Meet, via the link in an anonymous/incognito browser window</b> — do NOT sign in with your personal account.</li>
+    <li><b>Display name: <code>ThaiLe_Savvycom</code></b> — exactly matching the CV sent to the client. You join as a Savvycom employee.</li>
+    <li><b>Answer style:</b> to the point, no rambling. If a question is unclear — <b>ask back to clarify</b> (they reward this; guessing wrong is worse).</li>
+    <li><b>End of interview: ask them 2–3 questions</b> — shows willing-to-learn (list in the STAR section).</li>
+    <li><span class="warn">Never ask or share salary / income / onboard timing.</span> If the client raises it: "That's coordinated by Savvycom / the company."</li>
+    <li><b>Confidentiality:</b> client & project information stays private — don't overshare past work under NDA.</li>
+    <li>If you use an internal support channel, manage it carefully — <b>especially while screen-sharing</b>. If not screen-sharing, live captions are allowed and help.</li>
+  </ul>
+</section>
+
+<!-- ============ SHOWCASE ============ -->
+<section class="card" id="showcase">
+  <h2 class="sec"><span class="tag core">The JD's #1 ask</span> Project showcase — your 90-second walkthrough</h2>
+  <div class="where"><b>JD quote:</b> "Khách hàng sẽ tập trung phỏng vấn UV mạnh về Java nên cần tìm hiểu kỹ và tập trung vào 1 số dự án thế mạnh về Java để show ra" — they will dig into your Java projects. Rehearse this out loud until fluent.</div>
+
+  <h3>The script (Project 1 — mobile-banking orchestration platform) — natural version</h3>
+  <div class="pitch" style="font-size:14.5px">
+    "The project I'd bring up is that banking orchestration system. Simple version: the customer has a mobile banking app, but behind it there are many services and third parties — payment processors, SMS and email providers, the core bank itself. Our platform sits in the middle and makes one transfer work end to end.
+    <br><br>
+    I'm the senior in a team of about 6–7 people. My daily work is mostly backend Java — designing the APIs between services, writing the Kafka consumers, some Spring Batch jobs. For example, there's a reconciliation job that runs every night, comparing our records with the partner statements. The whole thing runs on AWS — Kubernetes, managed Kafka, RDS.
+    <br><br>
+    Besides that I own the Angular portal for the ops team — transaction monitoring screens, config management, that kind of thing. Reactive forms, NgRx where it makes sense.
+    <br><br>
+    Two things I'm happy to go deeper on: we cut API response times around 40% by fixing slow queries, adding indexes and caching; and there was a period when customers got duplicate SMS notifications after a Kafka rebalance — I solved that with an idempotency layer, and I can walk through the whole story if you're interested."
+  </div>
+
+  <h3>Whiteboard sketch — draw this if they say "describe the architecture"</h3>
+<pre class="ascii">
+   Web / Mobile / Partner clients
+                 │ HTTPS
+                 ▼
+   Spring Cloud Gateway ── JWT verify · rate limit · CORS · traceId
+                 │
+    ┌────────────┼────────────────┐
+    ▼            ▼                ▼
+  API svc   Orchestration     Notification svc
+  (Spring)  (saga state       (email/SMS adapters
+   │         machine)          w/ retry + circuit breaker)
+   │            │                        ▲
+   │       outbox row                    │ consume
+   ▼            ▼                        │
+  PostgreSQL ──► Kafka (MSK) ────────────┘
+   │          topics: payment.events · notify.*
+   ▼
+  Redis ── cache · event dedupe · rate-limit counters
+
+  Spring Batch: nightly reconciliation + reports → S3 archive
+  Logging: JSON + traceId → Filebeat → Elasticsearch → Grafana
+  Runtime: EKS multi-AZ · Helm · GitHub Actions → ECR → EKS</pre>
+
+  <h3>Which project for which question</h3>
+  <table>
+    <tr><th>Question theme</th><th>Lead with</th><th>Why</th></tr>
+    <tr><td>Kafka, transactions, batch, ES, AWS, security</td><td><b>Project 1</b> (banking orchestration)</td><td>Highest stakes (money), matches every JD topic, has the metrics</td></tr>
+    <tr><td>Angular deep-dive, migration/legacy modernization</td><td><b>Project 2</b> (ASP.NET → Angular 12 modernization)</td><td>Real migration story: strangler approach, NgRx, reusable component library adopted by other teams, ~45% load cut</td></tr>
+    <tr><td>Caching, high-traffic APIs, Python/Node versatility</td><td><b>Project 3</b> (content platform, 50K DAU)</td><td>Redis cutting DB load 60% at peak; refresh-token rotation</td></tr>
+  </table>
+  <div class="killshot">
+    <b>Bridge sentence whenever you don't know something:</b> "I haven't used that specific feature in production, but in our platform we solved the same class of problem with X — for example…" — then pivot to something real you did. Never bluff an API name; always anchor to the platform.
+  </div>
+</section>
+
+<!-- ============ RECENT FEATURE (LEAKED) ============ -->
+<section class="card" id="feature">
+  <h2 class="sec"><span class="tag core">Leaked</span> "Chức năng gần nhất em triển khai" — recent feature walkthrough</h2>
+  <div class="where"><b>Leaked from a candidate who passed R1:</b> they ask for your most recent feature, then drill "<b>BE thế nào?</b>" and "<b>FE thế nào?</b>" separately. Have ONE feature rehearsed with both halves ready. This one maps to the transaction-configuration bullet already in your CV.</div>
+
+  <h3>60-second pitch — "per-partner transaction configuration" (natural version)</h3>
+  <div class="pitch" style="font-size:14.5px">
+    "The most recent thing I shipped was a config management feature for the banking platform. Before, every time the ops team wanted to change a partner's transaction limits or cutoff times, they needed us developers — every change was a release. So we built a screen where they can do it themselves.
+    <br><br>
+    On the backend I added a versioned API in the config service — validation on the server side, optimistic locking because two ops people can edit at the same time, and everything is audited. When a config changes, we publish an event through Kafka, and all services reload it — no restart needed.
+    <br><br>
+    On the frontend it's an Angular reactive form. The tricky part is the validation — some rules only the server can check, like overlapping limit ranges, so the form has async validators, debounced, calling a validation endpoint. The screen is role-restricted of course.
+    <br><br>
+    After that, a limit change takes minutes instead of a release cycle. The hardest part was keeping validation consistent between frontend and backend — we generate the TypeScript client from the OpenAPI spec, which helps a lot."
+  </div>
+
+  <h3>When they drill "BE thế nào?" — have these ready</h3>
+  <ul>
+    <li><b>API design:</b> resource versioning (<code>/v2</code>), idempotency key on writes, error envelope with stable codes, Swagger/OpenAPI as the single contract source.</li>
+    <li><b>Transactions:</b> one tx writes config row + audit entry + outbox event; failed-attempt audit uses <code>REQUIRES_NEW</code> so it survives the rollback (ties straight into the @Transactional answer).</li>
+    <li><b>Propagation of change:</b> <code>config.changed</code> event → each service refreshes its Redis/local cache — no restarts; the audit trail reconstructs who changed what, when.</li>
+    <li><b>Concurrency:</b> optimistic <code>@Version</code>; a conflicting edit gets 409 and the FE offers reload-and-merge.</li>
+    <li><b>Tests:</b> Testcontainers (Postgres + Kafka) integration tests, 75%+ coverage bar, contract tests on the OpenAPI surface.</li>
+  </ul>
+
+  <h3>When they drill "FE thế nào?" — have these ready</h3>
+  <ul>
+    <li><b>Reactive forms:</b> dynamic groups per rule type; <code>FormArray</code> for fee tiers; <code>updateOn: 'blur'</code> to trim validation churn; control disabled-state driven by form value streams.</li>
+    <li><b>Validators:</b> custom cross-field (min &lt; max, no overlapping ranges); async validator debounced via the <code>valueChanges + debounceTime + switchMap</code> pattern against the validation endpoint; pending state shown in the UI.</li>
+    <li><b>Data flow:</b> generated TypeScript client (OpenAPI) → service → component via <code>async</code> pipe + OnPush; NgRx/service state only where data is shared across screens.</li>
+    <li><b>Security:</b> <code>roleGuard</code> on the route (CanMatch protects the lazy chunk), <code>*appHasRole</code> on Save, interceptor attaches JWT — the server re-authorizes everything anyway.</li>
+    <li><b>UX details:</b> unsaved-changes <code>CanDeactivate</code> guard, disabled-submit while saving, error toasts from the normalized error model.</li>
+  </ul>
+
+  <div class="killshot"><b>If they ask "what was the hardest part?":</b> keeping validation parity between FE and BE — solved by generating the TS client from the same OpenAPI contract and mirroring rule validators; and concurrent edits — solved with optimistic locking plus explicit 409 handling in the form. Real difficulties, real fixes.</div>
+</section>
+
+<!-- ============ JAVA CORE ============ -->
+<section class="card" id="javacore">
+  <h2 class="sec"><span class="tag be">Backend 0</span> Java core strength (they're testing for "mạnh về Java")</h2>
+  <div class="where"><b>Where in your story:</b> Java 8→21 across all projects. A Java-strong client WILL ask core-Java questions before framework ones.</div>
+
+  <h3>Collections & language</h3>
+  <ul>
+    <li><b>HashMap internals (classic):</b> array of buckets; capacity is a power of 2 so <code>index = hash &amp; (n-1)</code>; hash is spread (<code>h ^ (h &gt;&gt;&gt; 16</code>)); default load factor <b>0.75</b>, resize doubles; since Java 8 a bucket treeifies to a <b>red-black tree at 8 entries</b> (back to list at 6, and only when capacity ≥ 64) — defends against hash-collision DoS.</li>
+    <li><b>equals/hashCode contract:</b> equal objects ⟹ equal hashes; violation breaks HashMap/HashSet lookups (object goes to a different bucket). Records generate correct ones.</li>
+    <li><b>ConcurrentHashMap:</b> no segment locks since Java 8 — CAS on empty bins, <code>synchronized</code> on the bin's first node; <b>no null keys/values</b> (ambiguity vs "absent"); weakly consistent iterators (no <code>ConcurrentModificationException</code>); <code>computeIfAbsent</code> is atomic — great for caches.</li>
+    <li><b>Fail-fast iterators:</b> <code>ArrayList</code> iterator throws <code>ConcurrentModificationException</code> on structural change (modCount check). Fix: <code>CopyOnWriteArrayList</code> for read-mostly listener lists, or iterate a snapshot / use <code>removeIf</code>.</li>
+    <li><b>String immutability:</b> thread-safe, hash cached once, enables the string pool and secure use (can't mutate after passing a credentials check). String pool: literals interned; <code>new String("x")</code> always makes a fresh object.</li>
+    <li><b>Optional discipline:</b> return type only — never fields, never parameters, never <code>get()</code> without <code>orElse</code>/<code>orElseThrow</code>.</li>
+  </ul>
+
+  <h3>Concurrency</h3>
+  <ul>
+    <li><b>volatile:</b> visibility + happens-before ordering, <b>not</b> atomicity (<code>count++</code> still races). Atomics use CAS; <code>AtomicInteger.incrementAndGet()</code> is lock-free.</li>
+    <li><b>synchronized vs ReentrantLock:</b> ReentrantLock adds <code>tryLock(timeout)</code>, interruptible acquisition, fairness. Both are on our hot paths only when we can't design the race away.</li>
+    <li><b>Thread pools:</b> <code>newFixedThreadPool</code> for known CPU/IO profile; <span class="warn">never <code>newCachedThreadPool</code> under load</span> (unbounded threads); always <b>bounded queue + named threads + explicit RejectedExecutionHandler</b> (we log-and-alert on <code>CallerRunsPolicy</code> backpressure).</li>
+    <li><b>CompletableFuture:</b> compose async calls — <code>supplyAsync(task, executor)</code> (<b>pass your own executor</b> — the default common ForkJoin pool is sized to cores and hates blocking IO), <code>thenCombine</code>, <code>allOf</code>, <code>exceptionally</code>/<code>handle</code>, <code>orTimeout</code>. Used for fan-out calls to partner APIs in orchestration.</li>
+    <li><b>ThreadLocal:</b> we use it exactly where MDC does (traceId). Rule: <b>remove() in finally</b> — thread pools reuse threads, stale context leaks between requests.</li>
+    <li><b>Virtual threads (Java 21):</b> cheap blocking-IO threads managed by the JVM on carrier threads — great for IO-heavy partner calls; <b>don't pool them</b>, use a semaphore for concurrency limits. Original caveat — pinning on <code>synchronized</code> blocks — was largely fixed in JDK 24. Our stance: piloting, not yet prod-critical. Saying exactly that is credible.</li>
+  </ul>
+
+  <h3>JVM & GC (expect at least one)</h3>
+  <ul>
+    <li><b>Memory:</b> heap (young: eden + survivors / old), <b>metaspace</b> (classes, replaced PermGen in 8), thread stacks, direct buffers.</li>
+    <li><b>Collectors:</b> <b>G1</b> default since JDK 9 — region-based, pause-time target (<code>-XX:MaxGCPauseMillis</code>), concurrent mark + mixed collections; <b>ZGC</b> (generational since 21) for sub-millisecond pauses on large heaps; Parallel for throughput batch jobs; CMS removed in 14.</li>
+    <li><b>OOM vocabulary:</b> heap space, <code>GC overhead limit exceeded</code>, metaspace (class-loader leak), direct buffer, "unable to create native thread" (thread leak).</li>
+    <li><b>Troubleshooting ritual</b> (they like a method, not a guess): alerts from Grafana → <code>jstack</code> thread dump (what's blocked/busy) → <code>jmap</code> heap dump → MAT dominator tree → fix (query, cache unboundedness, thread leak). JFR for always-on profiling.</li>
+    <li><b>Streams:</b> lazy intermediate ops, terminal triggers; short-circuit (<code>limit</code>, <code>findFirst</code>); <code>parallelStream</code> uses the common pool — avoid inside request threads.</li>
+    <li><b>Modern Java you can claim (8→21):</b> records for DTOs, sealed interfaces + pattern-matching switch for closed domain events, text blocks for JSON/SQL, switch expressions.</li>
+  </ul>
+
+  <details class="trap"><summary>Trap: "Two threads run increment() on a shared int 1000× each — result?"</summary><div class="reveal">
+    <p>Less than 2000 — read-modify-write isn't atomic. Fix ladder: <code>AtomicInteger</code> → <code>synchronized</code>/<code>LongAdder</code> (high contention) → redesign to single-writer.</p>
+  </div></details>
+  <details class="trap"><summary>Trap: "Why can a HashMap key class need hashCode but must override equals too?"</summary><div class="reveal">
+    <p>Lookup uses hashCode to find the bucket, then equals to find the entry. hashCode-only works only by accident; contract violations make entries vanish.</p>
+  </div></details>
+  <details class="trap"><summary>Trap: "final fields = thread safety?"</summary><div class="reveal">
+    <p>Immutability removes <i>mutation</i> races and gives safe publication of the object graph after construction (JMM final-field semantics) — but a final <i>reference</i> to a mutable object is still shared mutable state.</p>
+  </div></details>
+</section>
+
+<!-- ============ JAVA UPGRADE (LEAKED) ============ -->
+<section class="card" id="upgrade">
+  <h2 class="sec"><span class="tag be">Leaked</span> Java version upgrades — "có hay update? Quy trình? Chú ý gì?"</h2>
+  <div class="where"><b>Leaked from R1:</b> three Java-upgrade questions in a row. Your CV says <b>Java 8–21</b> and the platform runs 17/21 — the story: started on 8, stepped 8→11→17, now 17 everywhere with 21 rolling out for partner-call services (virtual threads).</div>
+
+  <h3>45-second answer to "em có hay update Java version không?"</h3>
+  <div class="pitch" style="font-size:14.5px">
+    "Yes — we treat JDK upgrades as small migration projects, and we follow <em>LTS releases only</em>: 8 → 11 → 17, and now 17 with 21 being adopted for new services. Why: security patches, GC and startup improvements, better container awareness, and framework pressure — <em>Spring Boot 3 requires Java 17</em>. The rule I follow: <em>never jump JDK and framework majors in the same release</em> — upgrade dependencies first, then the JDK, one service at a time."
+  </div>
+
+  <h3>The process (answer to "quy trình update thế nào?")</h3>
+  <ol>
+    <li><b>Inventory &amp; compatibility matrix first:</b> Spring Boot / Hibernate / build plugins / Docker base image / CI agents / Sonar / Lombok-MapStruct — everything that touches bytecode.</li>
+    <li><b>Build pipeline first:</b> CI builds on the new JDK (<code>maven.compiler.release=17</code>), Docker base image bump (<code>eclipse-temurin:17</code>) — nobody's laptop is special.</li>
+    <li><b>Compile-fix loop:</b> removed APIs, <code>javax → jakarta</code> (Boot 3), reflection into JDK internals → upgrade the offending library, or bridge with <code>--add-opens</code> temporarily.</li>
+    <li><b>Automated safety net:</b> full unit + Testcontainers integration + contract tests; Sonar gate; dependency scans — before any human testing.</li>
+    <li><b>Performance validation on staging:</b> GC logs before/after (defaults change between versions), startup time, load-test comparison; JVM flag audit — <span class="warn">removed flags (e.g. old CMS options) stop the JVM from starting at all</span>, so you want that discovered in staging, not prod.</li>
+    <li><b>Canary rollout:</b> lowest-risk service first, one service per release train, rollback = redeploy the previous image tag.</li>
+  </ol>
+
+  <h3>Watch-outs per jump (answer to "cần phải chú ý điều gì?")</h3>
+  <table>
+    <tr><th>Jump</th><th>What bites</th><th>Fix</th></tr>
+    <tr><td>8 → 11</td><td>Java EE modules removed from the JDK (JAXB, <code>javax.annotation</code>, activation)</td><td>Add them as explicit Maven dependencies; update bytecode tools</td></tr>
+    <tr><td>11 → 17</td><td><b>Strong encapsulation</b> — reflection into JDK internals blocked (<code>--illegal-access</code> gone); Nashorn removed; CMS GC removed</td><td>Upgrade Jackson/Kotlin/Lombok-era libs; remove CMS flags; audit <code>sun.misc</code>/<code>Unsafe</code> usage</td></tr>
+    <tr><td>Boot 2 → 3 (the 17 companion)</td><td><code>javax → jakarta</code> across imports; config property renames; trailing-slash URL behavior</td><td>OpenRewrite/migration recipes + full regression</td></tr>
+    <tr><td>17 → 21</td><td>Low breakage; virtual-thread pinning on <code>synchronized</code> blocks (largely fixed in JDK 24)</td><td>Load-test virtual threads separately; don't pool them</td></tr>
+    <tr><td>Cross-cutting</td><td>Container memory defaults changed — use <code>MaxRAMPercentage</code> instead of hardcoded <code>-Xmx</code>; locale/data updates can break golden-file tests</td><td>Re-baseline tests; set container-aware JVM flags explicitly</td></tr>
+  </table>
+
+  <details class="trap"><summary>Trap: "Why not jump 8 → 21 in one go?"</summary><div class="reveal">
+    <p>Bigger diff = unbisectable failures. Staged LTS jumps each carry a known, documented set of removals, so every regression points at one change. Library ecosystems and vendor support also land on LTS releases, not every minor.</p>
+  </div></details>
+</section>
+
+<!-- ============ JPA ============ -->
+<section class="card" id="jpa">
+  <h2 class="sec"><span class="tag be">Backend 0.5</span> Hibernate / JPA (banking = data layer questions)</h2>
+  <div class="where"><b>Where in your story:</b> the whole data layer of the orchestration platform — Spring Data JPA, complex JPQL, stored procedures, Flyway, indexing (straight from the CV, incl. the 40% query win).</div>
+
+  <h3>Core answers</h3>
+  <ul>
+    <li><b>Entity lifecycle:</b> transient → managed (persist/find) → detached (tx ends) → removed. <b>Dirty checking</b>: managed entities are diffed at flush — you don't call <code>update()</code>; that's the #1 JPA misconception to get right.</li>
+    <li><b>save vs persist vs merge:</b> Spring Data <code>save()</code> calls <code>persist</code> for new entities (null id/version) else <code>merge</code>. <code>merge</code> copies state into a <b>new managed instance</b> — the original stays detached; keep using the return value.</li>
+    <li><b>N+1 (they WILL ask):</b> 1 query for parents + 1 per parent for a lazy association. Detect with SQL logging / <code>hibernate.generate_statistics</code>. Fix ladder: <code>JOIN FETCH</code> in JPQL → <code>@EntityGraph(attributePaths = …)</code> → <code>@BatchSize</code> / <code>hibernate.default_batch_fetch_size=50</code> (in-batch loading) → <b>DTO projections</b> for read-only screens (no entity management at all).</li>
+    <li><b>Pagination + collection fetch trap:</b> <code>JOIN FETCH</code> a collection with <code>Pageable</code> → Hibernate warns <code>HHH000104</code> and paginates <b>in memory</b>. Fix: page a parent-id query first, then fetch children <code>WHERE parent_id IN (…)</code>.</li>
+    <li><b>LazyInitializationException:</b> proxy accessed after the session closed. Right fix: fetch what the view needs inside the service boundary and map to DTOs. We disable <b>open-in-view</b> (<code>spring.jpa.open-in-view=false</code>) so the problem surfaces in dev, not as a prod surprise.</li>
+    <li><b>getID strategies:</b> <code>IDENTITY</code> forces a per-row round-trip and <b>disables JDBC insert batching</b>; use <code>SEQUENCE</code> + <code>allocationSize=50</code> with <code>hibernate.jdbc.batch_size=50</code>, <code>order_inserts=true</code> — this is exactly how we made batch writes fast.</li>
+    <li><b>Locking:</b> optimistic <code>@Version</code> (Spring translates to <code>ObjectOptimisticLockingFailureException</code>; retry the business op) — default everywhere; pessimistic <code>LockModeType.PESSIMISTIC_WRITE</code> (<code>SELECT … FOR UPDATE</code>) only on hot contention like balance-style rows.</li>
+    <li><b>First-level cache</b> = the persistence context, per transaction, free; second-level cache — we skip it and cache projections in Redis instead (invalidation is business-driven and explicit).</li>
+    <li><b>Migrations:</b> Flyway versioned <code>V123__desc.sql</code> + repeatable <code>R__views.sql</code>, expand/contract pattern for zero-downtime schema changes (add column → backfill → switch reads → drop).</li>
+    <li><b>The 40% story, decomposed:</b> slow-query log + <code>EXPLAIN</code> → missing composite indexes (order by selectivity) → rewritten N+1 to joins/projections → Redis cache-aside for hot reference data → correct fetch strategies.</li>
+  </ul>
+
+  <details class="trap"><summary>Trap: "getReference vs findById?"</summary><div class="reveal">
+    <p><code>getReference</code> returns a lazy proxy with no SQL — perfect to set an FK (<code>order.setUser(userRef)</code>); <code>findById</code> actually loads the row. Also mention: accessing a proxy's state after session close → LazyInitializationException.</p>
+  </div></details>
+  <details class="trap"><summary>Trap: "Why did a flushed change appear without any save() call?"</summary><div class="reveal">
+    <p>Dirty checking: any managed entity changed inside a transaction is written at flush. Calling <code>save</code> on managed entities is mostly a no-op habit from other ORMs.</p>
+  </div></details>
+  <details class="trap"><summary>Trap: "Batch insert of 100k rows is slow — what do you check?"</summary><div class="reveal">
+    <p>IDENTITY id strategy (kills batching) → switch to SEQUENCE; enable <code>jdbc.batch_size</code> + <code>order_inserts</code>; clear the persistence context every N entities (memory + dirty-check cost); consider plain JDBC/JdbcTemplate for pure loads.</p>
+  </div></details>
 </section>
 
 <!-- ============ KAFKA ============ -->
@@ -200,25 +441,36 @@
 
   <h3>Core answers</h3>
   <ul>
-    <li><b>Why Kafka over RabbitMQ:</b> pull-based log with retention → consumers can <b>replay history</b> (audit/recovery), much higher throughput, multiple independent <b>consumer groups</b> on the same topic. RabbitMQ = per-message routing/ack queues; Kafka = distributed append-only log.</li>
-    <li><b>Delivery semantics:</b> default is <b>at-least-once</b>. We make processing <b>effectively-once</b> by (1) idempotent producer (<code>enable.idempotence=true</code>, <code>acks=all</code>, <code>min.insync.replicas=2</code>), (2) <b>idempotent consumers</b> — dedupe by <code>event_id</code> in Redis/DB table.</li>
-    <li><b>Ordering:</b> guaranteed only <b>within a partition</b>. We key messages by <code>transactionId</code>/<code>accountId</code>, so all events for one entity are ordered; global ordering isn't needed.</li>
-    <li><b>Error handling (they WILL ask):</b> Spring Kafka <code>@RetryableTopic</code> — non-blocking retries with exponential backoff on retry topics → after N attempts, publish to <b>DLT (dead-letter topic)</b>; alerting to Grafana, ops dashboard for DLT triage.</li>
-    <li><b>Offset management:</b> manual ack after successful processing; commit = checkpoint. Poison pill → seek past + record, never block the partition.</li>
-    <li><b>Rebalance:</b> group rebalances when a member dies; tune <code>max.poll.interval.ms</code> so slow batches don't trigger rebalance storms; cooperative-sticky assignor for smoother handover.</li>
+    <li><b>Why Kafka over RabbitMQ/SQS:</b> pull-based <b>append-only log with retention</b> → consumers can <b>replay history</b> (audit/recovery/new services), much higher throughput, multiple independent <b>consumer groups</b> on the same topic. Queue systems delete on ack; the log is the difference.</li>
+    <li><b>Architecture:</b> brokers; topics split into <b>partitions</b> (unit of parallelism & ordering); each partition has a <b>leader</b> and follower replicas; <b>ISR</b> = in-sync replicas; leaders fail over to an ISR member; <b>KRaft</b> replaced ZooKeeper for metadata (Kafka 4.x is KRaft-only). MSK abstracts all of this — we tune partitions/retention, not broker ops.</li>
+    <li><b>Delivery semantics:</b> default <b>at-least-once</b>. We make processing <b>effectively-once</b>: (1) idempotent producer (<code>enable.idempotence=true</code>, <code>acks=all</code>, <code>min.insync.replicas=2</code>) — broker dedupes by producer-id + sequence; (2) <b>idempotent consumers</b> — dedupe by <code>event_id</code> in Redis/DB before side effects.</li>
+    <li><b>Ordering:</b> guaranteed only <b>within a partition</b>. We key by <code>transactionId</code>/<code>accountId</code> (default partitioner = murmur2(key) % partitions) so each entity's events stay ordered; global order isn't needed — say that explicitly.</li>
+    <li><b>Producer tuning:</b> <code>linger.ms</code> + <code>batch.size</code> (throughput vs latency), compression (<code>lz4</code>/<code>zstd</code>), <code>delivery.timeout.ms</code> bounds the total send attempt window.</li>
+    <li><b>Consumer mechanics:</b> heartbeats keep group membership (<code>session.timeout.ms</code>); <b>polls</b> prove liveness (<code>max.poll.interval.ms</code>) — a slow batch that stops polling gets evicted → rebalance storm. Cooperative-sticky assignor makes rebalances incremental instead of stop-the-world; <b>static membership</b> (<code>group.instance.id</code>) survives restarts without rebalance.</li>
+    <li><b>Offset management:</b> commit = checkpoint; we ack after successful processing (Spring <code>AckMode.RECORD/MANUAL</code>). Poison pill → <code>DLT</code> or seek-past-and-record — never block the partition.</li>
+    <li><b>Error handling (they WILL ask):</b> Spring Kafka <code>@RetryableTopic</code> — non-blocking retries with backoff on retry topics (<code>-retry-0/1/…</code>) → <b>DLT</b> with <code>@DltHandler</code> + Grafana alerting and an ops dashboard for triage/replay. <b>Know the trade-off:</b> retry topics break per-key ordering — if order matters for that event, retry inline (blocking) or use per-key retry lanes.</li>
+    <li><b>Schema governance:</b> Schema Registry + Avro; compatibility modes — BACKWARD (new consumers read old data), FORWARD, FULL; producers can't register breaking schemas. Alternatives: JSON Schema / Protobuf.</li>
+    <li><b>Lag monitoring:</b> lag = log-end-offset − committed offset; Kafka exporter → Grafana alert before SLA hurt. Remedies: more partitions + listener <code>concurrency</code>, batch listeners, and backpressure via container <code>pause()/resume()</code>.</li>
+    <li><b>DR:</b> MirrorMaker 2 (or MSK replication) to a second region; consumers offset-translate on failover.</li>
   </ul>
 
   <div class="killshot">
     <b>Senior kill-shot — Transactional Outbox pattern.</b><br>
     Problem: dual-write — commit DB tx then publish to Kafka and the publish fails (or vice versa) → inconsistency.<br>
-    Solution: write the event to an <code>outbox</code> table <b>inside the same DB transaction</b> as the business change; a relay (or Debezium CDC) publishes it to Kafka. <b>Kafka publish is never inside the DB transaction.</b> Deploy this answer whenever they ask about DB↔Kafka consistency.
+    Solution: write the event to an <code>outbox</code> table <b>inside the same DB transaction</b> as the business change; a relay (poller, or <b>Debezium CDC on MSK Connect</b>) publishes it to Kafka. <b>Kafka publish is never inside the DB transaction.</b> Deploy this answer whenever they ask about DB↔Kafka consistency, sagas, or "how do you avoid distributed transactions".
   </div>
 
   <details class="trap"><summary>Trap: "Is Kafka exactly-once?"</summary><div class="reveal">
-    <p>Transactional producer gives EOS for <b>Kafka→Kafka</b> consume-transform-produce flows. For side-effectful consumers (send SMS, write external API) you still dedupe: at-least-once delivery + idempotent processing.</p>
+    <p>The transactional producer (<code>transactional.id</code>) gives EOS for <b>Kafka→Kafka</b> consume-transform-produce (consumers set <code>isolation.level=read_committed</code>). For side-effectful consumers (send SMS, write external API) you still dedupe: at-least-once delivery + idempotent processing. "Effectively-once end-to-end" is the honest phrasing.</p>
   </div></details>
   <details class="trap"><summary>Trap: "Consumer lag spikes at peak — what do you do?"</summary><div class="reveal">
-    <p>Increase partitions + listener <code>concurrency</code>, batch listeners, monitor lag with an exporter → Grafana alert before it hurts SLA.</p>
+    <p>First: is it throughput or a stuck consumer? Check thread/GC health, then scale: partitions + <code>concurrency</code> (≤ partitions per instance), batch listeners, <code>fetch.min.bytes</code>. Longer term: alert on lag-rate, not absolute lag.</p>
+  </div></details>
+  <details class="trap"><summary>Trap: "How many partitions should a topic have?"</summary><div class="reveal">
+    <p>Target max throughput × headroom, but bounded: partitions multiply open files, leader elections, and end-to-end latency (more replication), and <b>you can add partitions later but never reorder</b> — key-to-partition mapping breaks. We start with growth headroom (e.g., 12) and size consumers to match.</p>
+  </div></details>
+  <details class="trap"><summary>Trap: "min.insync.replicas=2 with acks=all — why not 3?"</summary><div class="reveal">
+    <p>With RF=3, min ISR=2 tolerates one broker down while still blocking writes only when two are down. min ISR=3 means any single broker failure stops all writes — availability gone. It's the durability/availability dial.</p>
   </div></details>
 </section>
 
@@ -229,165 +481,243 @@
 
   <h3>Core answers</h3>
   <ul>
-    <li><b>Why not SQL <code>LIKE '%x%'</code>:</b> leading wildcard = full table scan, no index. ES uses an <b>inverted index</b> (token → list of documents) built at index time → fast full-text + filters.</li>
+    <li><b>Why not SQL <code>LIKE '%x%'</code>:</b> leading wildcard = full table scan, no index. ES builds an <b>inverted index</b> (token → posting list of docs) at index time → fast full-text + filters. Shard = a Lucene index; segments are immutable (that's why updates = mark-delete + append).</li>
     <li><b>Our pipeline:</b> services log structured JSON with <code>trace_id</code> → Filebeat → Logstash (parse/enrich) → ES → Grafana/Kibana. Trace ID correlates one request across gateway → services → Kafka consumers.</li>
-    <li><b>NRT:</b> searchable after ~1s refresh interval; durability comes from translog + flush, not refresh.</li>
-    <li><b>Cluster basics:</b> data nodes hold shards; index = primary shards + replicas (HA + read throughput); <b>explicit mapping</b> in prod — a wrong <code>text</code> vs <code>keyword</code> mapping ruins aggregations. <code>keyword</code> = exact/filter/agg, <code>text</code> = full-text with analyzer.</li>
-    <li><b>Ops we did:</b> ILM policy — rollover daily alias, delete after 30 days; shard sizing ~30–50GB max; yellow cluster = replicas unassigned.</li>
-    <li><b>Zero-downtime mapping change:</b> reindex into a new index behind an <b>alias</b>, swap the alias when done.</li>
+    <li><b>Text vs keyword (mapping):</b> <code>text</code> = analyzed full-text (match queries, relevance); <code>keyword</code> = exact filter/agg/sort. <b>Explicit mappings in prod</b> — dynamic mapping guessing wrong ruins aggregations. Zero-downtime mapping change: reindex behind an <b>alias</b>, swap alias when done.</li>
+    <li><b>Analysis chain:</b> character filters → tokenizer → token filters (lowercase, stemmer). For autocomplete we use <b>edge n-grams</b> / <code>search_as_you_type</code>; <code>normalizer</code> (e.g. lowercase) for keyword fields.</li>
+    <li><b>Query DSL:</b> <code>bool</code> with <code>must</code> (scored) / <code>filter</code> (non-scoring, <b>cacheable</b> — put status/date ranges there) / <code>should</code> / <code>must_not</code>. <code>match</code> vs <code>term</code> (analyzed vs exact) vs <code>match_phrase</code> (ordered proximity).</li>
+    <li><b>Relevance:</b> BM25 — term frequency (saturating, k1) × inverse doc frequency × field-length normalization (b). Enough to explain the three factors.</li>
+    <li><b>Aggregations:</b> metrics (avg, cardinality approx), bucket (<code>terms</code>, <code>date_histogram</code>), pipeline (derivative, moving avg). Terms-agg counts are approximate on high-cardinality fields (shard-level top-k, <code>doc_count_error_approximation</code> — raise <code>shard_size</code> if precision matters).</li>
+    <li><b>Deep pagination:</b> <code>from+size</code> capped at 10k (<code>max_result_window</code>); <b><code>search_after</code> + point-in-time</b> for the transaction-search UI; scroll only for exports.</li>
+    <li><b>Writes & visibility:</b> refresh (~1s) makes docs searchable; <b>translog</b> gives durability per request; flush = Lucene commit clearing the translog. Don't set refresh=-1 blindly; do force-merge only on write-once indices (logs after rollover).</li>
+    <li><b>Concurrency:</b> optimistic control with <code>if_seq_no</code>/<code>if_primary_term</code>, or <b>external versioning</b> (e.g. DB <code>updated_at</code>) when projecting Postgres → ES — our actual pattern for the transaction-search projection.</li>
+    <li><b>Ops we did:</b> ILM — hot (rollover daily by size), warm (shrink/force-merge), delete at 30d; shards ≤ ~50GB; yellow = replicas unassigned; snapshots to S3 (SLM) for restore drills.</li>
+    <li><b>Node roles:</b> master-eligible / data (hot/warm/cold tiers) / ingest / coordinating — small clusters combine roles; the split matters at scale.</li>
   </ul>
 
   <details class="trap"><summary>Trap: "Is ES a primary datastore?"</summary><div class="reveal">
-    <p>No: no joins/ACID across documents, eventual consistency. PostgreSQL stays the source of truth; ES is a search/projection.</p>
+    <p>No: no joins/ACID across documents, near-real-time, eventual consistency. PostgreSQL stays the source of truth; ES is a search/projection rebuilt from the source (external versioning keeps them in sync).</p>
   </div></details>
   <details class="trap"><summary>Trap: "Filter vs query context?"</summary><div class="reveal">
-    <p>Filter context is non-scoring and <b>cacheable</b> — put exact conditions (status, date range) in <code>filter</code>; only relevance terms in <code>must</code>.</p>
+    <p>Filter context is non-scoring and <b>cacheable</b> — put exact conditions (status, date range) in <code>filter</code>; only relevance terms in <code>must</code>. Free performance, one-word answer.</p>
+  </div></details>
+  <details class="trap"><summary>Trap: "Cluster is red / slow — first moves?"</summary><div class="reveal">
+    <p>Red = unassigned primaries (disk watermark, node down) — check allocation explain. Slow: hot threads API, are queries fetching huge <code>size</code>? too many shards per GB heap (~aim ≤ 20/GB)? heavy aggregations on high-cardinality keyword fields?</p>
   </div></details>
 </section>
 
 <!-- ============ SPRING BATCH ============ -->
 <section class="card" id="batch">
   <h2 class="sec"><span class="tag be">Backend 3</span> Spring Batch</h2>
-  <div class="where"><b>Where in your story:</b> nightly reconciliation (bank statements vs internal ledger), monthly compliance reports, partner data sync, backup validation — millions of records.</div>
+  <div class="where"><b>Where in your story:</b> nightly reconciliation (bank statements vs internal ledger), monthly compliance reports, partner data sync, backup validation — millions of records. Straight from the CV bullet.</div>
 
   <h3>Core answers</h3>
   <ul>
-    <li><b>Chunk-oriented model:</b> read items → process → write per chunk; <b>each chunk = its own transaction</b> (commit-interval). ItemReader → ItemProcessor → ItemWriter.</li>
-    <li><b>Metadata tables:</b> JobRepository persists JOB_INSTANCE / JOB_EXECUTION / STEP_EXECUTION in the DB → <b>restartable</b>: a failed job restarts from its checkpoint (ExecutionContext), and a completed instance with the same params won't rerun (idempotent scheduling).</li>
-    <li><b>Fault tolerance:</b> <code>skip</code> (SkipPolicy + skip-limit; bad rows → SkipListener logs them to a dead-letter table) and <code>retry</code> (retry-limit, e.g. transient partner API errors):
+    <li><b>Chunk-oriented model:</b> read → process → write per chunk; <b>each chunk = its own transaction</b> (commit-interval). ItemReader → ItemProcessor (return null = filter, not skip) → ItemWriter. Tasklet = single-task step (cleanup, API call).</li>
+    <li><b>The metadata model (know cold):</b> <b>JobInstance</b> = job name + identifying parameters; each run = <b>JobExecution</b> → <b>StepExecution</b>s, all persisted by the <b>JobRepository</b>. Consequences: <b>restartability</b> (failed execution resumes from the step's <code>ExecutionContext</code> checkpoint — e.g. read.count), and <b>run-idempotency</b> (same params + COMPLETED → <code>JobInstanceAlreadyCompleteException</code>); daily runs need a <code>run.id</code> incrementer parameter.</li>
+    <li><b>Fault tolerance:</b> <code>skip</code> (SkipPolicy + skip-limit; bad rows logged by SkipListener to a dead-letter table for ops) and <code>retry</code> (per-item, for transient errors like deadlock or partner 503s):
       <br><code>faultTolerant().skip(FlatFileParseException.class).skipLimit(100).retry(DeadlockLoserDataAccessException.class).retryLimit(3)</code></li>
-    <li><b>Scaling:</b> multi-threaded step (simple); <b>partitioning</b> — manager splits by date range into worker steps (our default for reconciliation); remote partitioning via Kafka for very big loads.</li>
-    <li><b>Tuning:</b> chunk size 500–1000, page size on readers, never load all in memory; listeners push duration/skip-count metrics to Grafana.</li>
-    <li><b>Scheduling:</b> Spring <code>@Scheduled</code> / Quartz + a distributed lock (ShedLock/DB lock) so only one node runs the job in a multi-pod deployment.</li>
+    <li><b>How skip actually works (senior detail):</b> a failing item rolls back the whole chunk, then Spring <b>re-scans the chunk item-by-item</b> and skips only the offender — so failures cost a re-read, and skip-limit protects against pathological files.</li>
+    <li><b>Scaling ladder:</b> single-threaded → <b>multi-threaded step</b> (readers/processors must be thread-safe; stateless processors) → <b>parallel steps</b> (flows) → <b>partitioning</b> (manager splits by date-range/range into worker step executions — our default for reconciliation) → <b>remote chunking/partitioning over Kafka</b> for very big loads (workers get chunks via topics; watch backpressure).</li>
+    <li><b>Reader restartability:</b> paging readers (<code>JpaPagingItemReader</code>) checkpoint cleanly; cursor readers (<code>JdbcCursorItemReader</code>) hold a DB cursor — for them use the <b>process-indicator pattern</b> (mark rows processed) or restartable queries.</li>
+    <li><b>Tuning:</b> align chunk size with reader page size (we use 500–1000), never load all in memory, IDENTITY→SEQUENCE + JDBC batching for inserts, clear persistence context every N items; listeners push duration/skip/read-count metrics to Grafana via Micrometer.</li>
+    <li><b>Scheduling & single-runner:</b> Quartz/<code>@Scheduled</code> + a <b>distributed lock (ShedLock/DB lock)</b> so exactly one node runs the job in a multi-pod deployment; graceful stop via <code>JobOperator.stop()</code> mid-chunk so restart picks up from the checkpoint.</li>
+    <li><b>Flow control:</b> exit status → conditional transitions (<code>.on(FAILED).to(errorStep)</code>), decide with JobExecutionDecider; <code>stopAndRestart(step)</code> for controlled pauses.</li>
+    <li><b>Spring Batch 5 (Boot 3):</b> builders take the JobRepository explicitly (<code>new JobBuilder("job", jobRepository)</code> — old JobBuilderFactory removed), transaction manager passed to the chunk step; know this so version talk doesn't trip you.</li>
   </ul>
 
   <details class="trap"><summary>Trap: "Chunk transaction fails at item 990 — what happens?"</summary><div class="reveal">
-    <p>The whole chunk rolls back. With skip configured, Spring <b>re-reads the chunk item-by-item</b> and skips only the offender — that's why skip + restart semantics matter.</p>
+    <p>Whole chunk rolls back. With skip configured, Spring re-reads the chunk and processes item-by-item, skipping only the offender; the job continues with the next chunk. Without skip/retry, the step fails and the job restarts later from the checkpoint.</p>
   </div></details>
-  <details class="trap"><summary>Trap: "Is JdbcCursorItemReader restartable?"</summary><div class="reveal">
-    <p>Cursor readers aren't transactional-restartable by themselves — use paging readers or the <b>process-indicator pattern</b> (mark rows processed) for restartability.</p>
+  <details class="trap"><summary>Trap: "Same job must run twice a day — what breaks?"</summary><div class="reveal">
+    <p>Identifying params identical → treated as the same JobInstance. Add a distinguishing parameter (timestamp or <code>run.id</code> via <code>JobParametersIncrementer</code>).</p>
+  </div></details>
+  <details class="trap"><summary>Trap: "Restart replays writes — duplicates?"</summary><div class="reveal">
+    <p>Writers must be idempotent/restart-aware: chunk-level the repository tracks committed chunks, but for external side effects use idempotent writes (upsert by natural key) — same principle as the Kafka consumer dedupe.</p>
   </div></details>
 </section>
 
 <!-- ============ TRANSACTIONAL ============ -->
 <section class="card" id="tx">
   <h2 class="sec"><span class="tag be">Backend 4</span> @Transactional in Spring</h2>
-  <div class="where"><b>Where in your story:</b> anywhere money moves — orchestration sagas, payment records, audit logs.</div>
+  <div class="where"><b>Where in your story:</b> anywhere money moves — orchestration sagas, payment records, audit logs. <b>Leaked:</b> "Transactional hoạt động thế nào" was asked word-for-word — open with this, then let them drill.</div>
+
+  <div class="pitch" style="font-size:14.5px">
+    <b style="color:#93c5fd">60-second spoken answer:</b><br>
+    "It's implemented with Spring AOP: when the container creates the bean it wraps it in a <em>proxy</em>. When a call enters a <code>@Transactional</code> method <em>through the proxy</em>, the TransactionInterceptor begins a transaction on the connection — joining an existing one under REQUIRED — commits on normal return, and rolls back on uncaught RuntimeException or Error. Checked exceptions do <em>not</em> roll back by default, so on money paths we set <code>rollbackFor</code> explicitly. Two gotchas we guard against in code review: <em>self-invocation</em> bypasses the proxy so no transaction starts, and a failed inner REQUIRED marks the tx rollback-only, so an outer catch explodes with <em>UnexpectedRollbackException</em> at commit. And we keep transactions short — no HTTP or Kafka inside — side effects go through an outbox written in the same transaction."
+  </div>
 
   <h3>Core answers</h3>
   <ul>
-    <li><b>How it works:</b> Spring AOP wraps the bean in a <b>proxy</b>; the proxy begins/commits/rolls back the tx around public method calls. JDK dynamic proxy (interface) or CGLIB (subclass).</li>
-    <li><b>Rollback rules (classic question):</b> default rolls back on <b>RuntimeException and Error only</b> — checked exceptions do NOT roll back unless <code>rollbackFor = Exception.class</code>. We set it explicitly on money-path methods.</li>
+    <li><b>How it works:</b> Spring AOP wraps the bean in a <b>proxy</b> (JDK dynamic proxy on interfaces, CGLIB subclass otherwise); <code>TransactionInterceptor</code> begins/commits/rolls back around <b>external, public</b> method calls. Only calls that enter through the proxy are transactional.</li>
+    <li><b>Rollback rules (classic):</b> default rolls back on <b>RuntimeException and Error only</b> — checked exceptions do NOT roll back unless <code>rollbackFor = Exception.class</code>. We set it explicitly on money-path methods where checked partner exceptions exist.</li>
     <li><b>Propagation:</b>
       <ul>
         <li><code>REQUIRED</code> (default) — join existing or create new.</li>
-        <li><code>REQUIRES_NEW</code> — suspends outer tx, independent commit/rollback. Our use: <b>the audit log of a failed attempt must persist even when the main payment tx rolls back.</b></li>
-        <li><code>NESTED</code> — savepoint within the same tx (JDBC only).</li>
-        <li><code>MANDATORY / NEVER / SUPPORTS / NOT_SUPPORTED</code> — know the names.</li>
+        <li><code>REQUIRES_NEW</code> — suspends outer tx, fully independent commit/rollback. Our use: <b>the audit log of a failed attempt must persist even when the main payment tx rolls back.</b></li>
+        <li><code>NESTED</code> — savepoint inside the same physical tx (JDBC; awkward with JPA — most teams model it as REQUIRES_NEW).</li>
+        <li><code>MANDATORY</code> (fails without tx), <code>NEVER</code> (fails with tx), <code>NOT_SUPPORTED</code> (suspends), <code>SUPPORTS</code> — know the names.</li>
       </ul>
     </li>
-    <li><b>Isolation:</b> PostgreSQL default = READ_COMMITTED, MySQL InnoDB = REPEATABLE_READ; phenomena: dirty / non-repeatable / phantom read. In practice: <b>optimistic locking with <code>@Version</code></b>; pessimistic (<code>SELECT ... FOR UPDATE</code>) only for hot contention.</li>
-    <li><b>The two classic bugs:</b>
+    <li><b>Isolation & anomalies:</b> PostgreSQL default READ_COMMITTED; MySQL InnoDB REPEATABLE_READ (MVCC + gap locks). Ladder: dirty read → non-repeatable read → phantom read. Beyond the ladder: <b>lost update</b> (two read-modify-writes) and <b>write skew</b> (two constraints each valid alone). In practice we don't raise isolation — we use <b>optimistic <code>@Version</code></b>, pessimistic <code>SELECT … FOR UPDATE</code> only on hot rows (links to the JPA section).</li>
+    <li><b>The three classic bugs:</b>
       <ol>
-        <li><b>Self-invocation:</b> <code>this.method2()</code> inside the same bean bypasses the proxy → no new transaction. Fix: move it to another bean (or self-injection).</li>
-        <li><code>@Transactional</code> on <b>private/final</b> methods doesn't work (proxy can't intercept/override).</li>
+        <li><b>Self-invocation:</b> <code>this.method2()</code> inside the same bean bypasses the proxy → no transaction. Fix: move it to another bean (or self-injection / <code>TransactionTemplate</code>).</li>
+        <li><b>Private/final/static methods</b> — proxy can't intercept/override.</li>
+        <li><b>UnexpectedRollbackException:</b> inner REQUIRED method throws, someone catches it upstream, outer tries to commit → the tx was already marked rollback-only → commit explodes. Fixes: don't swallow, <code>noRollbackFor</code>, or make the inner REQUIRES_NEW. <b>This trap is a senior-level filter — know it cold.</b></li>
       </ol>
     </li>
-    <li><b>Keep transactions short:</b> never call Kafka/HTTP/SMTP inside a DB tx → connection-pool exhaustion + dual-write problem → <b>outbox pattern</b> (links back to Kafka — sounds great).</li>
-    <li><code>readOnly = true</code> for report/query methods: Hibernate skips dirty-checking (flush MANUAL), driver hint to DB.</li>
+    <li><b>Keep transactions short:</b> never Kafka/HTTP/SMTP inside a DB tx → pool exhaustion under load + dual-write problem → <b>outbox pattern</b>. Best-effort alternative: <code>TransactionSynchronization afterCommit</code> callback — but outbox is the durable answer.</li>
+    <li><b>readOnly = true:</b> Hibernate skips dirty-checking snapshots (FlushMode.MANUAL) + driver hint; can also route to a read replica with a routing DataSource.</li>
+    <li><b>Pool math (nice senior touch):</b> HikariCP isn't "bigger is better" — formula ≈ cores × 2 + spindles; more connections = more DB contention. Symptom of starvation: <code>Connection is not available, request timed out after 30000ms</code> → find the tx holding connections (long tx / external call inside tx).</li>
+    <li><b>Transactions don't cross threads:</b> context lives in a ThreadLocal — <code>@Async</code> inside a tx loses it; same reason @Transactional doesn't propagate into CompletableFuture tasks.</li>
+    <li><b>Why no XA/2PC:</b> it exists, but blocking + coordinator fragility; we choose <b>sagas + outbox + idempotency + reconciliation batch</b> — say the whole sentence, it ties three sections together.</li>
   </ul>
 
   <details class="trap"><summary>Trap: "Outer REQUIRED + inner REQUIRES_NEW; inner rolls back — what does outer see?"</summary><div class="reveal">
-    <p>Inner is independent: it rolled back, its resources released. Outer continues and can still commit — <b>unless</b> the inner exception propagates out and hits outer's rollback rule.</p>
+    <p>Inner is independent: it rolled back, its locks released. Outer continues and can still commit — <b>unless</b> the inner exception propagates and trips outer's rollback rules. And REQUIRES_NEW holds a second connection — nested deeply under load = pool deadlock risk.</p>
   </div></details>
   <details class="trap"><summary>Trap: "How do you test transactions?"</summary><div class="reveal">
-    <p><code>@DataJpaTest</code> is transactional-rollback by default — REQUIRES_NEW is invisible inside it. Test real commits with <b>Testcontainers</b>.</p>
+    <p><code>@DataJpaTest</code> is transactional-rollback by default — REQUIRES_NEW and afterCommit are invisible inside it. Test real commits/failures with <b>Testcontainers</b> Postgres and <code>@Commit</code>/manual cleanup.</p>
+  </div></details>
+  <details class="trap"><summary>Trap: "@Transactional on a @KafkaListener method — worth it?"</summary><div class="reveal">
+    <p>Yes — the listener container can run each record/loop in a Spring-managed tx so DB writes + offset commit align. Combine with outbox reads for the Kafka side. AckMode choice (BATCH/RECORD/MANUAL) decides when offsets commit relative to the tx.</p>
   </div></details>
 </section>
 
 <!-- ============ EXCEPTIONS ============ -->
 <section class="card" id="exc">
   <h2 class="sec"><span class="tag be">Backend 5</span> Exception handling in REST APIs</h2>
-  <div class="where"><b>Where in your story:</b> platform-wide error contract used by web + mobile + partner clients.</div>
+  <div class="where"><b>Where in your story:</b> platform-wide error contract used by web + mobile + partner clients (CV bullet: exception handling + input validation on REST APIs).</div>
 
   <h3>Core answers</h3>
   <ul>
-    <li><b>Central handler:</b> <code>@RestControllerAdvice</code> + <code>@ExceptionHandler(SomeException.class)</code> returning a consistent envelope. Local handlers only as rare exception.</li>
-    <li><b>Custom hierarchy:</b> base <code>ApiException(code, message)</code> → <code>NotFoundException</code> (404), <code>ValidationException</code> (400), <code>ConflictException</code> (409), <code>ExternalServiceException</code> (502), <code>AuthException</code> (401/403). <code>ErrorCode</code> enum = stable machine-readable code (<code>PAY-4021</code>) so clients branch on it.</li>
-    <li><b>Validation:</b> <code>@Valid</code> + Bean Validation on DTOs; catch <code>MethodArgumentNotValidException</code> globally → 400 with per-field <code>field, message</code> list.</li>
-    <li><b>Error body shape:</b> <code>timestamp, status, code, message, path, traceId</code> — traceId jumps straight to the logs in ELK. <span class="warn">Never leak stack traces or SQL messages.</span></li>
-    <li><b>Modern note:</b> Spring 6 supports <b>RFC 7807 Problem Details</b> (<code>ProblemDetail</code>) — say you know it even if you keep a custom envelope for legacy clients.</li>
-    <li><b>Log once, in the advice</b> (warn for 4xx, error for 5xx) with MDC traceId — not scattered catch blocks.</li>
-    <li>Same discipline elsewhere: Kafka listeners use a listener error handler → DLT; WebClient/RestClient <code>onStatus</code> maps partner errors to <code>ExternalServiceException</code>.</li>
+    <li><b>Central handler:</b> <code>@RestControllerAdvice</code> + <code>@ExceptionHandler(SomeException.class)</code> returning a consistent envelope. Local <code>@ExceptionHandler</code> only for genuinely controller-specific cases.</li>
+    <li><b>Custom hierarchy:</b> base <code>ApiException(code, message)</code> → <code>NotFoundException</code> (404), <code>ValidationException</code> (400), <code>ConflictException</code> (409), <code>ExternalServiceException</code> (502), <code>AuthException</code> (401/403). <code>ErrorCode</code> enum = stable machine-readable code (<code>PAY-4021</code>) so clients branch on codes, not English text; messages resolved via MessageSource → i18n-ready.</li>
+    <li><b>Validation:</b> <code>@Valid</code> + Bean Validation on DTOs; catch <code>MethodArgumentNotValidException</code> globally → 400 with per-field <code>field, message</code>; also map <code>MethodArgumentTypeMismatchException</code> and <code>HttpMessageNotReadableException</code> to clean 400s; class-level constraints for cross-field rules; <code>@Validated</code> on params → <code>ConstraintViolationException</code>.</li>
+    <li><b>Error body shape:</b> <code>timestamp, status, code, message, path, traceId, fieldErrors[]</code> — traceId jumps straight to the logs in ES. <span class="warn">Never leak stack traces or SQL messages.</span></li>
+    <li><b>Modern note:</b> Spring 6 supports <b>RFC 7807 Problem Details</b> (<code>ProblemDetail</code>, media type <code>application/problem+json</code>; enable with <code>spring.mvc.problemdetails.enabled=true</code> for framework errors) — we keep a custom envelope for legacy clients but I can show both. Saying that = instant senior credit.</li>
+    <li><b>Know the resolver chain:</b> <code>@ExceptionHandler</code> advice first → <code>@ResponseStatus</code>-annotated exceptions → framework defaults (e.g. <code>NoResourceFoundException</code> → 404 in Spring 6.1 — catch it in the advice or your catch-all turns missing static paths into 500s).</li>
+    <li><b>Log once, in the advice</b> (warn for 4xx, error for 5xx) with MDC traceId — not scattered catch-and-rethrow stacks.</li>
+    <li><b>Outside the controller:</b> Kafka listeners → retry/DLT path; Feign <code>ErrorDecoder</code> / RestClient <code>onStatus</code> maps partner 4xx/5xx to <code>ExternalServiceException</code>; <code>@Async</code> void methods → <code>AsyncUncaughtExceptionHandler</code>; <code>CompletableFuture</code> → <code>exceptionally</code>/<code>handle</code>.</li>
+    <li><b>Streaming caveat:</b> once SSE/streaming headers are flushed you can't change the status — signal errors in-band (error event frame) and design consumers to handle it.</li>
+    <li><b>Testing:</b> <code>@WebMvcTest</code> + MockMvc asserts status + envelope shape; one test per exception class in the matrix.</li>
   </ul>
 
   <details class="trap"><summary>Trap: "Two @ControllerAdvice with overlapping handlers — order?"</summary><div class="reveal">
-    <p><code>@Order</code> decides; the more specific advice should win.</p>
+    <p><code>@Order</code> decides; the more specific advice wins when ordered first. Also: handler methods are matched by <b>most-specific exception type</b>, not declaration order.</p>
   </div></details>
   <details class="trap"><summary>Trap: "Exception thrown in a filter — does the advice catch it?"</summary><div class="reveal">
-    <p>No — advice only covers controllers. Handle it inside the filter (try/catch + error response) or via a custom <code>ErrorController</code>.</p>
+    <p>No — advice only covers handler methods (they run after filters, and the DispatcherServlet's resolver chain). Handle inside the filter (try/catch + error response) or a custom <code>ErrorController</code> for the /error path.</p>
+  </div></details>
+  <details class="trap"><summary>Trap: "404 vs 400 vs 409 vs 422?"</summary><div class="reveal">
+    <p>404 unknown resource id; 400 malformed/unparseable or validation of shape; 422/409 semantic violations (we use 409 for state conflicts like duplicate idempotency-key-with-different-payload). Idempotency conflict ≠ validation error — clients retry one, fix the other.</p>
   </div></details>
 </section>
 
 <!-- ============ SPRING CLOUD ============ -->
 <section class="card" id="cloud">
   <h2 class="sec"><span class="tag be">Backend 6</span> Spring Cloud</h2>
-  <div class="where"><b>Where in your story:</b> the microservices layer — but be smart: you run on <b>Kubernetes</b>, so tell the modern version.</div>
+  <div class="where"><b>Where in your story:</b> the microservices layer of the orchestration platform — but be smart: you run on <b>Kubernetes</b>, so tell the modern version.</div>
 
   <h3>Core answers (your stack)</h3>
   <ul>
-    <li><b>API Gateway — Spring Cloud Gateway:</b> single edge for all clients — routing, JWT validation at the edge, rate limiting (<b>Redis RequestRateLimiter</b> filter) per client/API key, retry + timeout filters, centralized CORS.</li>
-    <li><b>Service discovery:</b> on K8s we do <b>not run Eureka</b> — K8s Services + DNS is the registry (platform-native, one less stateful system; Eureka/Consul for VM/on-prem).</li>
-    <li><b>Circuit breaking — Resilience4j</b> (Hystrix is dead — say that): <code>CircuitBreaker</code> + <code>TimeLimiter</code> + <code>Retry</code> around partner/banking integrations with fallbacks (return last-known status / queue for retry). Sliding-window ratio opens the breaker; half-open probes recovery. Also Project 2: retry + circuit breaker on REST/SOAP integrations.</li>
-    <li><b>Config:</b> Spring Cloud Config Server for externalized config (on-prem variant); in K8s → ConfigMaps + Secrets. Modern Spring Cloud dropped <code>bootstrap.yml</code> → <code>spring.config.import</code>.</li>
-    <li><b>Load balancing:</b> Spring Cloud LoadBalancer (replaced Ribbon) for client-side balancing to non-K8s services.</li>
-    <li><b>Distributed tracing:</b> Micrometer Tracing (ex-Sleuth) + Zipkin/Tempo — <code>traceId</code> propagated gateway → service → <b>Kafka header</b> → consumer. This cross-Kafka propagation detail impresses.</li>
-    <li><b>OpenFeign:</b> declarative REST clients with a custom ErrorDecoder mapping partner 4xx/5xx to domain exceptions — mention as an option alongside WebClient/RestClient.</li>
+    <li><b>API Gateway — Spring Cloud Gateway:</b> Route = URI + predicates + filters. Predicates: Path/Method/Header/Query/Weight. Filters: add/rewrite headers, <code>StripPrefix</code>, <b>Retry</b> (with backoff — only idempotent methods), <b>Redis RequestRateLimiter</b> (token bucket: <code>replenishRate</code>, <code>burstCapacity</code>, per <code>KeyResolver</code> — user/API-key), centralized CORS, JWT validation at the edge. Custom filters = extend <code>AbstractGatewayFilterFactory</code>; inspect live routes at <code>/actuator/gateway/routes</code>. It's Netty/reactive — non-blocking by design.</li>
+    <li><b>Service discovery:</b> on K8s we do <b>not run Eureka</b> — K8s Services + DNS is the registry (platform-native, one less stateful system; Eureka/Consul for VM/on-prem deployments). Knowing when NOT to use a component is the senior answer.</li>
+    <li><b>Circuit breaking — Resilience4j</b> (Hystrix is dead — say that): <code>CircuitBreaker</code> config that matters: sliding window (count/time), <code>failureRateThreshold</code>, <code>waitDurationInOpenState</code>, half-open probes, <b>slow-call rate</b> (catches brown-outs, not just errors); <code>TimeLimiter</code> for latency ceilings; <code>Bulkhead</code> to cap concurrent calls to one dependency (semaphore-based); fallbacks return last-known status / queue for retry. Same patterns in Project 2 on REST/SOAP integrations.</li>
+    <li><b>Resilience trio as a sentence:</b> retry amplifies load during an outage; the breaker stops amplification; the bulkhead stops one dependency's thread pool from starving everything else; timeouts make failures visible. "Retry inside a breaker, never instead of one."</li>
+    <li><b>Config:</b> Spring Cloud Config Server for externalized config (Git backend, <code>{cipher}</code>-encrypted secrets); on K8s → ConfigMaps + Secrets; modern import: <code>spring.config.import=optional:configserver:</code> (bootstrap.yml is gone); <code>fail-fast</code> + retry for startup resilience.</li>
+    <li><b>Load balancing:</b> Spring Cloud LoadBalancer (replaced Ribbon) for client-side balancing to non-K8s services; on K8s the Service does it.</li>
+    <li><b>Distributed tracing:</b> Micrometer Tracing (ex-Sleuth) + Zipkin/Tempo, <b>W3C traceparent</b> propagation; Boot 3 + spring-kafka 3 propagate the trace context <b>through Kafka headers automatically</b> — gateway → service → consumer in one trace. This detail reliably impresses.</li>
+    <li><b>OpenFeign:</b> declarative REST clients with custom <code>ErrorDecoder</code> mapping partner 4xx/5xx to domain exceptions; timeouts + retryer configured per client — mention as an option alongside WebClient/RestClient.</li>
+    <li><b>K8s health integration:</b> actuator liveness/readiness/startup probe groups — readiness gates traffic during deploys, liveness restarts, startup protects slow boot.</li>
+    <li><b>Service mesh (one-liner, shows range):</b> Istio gives mTLS/traffic-shifting/retries at the sidecar with zero code; we still prefer Spring Cloud where the policy is business-aware (per-client fallbacks, domain-aware routing).</li>
   </ul>
 
   <details class="trap"><summary>Trap: "Why circuit breaker at all if the LB retries?"</summary><div class="reveal">
-    <p>Retry without a breaker <b>amplifies</b> an overloaded dependency (retry storm); the breaker sheds load and fails fast. Use both, with backoff.</p>
+    <p>Retry without a breaker <b>amplifies</b> an overloaded dependency (retry storm); the breaker sheds load and fails fast so callers degrade gracefully. Use both, with backoff + jitter, and cap retries.</p>
   </div></details>
-  <details class="trap"><summary>Trap: "Config server is down at startup — what happens?"</summary><div class="reveal">
-    <p>Services fail fast (<code>fail-fast=true</code>) unless config is cached / retried — mention caching + retry as the production answer.</p>
+  <details class="trap"><summary>Trap: "Rate limiting — token bucket vs fixed window?"</summary><div class="reveal">
+    <p>Fixed window bursts at boundaries (100 at 10:59 + 100 at 11:00 = 200 in a second). Token bucket refills continuously and enforces an average rate with bounded bursts — that's why the Redis limiter uses it. Gateway-level for coarse per-client limits; service-level with Redis counters for fine-grained per-API rules.</p>
+  </div></details>
+  <details class="trap"><summary>Trap: "Circuit breaker is open — user pays again?"</summary><div class="reveal">
+    <p>Payment calls are not safely retryable — fallback for the partner-payment path queues the command (Kafka) rather than auto-retrying; idempotency keys make any retry safe. Distinguish read fallbacks (cache/last-known) from write fallbacks (accept + async settle + reconcile).</p>
   </div></details>
 </section>
 
 <!-- ============ AWS ============ -->
 <section class="card" id="aws">
   <h2 class="sec"><span class="tag be">Backend 7</span> AWS</h2>
-  <div class="where"><b>Where in your story:</b> the whole platform runs there — map services to platform components, that's how you prove it.</div>
+  <div class="where"><b>Where in your story:</b> the whole platform runs there — map services to platform components, that's how you prove it. You hold <b>SA-Pro + DevOps-Pro</b>: own this conversation confidently.</div>
 
   <table>
     <tr><th>Platform component</th><th>AWS service</th><th>Talking point</th></tr>
-    <tr><td>Microservices</td><td><b>EKS</b></td><td>Helm deployments, HPA autoscaling, pods across multi-AZ</td></tr>
-    <tr><td>Kafka</td><td><b>MSK</b></td><td>Managed 3-broker multi-AZ cluster; we tune partitions/retention, not zookeeping</td></tr>
-    <tr><td>PostgreSQL</td><td><b>RDS multi-AZ</b></td><td>Sync standby + failover; read replica for reporting queries</td></tr>
-    <tr><td>Redis</td><td><b>ElastiCache</b></td><td>Token blacklist, hot-data cache, rate-limit counters</td></tr>
-    <tr><td>Files/reports</td><td><b>S3</b></td><td>Report archive + audit export, lifecycle → Glacier</td></tr>
-    <tr><td>Secrets</td><td><b>Secrets Manager + KMS</b></td><td>No credentials in images/env; rotation; encryption at rest</td></tr>
-    <tr><td>Observability</td><td>CloudWatch + Grafana</td><td>ELK/ES for logs, CloudWatch for infra alarms</td></tr>
-    <tr><td>Network</td><td>VPC</td><td>Private subnets for the data tier, SGs per layer, NAT for egress</td></tr>
+    <tr><td>Microservices</td><td><b>EKS</b></td><td>Helm deployments, HPA autoscaling, pods across multi-AZ; Karpenter/managed node groups for right-sized nodes</td></tr>
+    <tr><td>Kafka</td><td><b>MSK</b></td><td>Managed multi-AZ brokers; we tune partitions/retention/client config; MSK Connect can host Debezium (outbox relay)</td></tr>
+    <tr><td>PostgreSQL</td><td><b>RDS multi-AZ</b></td><td>Synchronous standby + automatic failover; read replica for reporting; <b>RDS Proxy</b> pools connections from many pods + speeds failover</td></tr>
+    <tr><td>Redis</td><td><b>ElastiCache</b></td><td>Token/dedupe cache, hot reference data, rate-limit counters</td></tr>
+    <tr><td>Files/reports</td><td><b>S3</b></td><td>Report archive + audit export, lifecycle → Glacier; presigned URLs for secure downloads; strong consistency since 2021</td></tr>
+    <tr><td>Secrets</td><td><b>Secrets Manager + KMS</b></td><td>No credentials in images/env; rotation; envelope encryption at rest</td></tr>
+    <tr><td>Observability</td><td>CloudWatch + Grafana</td><td>ES for logs, CloudWatch Container Insights for infra alarms</td></tr>
+    <tr><td>Network</td><td>VPC</td><td>Private subnets for the data tier, SGs per layer, NAT for egress, <b>VPC endpoints</b> to keep S3/ECR traffic off NAT ($)</td></tr>
   </table>
 
   <h3>Core answers</h3>
   <ul>
-    <li><b>IAM done right:</b> <b>IRSA</b> — EKS service accounts mapped to IAM roles; no static access keys in pods.</li>
-    <li><b>CI/CD on AWS:</b> GitHub Actions → build + SonarQube gate → push to <b>ECR</b> → Helm upgrade to EKS (canary for risky services).</li>
-    <li><b>HA story:</b> everything multi-AZ; RDS automated backups + PITR; DR = infra-as-code (Terraform) so region rebuild is scripted.</li>
-    <li><b>Cost awareness:</b> right-size from Grafana usage data, Savings Plans for steady baseline, S3 lifecycle — one sentence each is enough.</li>
-    <li><b>Security:</b> TLS in transit + KMS at rest (RDS/S3/MSK), least-privilege security groups, private-only data tier.</li>
+    <li><b>IAM done right:</b> <b>IRSA</b> — EKS service accounts mapped to IAM roles; no static access keys in pods. (Newer/simpler alternative: EKS Pod Identity — know the name.)</li>
+    <li><b>CI/CD on AWS:</b> GitHub Actions/Jenkins → build + SonarQube gate → push to <b>ECR</b> (scan on push) → Helm upgrade to EKS; canary for risky services; feature flags + rollback = the CV bullet.</li>
+    <li><b>HA story:</b> everything multi-AZ; RDS automated backups + PITR; DR tier = pilot-light/warm-standby with Terraform — state the words <b>RTO/RPO</b> when asked about DR.</li>
+    <li><b>Cost awareness (one sentence each):</b> right-size from Grafana usage data; Savings Plans for steady baseline; S3 lifecycle/Intelligent-Tiering; <b>Graviton (arm64)</b> ~20–40% better price/perf; Spot for batch/CI; NAT-gateway egress is the silent killer → VPC endpoints.</li>
+    <li><b>Security:</b> TLS in transit + KMS at rest (RDS/S3/MSK), least-privilege SGs, private-only data tier; WAF rate-based rules back up the gateway limiter.</li>
+    <li><b>Messaging alternatives (know the trade-off):</b> SQS = queue, per-message ack, visibility timeout, DLQ redrive — great for commands; Kafka/MSK = replayable log — required for audit/event-sourcing. EventBridge for SaaS/webhook fan-out.</li>
   </ul>
 
   <details class="trap"><summary>Trap: "Security group vs NACL?"</summary><div class="reveal">
-    <p>SG = stateful, instance/ENI level; NACL = stateless, subnet level (needs allow rules for return traffic).</p>
+    <p>SG = stateful, instance/ENI level, allow rules only; NACL = stateless, subnet level (must allow return traffic), evaluated in rule-number order.</p>
   </div></details>
   <details class="trap"><summary>Trap: "RDS multi-AZ vs read replica?"</summary><div class="reveal">
-    <p>Multi-AZ = <b>availability</b> (synchronous standby, automatic failover); read replica = <b>scalability</b> for reads (async, promotable).</p>
+    <p>Multi-AZ = <b>availability</b> (synchronous standby in another AZ, automatic failover, no client URL change); read replica = <b>read scalability</b> (async, lag exists, promotable). Different problems; we use both — failover + reporting isolation.</p>
   </div></details>
   <details class="trap"><summary>Trap: "App is slow — how do you find the bottleneck on AWS?"</summary><div class="reveal">
-    <p>Follow the chain, don't guess: CloudWatch infra metrics → Grafana app metrics/traces → ELK logs by traceId → narrow to DB / GC / dependency. Shows a method.</p>
+    <p>Follow the chain, don't guess: CloudWatch infra metrics (CPU, throttling, DB connections) → Grafana app metrics/traces (Micrometer → which dependency is slow) → ES logs by traceId → narrow to DB query / GC / external partner. Shows a method, which is what they score.</p>
   </div></details>
+  <details class="trap"><summary>Trap: "HPA scales pods — but the DB connections exploded. Why?"</summary><div class="reveal">
+    <p>Each pod × its Hikari pool size vs DB max_connections. Fix: cap pool per pod, <b>RDS Proxy</b> to multiplex, or Serverless/Proxy layer — classic fullstack-at-scale question connecting Kubernetes, Hikari, and RDS.</p>
+  </div></details>
+</section>
+
+<!-- ============ SYSTEM DESIGN ============ -->
+<section class="card" id="sysdesign">
+  <h2 class="sec"><span class="tag core">If it goes senior</span> System-design rapid prep</h2>
+  <div class="where"><b>Reality check:</b> senior fullstack R1s often end with a 10–15 min mini design. Both designs below are <b>your own platform retold</b> — every element is something you can claim.</div>
+
+  <h3>Method (say it out loud first)</h3>
+  <ol>
+    <li>Requirements: functional + non-functional (QPS, p99 latency, consistency, durability).</li>
+    <li>API surface + data model.</li>
+    <li>High-level flow (draw boxes: client → gateway → services → data).</li>
+    <li>Failure & scale: retries, idempotency, backpressure, HA/DR.</li>
+    <li>Observability + security (traceId, RBAC, encryption).</li>
+  </ol>
+  <p><b>Cheat numbers:</b> 1 day ≈ 86,400s → 1M requests/day ≈ 12 rps average (peak ≈ 5–10×); assume 90/10 read/write; a 1KB row × 1M ≈ 1GB.</p>
+
+  <h3>Design 1 — "Design a notification service (email/SMS)"</h3>
+  <ul>
+    <li>API accepts a notify command → validate → persist + <b>outbox row in the same tx</b> → relay publishes to <b>Kafka notify.* topics</b> (per channel partitioning).</li>
+    <li>Consumers: render template → <b>dedupe by event_id (Redis + DB)</b> → provider adapters (SMTP/SMS gateway) with <b>retry + backoff + circuit breaker</b> and provider fallback; rate-limit per provider to respect their quotas.</li>
+    <li>Failures → <b>DLT + alerting + replay tooling</b>; delivery statuses come back via webhooks — <b>idempotent webhook handling</b> (CV bullet!) and status projection for the UI.</li>
+    <li>Scale: partitions per channel/provider, consumer concurrency = partitions, lag alerting. Observability: traceId end-to-end, delivery-rate dashboards.</li>
+  </ul>
+
+  <h3>Design 2 — "Design a payment orchestration flow"</h3>
+  <ul>
+    <li><b>Saga (orchestration):</b> a state machine per payment persisted in Postgres — each step (validate → debit core → partner charge → notify) is idempotent and replayable; compensation steps for rollback (reverse debit) — vs choreography (events only): easier to follow, at cost of a central brain.</li>
+    <li><b>Idempotency keys</b> on the write API; partner calls wrapped in <b>circuit breaker + timeout + limited retry</b>; state transitions published via <b>outbox → Kafka</b>.</li>
+    <li>Safety net: <b>nightly Spring Batch reconciliation</b> of internal ledger vs partner statements → mismatch report + auto-repair candidates (this is literally your job — say it exists).</li>
+    <li>Consistency statement: no XA — saga + outbox + idempotent consumers + reconciliation = "eventual, but reconciled".</li>
+  </ul>
+
+  <div class="killshot"><b>Vocabulary cards</b> (drop these by name): saga · outbox · CQRS (write to Postgres, project to ES read model) · API composition · strangler fig (your ASP.NET→Angular migration!) · bulkhead · backpressure · sidecar.</div>
 </section>
 
 <!-- ============ BINDING ============ -->
@@ -399,86 +729,168 @@
         <li>Interpolation <code>{{ user.name }}</code> — display.</li>
         <li>Property binding <code>[disabled]="isSaving"</code> — DOM property ← component.</li>
         <li>Event binding <code>(click)="save()"</code> — component ← DOM.</li>
-        <li>Two-way <code>[(ngModel)]="form.name"</code> — both (needs <code>FormsModule</code>).</li>
+        <li>Two-way <code>[(ngModel)]="form.name"</code> — syntax sugar for <code>[ngModel]</code> + <code>(ngModelChange)</code> (needs <code>FormsModule</code>).</li>
       </ul>
     </li>
-    <li><b>Component communication:</b> parent→child <code>@Input()</code>, child→parent <code>@Output() + EventEmitter</code>.</li>
-    <li><b>Change detection:</b> default checks everything; we use <b>OnPush</b> + immutable updates + <b><code>async</code> pipe</b> so Angular checks only on input reference change / event / observable emission — ties into the ~40% load/interaction story.</li>
-    <li><b>If asked "what's new":</b> on Angular 17+, signals (<code>signal()</code>, <code>computed()</code>) = value + dependency tracking, fine-grained reactivity without zone-based tree walks.</li>
+    <li><b>Component communication:</b> parent→child <code>@Input()</code> (or signal <code>input()</code>), child→parent <code>@Output() + EventEmitter</code>; template-ref vars locally; <code>@ViewChild/@ContentChild</code> for child/component refs.</li>
+    <li><b>Change detection internals (senior version):</b> zone.js patches async APIs → every event/microtask ends in <code>ApplicationRef.tick()</code> walking the component tree. <b>OnPush</b> narrows checks to: input-reference change, events from the component, <code>markForCheck()</code>, signal reads, <code>async</code> pipe emission. Immutable updates are what make OnPush actually fire — the trio: OnPush + immutability + async pipe = the ~40% load story.</li>
+    <li><b>trackBy in *ngFor / track in @for:</b> identity-stable keys let Angular reuse DOM nodes instead of re-creating rows — list rerenders are the classic jank source in transaction tables.</li>
+    <li><b>Pipes:</b> pure by default (recomputed only when input reference changes — free); async pipe is intentionally impure (subscribes/unsubscribes on every check) — it's the bridge between RxJS and the template.</li>
+    <li><b>Modern Angular you can claim:</b> standalone components (no NgModules), signal inputs <code>input()</code> / two-way <code>model()</code>, <code>computed()</code>/<code>effect()</code>, and the <code>@if/@for</code> control flow (17+) — we generate typed API clients from OpenAPI so components bind to DTO types end-to-end.</li>
+    <li><b>Structural directives:</b> the <code>*</code> is sugar for wrapping the template in <code>&lt;ng-template&gt;</code>; custom ones manipulate <code>TemplateRef + ViewContainerRef</code> (that's how our <code>*appHasRole</code> works).</li>
   </ul>
+
+  <details class="trap"><summary>Trap: "OnPush component didn't update — why?"</summary><div class="reveal">
+    <p>Someone mutated the input object in place (same reference = no check) or updated outside Angular's knowledge. Fix: new reference/immutable update, <code>markForCheck()</code>, or move the state into a signal the template reads.</p>
+  </div></details>
+  <details class="trap"><summary>Trap: "Signals vs Observables — which do you use?"</summary><div class="reveal">
+    <p>Signals for synchronous state the template reads (fine-grained, no tree walk); Observables for async streams (HTTP, websockets) bridged with <code>toSignal()</code> from rxjs-interop. Pragmatic mix, not a religion.</p>
+  </div></details>
 </section>
 
 <!-- ============ OBSERVABLE ============ -->
 <section class="card" id="rxjs">
   <h2 class="sec"><span class="tag fe">Frontend 2</span> Observables / RxJS</h2>
   <ul>
-    <li><b>What:</b> a lazy push-based stream of values over time; subscriber gets next / error / complete. <code>HttpClient</code> returns a <b>cold</b> observable — nothing happens until subscribe.</li>
-    <li><b>Unsubscribe discipline (always asked):</b> <code>async</code> pipe (auto-unsubscribes, works with OnPush) or <code>takeUntilDestroyed(this.destroyRef)</code>; leaking subscriptions = memory leaks + stale API calls.</li>
-    <li><b>Operators with real portal examples:</b>
-      <ul>
-        <li><code>debounceTime(300)</code> + <code>distinctUntilChanged()</code> — transaction search box.</li>
-        <li><b><code>switchMap</code></b> — typeahead: cancels the stale request on new input. The trio: <code>switchMap</code> (cancel stale — searches) / <code>concatMap</code> (order matters — sequential saves) / <code>exhaustMap</code> (ignore while in-flight — login submits).</li>
-        <li><code>forkJoin</code> — parallel dashboard API loads, render when all done; <code>combineLatest</code> — live filter + data streams.</li>
-        <li><code>catchError</code> → <code>throwError(() => new ApiError(...))</code> or <code>EMPTY</code> + user toast; retry APIs with <code>retry({ count: 2, delay: 500 })</code>.</li>
-        <li><code>shareReplay(1)</code> — cache reference data (currencies, branches): one HTTP call shared by many components.</li>
-      </ul>
+    <li><b>What:</b> a lazy push-based stream of values over time; subscriber gets next/error/complete. <code>HttpClient</code> returns a <b>cold</b> observable — nothing happens until subscribe; each subscriber re-triggers the request.</li>
+    <li><b>Unsubscribe discipline (always asked):</b> <code>async</code> pipe (auto-unsubscribes, plays perfectly with OnPush) or <code>takeUntilDestroyed(this.destroyRef)</code>; leaking subscriptions = memory leaks + stale API calls racing fresh ones.</li>
+    <li><b>Higher-order mapping — the decision table (memorize):</b>
+      <table>
+        <tr><th>Operator</th><th>Behavior</th><th>Portal example</th></tr>
+        <tr><td><code>switchMap</code></td><td>cancel stale inner stream</td><td>typeahead / transaction search</td></tr>
+        <tr><td><code>concatMap</code></td><td>queue, order preserved</td><td>sequential saves / file uploads in order</td></tr>
+        <tr><td><code>mergeMap</code></td><td>all in parallel, order-free</td><td>fan-out notifications</td></tr>
+        <tr><td><code>exhaustMap</code></td><td>ignore new while in-flight</td><td>login/submit button</td></tr>
+      </table>
     </li>
-    <li><b>State:</b> <code>BehaviorSubject</code> for local service state; <b>NgRx</b> for cross-module state — component dispatches action → reducer produces new state → selectors → <code>async</code> pipe; effects isolate side effects. One-liner: "state as immutable single source of truth."</li>
+    <li><b>Combining — second table they love:</b> <code>forkJoin</code> = Promise.all (last value of each, completes when all do) for dashboard loads; <code>combineLatest</code> = latest of each after each has emitted — live filter + data; <code>zip</code> = pairwise by index; <code>withLatestFrom</code> = snapshot of another stream at emit time (action + current form state).</li>
+    <li><b>Error strategy subtlety:</b> <code>catchError</code> at the top level ends the stream (subscription dies); placed <b>inside</b> a <code>switchMap</code> it protects the outer stream and lets it continue. Retries: <code>retry({ count: 2, delay: 500 })</code> (retryWhen is legacy).</li>
+    <li><b>Sharing:</b> <code>shareReplay({ bufferSize: 1, refCount: true })</code> — one HTTP call, many subscribers (reference data: currencies, branches).</li>
+    <li><b>Subjects family:</b> <code>BehaviorSubject</code> (replays current value — local service state, "current user"), <code>ReplaySubject(n)</code>, <code>AsyncSubject</code> (last on complete). One caution: an <code>error</code> on a Subject terminates all its subscribers — guard the source.</li>
+    <li><b>Realtime (CV bullet):</b> Spring WebSocket/STOMP consumed as an RxJS subject — live transaction updates; reconnection with exponential backoff + jitter.</li>
+    <li><b>State:</b> <code>BehaviorSubject</code> for local service state; <b>NgRx</b> for cross-module state — dispatch action → reducer → <b>memoized selectors</b> → <code>async</code> pipe; effects isolate side effects (<code>ofType</code> + concatMap); entity adapter for collections. One-liner: "state as immutable single source of truth."</li>
+    <li><b>Promises interop:</b> <code>firstValueFrom(obs)</code> when async/await is genuinely clearer — but in templates, the async pipe wins.</li>
   </ul>
+
+  <details class="trap"><summary>Trap: "Search sends a request per keystroke — fix it"</summary><div class="reveal">
+    <p><code>valueChanges.pipe(debounceTime(300), distinctUntilChanged(), switchMap(search))</code> — and handle errors inside the switchMap so one failed search doesn't kill the listener.</p>
+  </div></details>
+  <details class="trap"><summary>Trap: "Cold vs hot — and how do you make a cold one hot?"</summary><div class="reveal">
+    <p>Cold: one fresh execution per subscriber (HTTP). Hot: one execution shared (Subjects, fromEvent). Bridge: <code>share()/shareReplay()</code> or <code>connect()</code> — this is exactly the refresh-token queue pattern in the interceptor.</p>
+  </div></details>
 </section>
 
 <!-- ============ INTERCEPTOR ============ -->
 <section class="card" id="interceptor">
   <h2 class="sec"><span class="tag fe">Frontend 3</span> Interceptors</h2>
   <ul>
-    <li><b>What:</b> middleware on every HTTP call in/out (a chain, order matters — we register auth → trace-id → error).</li>
-    <li><b>Angular 15+ style:</b> functional interceptor — <code>authInterceptor: HttpInterceptorFn = (req, next) => ...</code> (say you use the modern functional form; matches your Angular 15+ story).</li>
-    <li><b>Auth interceptor:</b> <code>req.clone({ setHeaders: { Authorization: 'Bearer ' + token } })</code>.</li>
+    <li><b>What:</b> middleware on every HTTP call in/out — a chain where <b>order matters</b>: <code>provideHttpClient(withInterceptors([authInterceptor, traceInterceptor, errorInterceptor, loadingInterceptor]))</code>.</li>
+    <li><b>Angular 15+ style:</b> functional interceptor — <code>authInterceptor: HttpInterceptorFn = (req, next) =&gt; next(req.clone({ setHeaders: { Authorization: 'Bearer ' + token } }))</code>. Skip-auth for public endpoints via <code>HttpContextToken</code> + <code>req.context.set(SKIP_AUTH, true)</code> — a detail that signals real usage.</li>
     <li><b>The 401 refresh flow — know it step by step:</b>
       <ol>
-        <li>Call fails with 401 → <code>catchError</code> → skip if the request <b>is</b> the refresh call (marker header/context).</li>
-        <li>Call <code>authService.refresh()</code> and <b>share the in-flight refresh observable</b> — 10 parallel 401s trigger ONE refresh; the rest queue on it.</li>
+        <li>Call fails with 401 → <code>catchError</code> → skip if the request <b>is</b> the refresh call (marker/context) to avoid loops.</li>
+        <li>Call <code>authService.refresh()</code> and <b>share the in-flight refresh observable</b> (<code>share()</code> or a BehaviorSubject gate) — 10 parallel 401s trigger ONE refresh; the rest queue on it.</li>
         <li>On success, <code>switchMap</code> → retry the original request with the new token.</li>
-        <li>Refresh also fails → logout + redirect.</li>
+        <li>Refresh also fails → logout + redirect to login (clear state; optional BroadcastChannel to sync logout across tabs).</li>
       </ol>
     </li>
-    <li><b>Other uses we have:</b> inject <code>X-Trace-Id</code> header (correlates with backend ELK logs — connects to your BE story), normalize HTTP errors into the app error model, dev logging.</li>
+    <li><b>Other uses we have:</b> inject <code>X-Trace-Id</code> header (correlates with backend ES logs — connects to the BE story), normalize HTTP errors into the app error model (backend envelope <code>code</code> → typed domain errors), retry-with-backoff for idempotent GETs, and a <b>loading counter</b> via <code>finalize(() =&gt; count--)</code> driving the global spinner.</li>
+    <li><b>Uploads/downloads:</b> <code>reportProgress: true</code> + filter <code>HttpEventType.UploadProgress</code> for progress bars on report exports.</li>
+    <li><b>Scope note:</b> interceptors only see HttpClient — router navigation errors are handled by guards/router events, not interceptors.</li>
   </ul>
+
+  <h3>Be able to WRITE it (recruiter leak: FE focus = HttpInterceptor)</h3>
+<pre class="ascii">export const SKIP_AUTH = new HttpContextToken&lt;boolean&gt;(() =&gt; false);
+
+export const authInterceptor: HttpInterceptorFn = (req, next) =&gt; {
+  const auth = inject(AuthService);
+  const authReq = auth.token &amp;&amp; !req.context.get(SKIP_AUTH)
+    ? req.clone({ setHeaders: { Authorization: `Bearer ${auth.token}` } })
+    : req;
+  return next(authReq).pipe(
+    catchError((err: HttpErrorResponse) =&gt;
+      err.status === 401 &amp;&amp; !req.context.get(SKIP_AUTH)
+        ? retryWithRefresh(authReq, next, auth)
+        : throwError(() =&gt; normalize(err)))
+  );
+};
+
+// ONE shared in-flight refresh — N parallel 401s trigger a single refresh call
+let refresh$: Observable&lt;unknown&gt; | null = null;
+function retryWithRefresh(req: HttpRequest&lt;unknown&gt;, next: HttpHandlerFn, auth: AuthService) {
+  if (!refresh$) {
+    refresh$ = auth.refresh().pipe(
+      tap(() =&gt; (refresh$ = null)),   // next expiry starts a fresh refresh
+      share()
+    );
+  }
+  return refresh$.pipe(
+    switchMap(() =&gt; next(req.clone({ setHeaders: { Authorization: `Bearer ${auth.token}` } }))),
+    catchError(() =&gt; {
+      auth.logout();                   // refresh failed → session over
+      return throwError(() =&gt; new Error('session expired'));
+    })
+  );
+}
+
+// registration: provideHttpClient(withInterceptors([authInterceptor, ...]))</pre>
+
+  <details class="trap"><summary>Trap: "Why share() the refresh call — what breaks without it?"</summary><div class="reveal">
+    <p>Without sharing, N failed requests each trigger a refresh; the first refresh invalidates the old token so the others' refresh calls fail → mass logout. Sharing = single refresh + everyone retries on the new token.</p>
+  </div></details>
+  <details class="trap"><summary>Trap: "CORS error — do you fix it in the interceptor?"</summary><div class="reveal">
+    <p>No — CORS is enforced by the browser against server response headers. Fix at the edge: gateway/backend CORS config. Interceptors can't bypass preflight.</p>
+  </div></details>
 </section>
 
 <!-- ============ AUTHORIZED ============ -->
 <section class="card" id="auth">
   <h2 class="sec"><span class="tag fe">Frontend 4</span> Authorization (Authorized) in Angular</h2>
   <ul>
-    <li><b>Guards — functional style (v15+):</b> <code>canActivate: [authGuard, roleGuard]</code>; guard returns <code>boolean | UrlTree</code> (UrlTree redirects to <code>/login</code> or <code>/403</code>).
+    <li><b>Guards — functional style (v15+):</b> <code>canActivate: [authGuard, roleGuard]</code>; guard returns <code>boolean | UrlTree | Observable&lt;boolean&gt;</code> (UrlTree redirects to <code>/login</code> or <code>/403</code>).
       <ul>
-        <li><code>authGuard</code>: token exists / not expired; async validation returns <code>Observable&lt;boolean&gt;</code>.</li>
+        <li><code>authGuard</code>: token exists / not expired (async validation via <code>Observable</code>).</li>
         <li><code>roleGuard</code>: reads required roles from <b>route data</b> (<code>data: { roles: ['ADMIN'] }</code>), compares with decoded JWT claims (<code>jwt-decode</code>).</li>
       </ul>
     </li>
-    <li><b>Guard types:</b> <code>CanActivate</code> (page), <code>CanActivateChild</code> (subtree), <b><code>CanMatch</code></b> (v15+, replaces CanLoad — blocks even downloading the lazy chunk), <code>CanDeactivate</code> (unsaved form warning).</li>
-    <li><b>UI-level:</b> structural directive <code>*appHasRole="'ADMIN'"</code> to hide buttons; role-based menu config.</li>
+    <li><b>Guard types:</b> <code>CanActivate</code> (page), <code>CanActivateChild</code> (subtree), <b><code>CanMatch</code></b> (v15+; supersedes CanLoad — <b>blocks even downloading the lazy chunk</b>: unauthorized users never receive admin-bundle code), <code>CanDeactivate</code> (unsaved-form warning, our transaction-config screens).</li>
+    <li><b>UI-level:</b> structural directive <code>*appHasRole="'ADMIN'"</code> (TemplateRef + ViewContainerRef) hides buttons; role-based menu config — same RBAC permissions the backend enforces (mirrored from the CV bullet).</li>
+    <li><b>Modern SPA auth (drop these terms):</b> <b>OAuth 2.0 Authorization Code + PKCE</b> — implicit flow is deprecated; access token kept <b>in memory</b>, refresh token in an <b>httpOnly secure cookie</b> (XSS can't read it) — explain why not localStorage. JWT checked for <code>exp</code>/claims locally only as UX.</li>
   </ul>
   <div class="killshot">
     <b>The line that scores points:</b> "Frontend authorization is UX only — every route and action is re-authorized server-side: JWT verified at the <b>Spring Cloud Gateway</b>, method-level with <code>@PreAuthorize</code> in the services, and data-layer checks. Bypassing the UI still gets a 403." (Mirrors the RBAC bullet in your CV.)
   </div>
+
+  <details class="trap"><summary>Trap: "CanLoad vs CanMatch?"</summary><div class="reveal">
+    <p>CanLoad decided once per session and cached — after logout/login-as-lower-role, the chunk stayed loaded. CanMatch re-evaluates on every navigation match. Always CanMatch on modern Angular.</p>
+  </div></details>
+  <details class="trap"><summary>Trap: "JWT in localStorage — fine?"</summary><div class="reveal">
+    <p>Acceptable trade-off in some apps, but XSS then equals token theft. Our pattern: access token in memory only, refresh cookie httpOnly+secure+sameSite, short access-token TTL. Say the threat model out loud — that's the senior version.</p>
+  </div></details>
 </section>
 
 <!-- ============ QUICK-FIRE ============ -->
 <section class="card" id="quickfire">
   <h2 class="sec"><span class="tag misc">Expect a few</span> Quick-fire</h2>
   <ul>
-    <li><b>Java 17/21 (your CV says 8–21):</b> records (immutable DTOs), sealed interfaces (closed domain hierarchies), switch expressions, text blocks; <b>virtual threads (21)</b> — cheap blocking-IO threads; we're piloting for IO-heavy partner calls (honest: not prod-critical yet).</li>
-    <li><b>Streams vs loops:</b> streams for declarative collection transforms; not for everything — readability first.</li>
+    <li><b>Java 8→21 features:</b> records (immutable DTOs), sealed interfaces + pattern-matching switch (closed domain events), switch expressions, text blocks, <b>virtual threads (21)</b> — cheap blocking-IO threads; piloting for partner calls, not prod-critical (honest beats bluffing).</li>
+    <li><b>Streams vs loops:</b> streams for declarative collection transforms; not for everything — readability first; parallelStream uses the common ForkJoin pool.</li>
     <li><b>REST versioning (in your CV):</b> URL <code>/v1/</code> for breaking changes (simple, cacheable, gateway-routable) and header <code>Accept: version=2</code> for internal clients; deprecation window + Sunset header.</li>
-    <li><b>Microservices vs monolith:</b> start with a modular monolith; split when scaling/deployment/team demands it; the cost = distributed tx, tracing, eventual consistency.</li>
     <li><b>Idempotency in payments:</b> idempotency key on write APIs — first call executes, retries return the same result (ties to the Kafka dedupe answer).</li>
+    <li><b>Microservices vs monolith:</b> start with a modular monolith; split on scaling/deployment/team boundaries; the cost = distributed tx, tracing, eventual consistency — which is why outbox/sagas exist.</li>
+    <li><b>Docker/K8s basics:</b> Pod/Deployment/Service/Ingress/HPA; readiness vs liveness (traffic gating vs restart); we deploy via Helm, canary for risky services.</li>
+    <li><b>SQL tuning:</b> <code>EXPLAIN</code> first; composite index column order (selectivity, leftmost prefix); covering indexes avoid lookups; watch for implicit casts killing index use.</li>
+    <li><b>Redis patterns:</b> cache-aside + TTL with <b>jitter</b> (no synchronized expiry stampede); evict <code>allkeys-lru</code> vs <code>volatile-lru</code>; use as dedupe/rate-limit counters too.</li>
+    <li><b>Testing pyramid:</b> many unit (JUnit 5/Mockito) → fewer integration (<b>Testcontainers</b> real Postgres/Kafka) → few E2E (Playwright); 75%+ coverage on critical logic (CV number); contract tests keep microservice APIs honest.</li>
+    <li><b>Security quick set:</b> OWASP top 3 in our world: injection (parameterized queries/JPA), broken auth (short-lived JWT + refresh rotation), XSS (Angular escaping + CSP); plus CSRF strategy for cookie-based flows, CORS allow-lists at the gateway.</li>
   </ul>
 </section>
 
 <!-- ============ STAR ============ -->
 <section class="card" id="star">
-  <h2 class="sec"><span class="tag core">Rehearse 90s</span> STAR story to have ready</h2>
+  <h2 class="sec"><span class="tag core">Rehearse 90s each</span> Three STAR stories</h2>
+
+  <h3>Story 1 — Kafka duplicate notifications (the incident story)</h3>
   <div class="pitch" style="font-size:15px">
     <b style="color:#93c5fd">Situation:</b> peak-season load → a consumer group rebalance caused event redelivery → customers received duplicate SMS/email notifications.<br><br>
     <b style="color:#93c5fd">Task:</b> guarantee single delivery without losing the at-least-once safety net.<br><br>
@@ -486,16 +898,32 @@
     <b style="color:#93c5fd">Result:</b> zero duplicate sends after rollout; consumer-lag alarm tuned on Grafana; the same dedupe pattern got reused by two other teams.
   </div>
 
-  <h3>Questions to ask THEM (leaves a good impression)</h3>
+  <h3>Story 2 — the 40% API performance win (the optimization story)</h3>
+  <div class="pitch" style="font-size:15px">
+    <b style="color:#93c5fd">Situation:</b> transaction-list and reporting endpoints degraded at scale; p95 crept past SLA during peak hours.<br><br>
+    <b style="color:#93c5fd">Task:</b> cut average API response time without a costly re-platform.<br><br>
+    <b style="color:#93c5fd">Action:</b> measured first (slow-query log, <code>EXPLAIN</code>, Hibernate statistics) → fixed N+1s with fetch graphs and DTO projections → composite indexes on the hot filters → Redis cache-aside for reference data → batch-write tuning (SEQUENCE ids, JDBC batching).<br><br>
+    <b style="color:#93c5fd">Result:</b> <b>40% average response-time reduction</b>; p95 back inside SLA; dashboards added so regressions are caught before users notice.
+  </div>
+
+  <h3>Story 3 — legacy modernization under load (the fullstack story)</h3>
+  <div class="pitch" style="font-size:15px">
+    <b style="color:#93c5fd">Situation:</b> enterprise app on ASP.NET Web Forms/jQuery — slow to change, no component reuse, hard to hire for.<br><br>
+    <b style="color:#93c5fd">Task:</b> modernize the frontend to Angular and carve new features into Spring Boot microservices — without stopping the business.<br><br>
+    <b style="color:#93c5fd">Action:</b> strangler-fig pattern — new screens as Angular 12 feature modules beside legacy pages; reusable component library adopted by other teams; NgRx for cross-module state; guards/interceptors aligned with Spring Security + OAuth2; integrations hardened with retry + circuit breakers.<br><br>
+    <b style="color:#93c5fd">Result:</b> ~45% faster dashboard loads, a shared design system, and a path off the legacy stack with zero big-bang cutover.
+  </div>
+
+  <h3>Questions to ask THEM (protocol says: always end with these)</h3>
   <ol>
     <li>Current architecture — monolith being split, or greenfield microservices? Team split BE/FE or fullstack squads?</li>
     <li>Which Angular version and state management are you on today — any migration planned (e.g. to signals)?</li>
     <li>How do you run Kafka and search today — MSK/self-managed? Who owns DevOps vs the dev team?</li>
-    <li>What does success look like in the first 3 months for this role?</li>
+    <li>What does success look like in the first 3 months for this role? What would the person who gets this role have achieved by then?</li>
   </ol>
 </section>
 
-<footer>Savycom Senior Fullstack · Round 1 · Generated 2026-10-15 · pairs with savvycom-interview-cheatsheet.md</footer>
+<footer>Savvycom Senior Fullstack · Round 1 · Deep Edition · updated 2026-10-19 · includes leaked R1 questions · pairs with savvycom-interview-cheatsheet.md</footer>
 </div>
 
 <script>
